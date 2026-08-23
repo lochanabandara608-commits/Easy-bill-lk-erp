@@ -1,0 +1,35 @@
+/* Basic Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background: #f5f7fa;
+  color: #333;
+  padding: 15px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Header */
+header {
+  background: #2563eb;
+  color: white;
+  padding: 15px;
+  border-radius: 12px;
+  text-align: center;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+}
+
+header h1 {
+  font-size: 22px;
+}
+
+/* Cards */
+.card {
+  background: white;
+  padding:
