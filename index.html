@@ -17,7 +17,72 @@ button {background:#3498db; color:white; border:none; cursor:pointer;}
 .sidebar a {display:block; padding:12px 20px; color:#333; text-decoration:none; cursor:pointer;}
 .sidebar a.active {background:#3498db; color:white;}
 .content {margin-left:240px; padding:20px;}
-.page {display:none;}
+.page {display:none;}<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EB Easy Bill LK</title>
+<style>
+body {background:#f4f4f4; font-family:Arial;}
+#loginPage {display:flex; justify-content:center; align-items:center; height:100vh;}
+.login-box {background:white; padding:30px; border-radius:10px; width:350px;}
+input, button {width:100%; padding:12px; margin:8px 0; border-radius:5px; border:1px solid #ddd;}
+button {background:#3498db; color:white; border:none; cursor:pointer;}
+#dashboardPage {display:none;}
+.navbar {background:#2c3e50; color:white; padding:15px;}
+</style>
+</head>
+<body>
+
+<div id="loginPage">
+  <div class="login-box">
+    <h1>EB Easy Bill LK</h1>
+    <p id="errorMsg" style="color:red;"></p>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="doLogin()">Login</button>
+    <p><b>Demo:</b> admin/admin123</p>
+  </div>
+</div>
+
+<div id="dashboardPage">
+  <div class="navbar">
+    <h2>Dashboard - Login Success! ✅</h2>
+    <button onclick="logout()">Logout</button>
+  </div>
+  <div style="padding:20px;">
+    <h3>Welcome <span id="userRole"></span></h3>
+    <p>දැන් ඔයා Dashboard එක ඇතුලේ.</p>
+  </div>
+</div>
+
+<script>
+function doLogin(){
+  const u = document.getElementById('username').value;
+  const p = document.getElementById('password').value;
+  
+  if(u === 'admin' && p === 'admin123'){
+    document.getElementById('loginPage').style.display='none'; 
+    document.getElementById('dashboardPage').style.display='block';
+    document.getElementById('userRole').innerText = 'Admin';
+  } 
+  else if(u === 'cashier' && p === 'cashier123'){
+    document.getElementById('loginPage').style.display='none'; 
+    document.getElementById('dashboardPage').style.display='block';
+    document.getElementById('userRole').innerText = 'Cashier';
+  }
+  else {
+    document.getElementById('errorMsg').innerText='Username or Password wrong';
+  }
+}
+
+function logout(){
+  location.reload();
+}
+</script>
+</body>
+</html>
 .page.active {display:block;}
 .card {background:white; padding:20px; border-radius:8px; margin-bottom:20px;}
 @media(max-width:768px){.sidebar{width:100%; height:auto; position:relative;} .content{margin-left:0;}}
