@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EB Easy Bill LK</title>
+<style>
+* {margin:0; padding:0; box-sizing:border-box; font-family: Arial;}
+body {background:#f4f4f4;}
+#loginPage {display:flex; justify-content:center; align-items:center; height:100vh;}
+.login-box {background:white; padding:30px; border-radius:10px; width:350px; box-shadow:0 0 15px rgba(0,0,0,0.1);}
+input, button {width:100%; padding:12px; margin:8px 0; border-radius:5px; border:1px solid #ddd;}
+button {background:#3498db; color:white; border:none; cursor:pointer;}
+#dashboardPage {display:none;}
+.navbar {background:#2c3e50; color:white; padding:15px; display:flex; justify-content:space-between;}
+.sidebar {width:220px; background:white; height:100vh; position:fixed; padding-top:20px;}
+.sidebar a {display:block; padding:12px 20px; color:#333; text-decoration:none; cursor:pointer;}
+.sidebar a.active {background:#3498db; color:white;}
+.content {margin-left:240px; padding:20px;}
+.page {display:none;}
+.page.active {display:block;}
+.card {background:white; padding:20px; border-radius:8px; margin-bottom:20px;}
+@media(max-width:768px){.sidebar{width:100%; height:auto; position:relative;} .content{margin-left:0;}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginPage">
+  <div class="login-box">
+    <h1 style="text-align:center;">EB Easy Bill LK</h1>
+    <p id="errorMsg" style="color:red; text-align:center;"></p>
+    <form id="loginForm">
+      <input type="text" id="username" placeholder="Username" required>
+      <input type="password" id="password" placeholder="Password" required>
+      <button>Login</button>
+    </form>
+    <p style="font-size:12px;"><b>Demo:</b> admin/admin123 <br> <b>Cashier:</b> cashier/cashier123</p>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboardPage">
+  <div class="navbar">
+    <h2>EB Easy Bill LK</h2>
+    <div><span id="userRole"></span> | <button onclick="logout()" style="width:80px;">Logout</button></div>
+  </div>
+  <div class="sidebar">
+    <a onclick="showPage('dashboard', this)" class="active">📊 Dashboard</a>
+    <a onclick="showPage('billing', this)">🛒 Billing</a>
+    <a onclick="showPage('products', this)">📦 Products</a>
+  </div>
+  <div class="content">
+    <div id="dashboard" class="page active"><h3>Welcome!</h3><div class="card"><h4>Total Sales</h4><p id="totalSales">Rs. 0</p></div></div>
+    <div id="billing" class="page"><h3>POS Billing</h3><input id="pName" placeholder="Product"><input id="pPrice" type="number" placeholder="Price"><button onclick="addToBill()">Add</button><p>Total: Rs.<span id="billTotal">0</span></p></div>
+    <div id="products" class="page"><h3>Products</h3><input id="newP" placeholder="Product"><input id="newPrice" type="number" placeholder="Price"><button onclick="addProduct()">Add Product</button></div>
+  </div>
+</div>
+
+<script>
+const users = {admin:{pass:'admin123',role:'Admin'}, cashier:{pass:'cashier123',role:'Cashier'}}
+let billTotal = 0;
+
+document.getElementById('loginForm').addEventListener('
