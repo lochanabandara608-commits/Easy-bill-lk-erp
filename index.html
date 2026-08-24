@@ -24,7 +24,161 @@ Shared online business system<!DOCTYPE html>
     <link rel="stylesheet" href="css/login.css">
 </head>
 <body>
-    <!-- Login Page --><!DOCTYPE html><!DOCTYPE html>
+    <!-- Login Page --><!DOCTYPE html><!DOCTYPE html><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>EB Easy Bill LK</title>
+<style>
+* {margin:0; padding:0; box-sizing:border-box; font-family: Arial;}
+body {background:#f4f4f4;}
+#loginPage {display:flex; justify-content:center; align-items:center; height:100vh;}
+.login-box {background:white; padding:30px; border-radius:10px; width:350px; box-shadow:0 0 15px rgba(0,0,0,0.1);}
+input, button, select {width:100%; padding:12px; margin:8px 0; border-radius:5px; border:1px solid #ddd;}
+button {background:#3498db; color:white; border:none; cursor:pointer;}
+button:hover {background:#2980b9;}
+#dashboardPage {display:none;}
+.navbar {background:#2c3e50; color:white; padding:15px; display:flex; justify-content:space-between;}
+.sidebar {width:220px; background:white; height:100vh; position:fixed; padding-top:20px;}
+.sidebar a {display:block; padding:12px 20px; color:#333; text-decoration:none; cursor:pointer;}
+.sidebar a.active {background:#3498db; color:white;}
+.content {margin-left:240px; padding:20px;}
+.page {display:none;}
+.page.active {display:block;}
+.card {background:white; padding:20px; border-radius:8px; margin-bottom:20px;}
+table {width:100%; background:white; border-collapse:collapse;}
+th,td {padding:12px; border:1px solid #ddd; text-align:left;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginPage">
+  <div class="login-box">
+    <h1>EB Easy Bill LK</h1>
+    <p id="errorMsg" style="color:red;"></p>
+    <form id="loginForm">
+      <input type="text" id="username" placeholder="Username" required>
+      <input type="password" id="password" placeholder="Password" required>
+      <button>Login</button>
+    </form>
+    <p><b>Demo:</b> admin/admin123 | cashier/cashier123</p>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboardPage">
+  <div class="navbar">
+    <h2>EB Easy Bill LK</h2>
+    <div><span id="userRole"></span> | <button onclick="logout()" style="width:auto;">Logout</button></div>
+  </div>
+  <div class="sidebar">
+    <a onclick="showPage('dashboard')" class="active">📊 Dashboard</a>
+    <a onclick="showPage('billing')">🛒 Billing</a>
+    <a onclick="showPage('products')">📦 Products</a>
+    <a onclick="showPage('reports')">📈 Reports</a>
+  </div>
+  <div class="content">
+
+    <!-- DASHBOARD PAGE -->
+    <div id="dashboard" class="page active">
+      <h3>Overview</h3>
+      <div class="card"><h4>Today's Sales</h4><p id="totalSales">Rs. 0</p></div>
+    </div>
+
+    <!-- BILLING PAGE -->
+    <div id="billing" class="page">
+      <h3>POS Billing</h3>
+      <div class="card">
+        <input type="text" id="productName" placeholder="Product Name">
+        <input type="number" id="productPrice" placeholder="Price">
+        <button onclick="addToBill()">Add to Bill</button>
+      </div>
+      <table id="billTable"><tr><th>Item</th><th>Price</th></tr></table>
+      <h4>Total: Rs. <span id="billTotal">0</span></h4>
+      <button onclick="completeBill()">Complete Sale</button>
+    </div>
+
+    <!-- PRODUCTS PAGE -->
+    <div id="products" class="page">
+      <h3>Products</h3>
+      <div class="card">
+        <input type="text" id="newProduct" placeholder="New Product Name">
+        <input type="number" id="newPrice" placeholder="Price">
+        <button onclick="addProduct()">Add Product</button>
+      </div>
+      <table id="productTable"><tr><th>Product</th><th>Price</th></tr></table>
+    </div>
+
+    <!-- REPORTS PAGE -->
+    <div id="reports" class="page">
+      <h3>Sales Reports</h3>
+      <div class="card" id="reportData">No sales yet</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// Login System
+const users = {admin:{pass:'admin123',role:'Admin'}, cashier:{pass:'cashier123',role:'Cashier'}}
+let billItems = [];
+let products = JSON.parse(localStorage.getItem('products')) || [];
+let sales = JSON.parse(localStorage.getItem('sales')) || [];
+
+document.getElementById('loginForm').addEventListener('submit', e=>{
+  e.preventDefault();
+  const u = username.value, p = password.value;
+  if(users[u] && users[u].pass===p){
+    localStorage.setItem('role', users[u].role);
+    loginPage.style.display='none'; dashboardPage.style.display='block';
+    userRole.innerText = users[u].role;
+    if(users[u].role==='Cashier') products.style.display='none';
+    loadProducts(); loadReports();
+  } else errorMsg.innerText='Invalid Login';
+});
+
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sidebar a').forEach(a=>a.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function addToBill(){
+  billItems.push({name:productName.value, price:+productPrice.value});
+  billTotal.innerText = billItems.reduce((a,b)=>a+b.price,0);
+  billTable.innerHTML += `<tr><td>${productName.value}</td><td>${productPrice.value}</td></tr>`;
+  productName.value=''; productPrice.value='';
+}
+
+function completeBill(){
+  sales.push({items:billItems, total:billTotal.innerText, date:new Date()});
+  localStorage.setItem('sales', JSON.stringify(sales));
+  alert('Sale Completed!');
+  billItems=[]; billTable.innerHTML='<tr><th>Item</th><th>Price</th></tr>'; billTotal.innerText=0;
+  loadReports();
+}
+
+function addProduct(){
+  products.push({name:newProduct.value, price:+newPrice.value});
+  localStorage.setItem('products', JSON.stringify(products));
+  loadProducts();
+}
+
+function loadProducts(){
+  productTable.innerHTML='<tr><th>Product</th><th>Price</th></tr>';
+  products.forEach(p=> productTable.innerHTML+=`<tr><td>${p.name}</td><td>${p.price}</td></tr>`);
+}
+
+function loadReports(){
+  totalSales.innerText = 'Rs. ' + sales.reduce((a,b)=>a+ +b.total,0);
+}
+
+function logout(){localStorage.clear(); location.reload();}
+</script>
+</body>
+</html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
