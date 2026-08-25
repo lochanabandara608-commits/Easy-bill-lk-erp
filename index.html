@@ -1,0 +1,2656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EASY BILL LK - Advanced ERP</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins',sans-serif;
+}
+
+:root{
+    --blue:#2563eb;
+    --green:#10b981;
+    --orange:#f59e0b;
+    --purple:#8b5cf6;
+    --dark:#0f172a;
+    --red:#ef4444;
+    --cyan:#06b6d4;
+    --bg:#f1f5f9;
+    --white:#fff;
+    --border:#e2e8f0;
+    --text:#334155;
+}
+
+body{
+    background:var(--bg);
+    color:var(--text);
+}
+
+button{
+    border:0;
+    border-radius:8px;
+    padding:11px 16px;
+    cursor:pointer;
+    font-weight:600;
+    transition:.2s;
+}
+
+button:hover{
+    opacity:.9;
+    transform:translateY(-1px);
+}
+
+input,select{
+    width:100%;
+    padding:12px;
+    border:1px solid var(--border);
+    border-radius:8px;
+    outline:none;
+    font-size:14px;
+    background:white;
+}
+
+input:focus,select:focus{
+    border-color:var(--cyan);
+    box-shadow:0 0 0 2px rgba(6,182,212,.1);
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th,td{
+    padding:11px;
+    border-bottom:1px solid #eee;
+    text-align:left;
+    font-size:13px;
+}
+
+th{
+    background:#f8fafc;
+}
+
+.card{
+    background:white;
+    padding:20px;
+    border-radius:14px;
+    margin-bottom:20px;
+    box-shadow:0 3px 15px rgba(15,23,42,.04);
+}
+
+.cash{
+    background:var(--green);
+    color:white;
+}
+
+.credit{
+    background:var(--orange);
+    color:white;
+}
+
+.cardBtn{
+    background:var(--purple);
+    color:white;
+}
+
+.danger{
+    background:var(--red);
+    color:white;
+}
+
+.primary{
+    background:var(--blue);
+    color:white;
+}
+
+/* AUTH */
+
+#authBox{
+    position:fixed;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(135deg,#06b6d4,#2563eb,#4f46e5);
+    z-index:9999;
+    padding:15px;
+}
+
+.auth-card{
+    width:430px;
+    max-width:100%;
+    background:white;
+    padding:35px;
+    border-radius:20px;
+    box-shadow:0 20px 60px rgba(0,0,0,.25);
+}
+
+.auth-logo{
+    text-align:center;
+    margin-bottom:20px;
+}
+
+.auth-logo h1{
+    color:var(--blue);
+    font-size:27px;
+}
+
+.auth-logo p{
+    font-size:12px;
+    color:#64748b;
+}
+
+.tabs{
+    display:flex;
+    border-bottom:1px solid #eee;
+    margin-bottom:20px;
+}
+
+.tabs button{
+    flex:1;
+    background:white;
+    border-radius:0;
+    border-bottom:3px solid transparent;
+}
+
+.tabs button.active{
+    color:var(--blue);
+    border-bottom-color:var(--blue);
+}
+
+.authMsg{
+    min-height:22px;
+    text-align:center;
+    color:var(--red);
+    font-size:13px;
+    margin-bottom:5px;
+}
+
+/* DASHBOARD */
+
+#dashboard{
+    display:none;
+}
+
+.topbar{
+    height:68px;
+    background:white;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 22px;
+    position:sticky;
+    top:0;
+    z-index:100;
+    border-bottom:1px solid #eee;
+}
+
+.brand{
+    font-weight:700;
+    color:var(--blue);
+    font-size:20px;
+}
+
+.top-user{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:13px;
+}
+
+.menuBtn{
+    display:none;
+    background:var(--dark);
+    color:white;
+}
+
+.layout{
+    display:flex;
+}
+
+.sidebar{
+    width:250px;
+    background:var(--dark);
+    color:white;
+    min-height:calc(100vh - 68px);
+    position:fixed;
+    top:68px;
+    left:0;
+    bottom:0;
+    overflow-y:auto;
+    padding:12px 0;
+    z-index:90;
+}
+
+.sidebar-title{
+    padding:15px 22px;
+    color:#94a3b8;
+    font-size:11px;
+    text-transform:uppercase;
+}
+
+.sidebar a{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:13px 22px;
+    color:#cbd5e1;
+    text-decoration:none;
+    cursor:pointer;
+    font-size:13px;
+    margin:2px 10px;
+    border-radius:8px;
+}
+
+.sidebar a:hover,
+.sidebar a.active{
+    background:var(--cyan);
+    color:white;
+}
+
+.submenu{
+    display:none;
+    background:#020617;
+    padding:4px 0;
+}
+
+.submenu a{
+    padding-left:48px;
+    font-size:12px;
+}
+
+.content{
+    margin-left:250px;
+    width:calc(100% - 250px);
+    padding:22px;
+}
+
+.page{
+    display:none;
+}
+
+.page.active{
+    display:block;
+}
+
+.page-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.page-header h2{
+    font-size:22px;
+}
+
+/* STATS */
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:15px;
+    margin-bottom:20px;
+}
+
+.stat{
+    color:white;
+    border-radius:14px;
+    padding:20px;
+    position:relative;
+    overflow:hidden;
+}
+
+.stat h4{
+    font-size:13px;
+    opacity:.9;
+}
+
+.stat h2{
+    margin-top:8px;
+    font-size:24px;
+}
+
+.stat small{
+    opacity:.8;
+}
+
+/* POS */
+
+.pos-layout{
+    display:grid;
+    grid-template-columns:2fr 1fr;
+    gap:20px;
+}
+
+.product-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(145px,1fr));
+    gap:12px;
+    margin-top:15px;
+}
+
+.product{
+    background:white;
+    padding:15px;
+    border-radius:12px;
+    cursor:pointer;
+    border:2px solid transparent;
+    transition:.2s;
+}
+
+.product:hover{
+    border-color:var(--cyan);
+    transform:translateY(-2px);
+}
+
+.product .icon{
+    width:45px;
+    height:45px;
+    border-radius:10px;
+    background:#e0f2fe;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-bottom:10px;
+    font-size:20px;
+}
+
+.product h4{
+    font-size:14px;
+}
+
+.product p{
+    font-size:13px;
+    color:var(--blue);
+    font-weight:600;
+}
+
+.stock-low{
+    color:var(--red)!important;
+}
+
+.cart-item{
+    display:flex;
+    justify-content:space-between;
+    gap:8px;
+    padding:10px 0;
+    border-bottom:1px solid #eee;
+    font-size:13px;
+}
+
+.qty{
+    display:flex;
+    align-items:center;
+    gap:5px;
+}
+
+.qty button{
+    padding:3px 8px;
+    background:#e2e8f0;
+}
+
+.total-box{
+    background:#f8fafc;
+    padding:15px;
+    border-radius:10px;
+    margin-top:15px;
+}
+
+.payment-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+    margin-top:12px;
+}
+
+/* FORMS */
+
+.form-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+}
+
+.form-actions{
+    display:flex;
+    align-items:end;
+}
+
+.search{
+    margin-bottom:10px;
+}
+
+/* BADGE */
+
+.badge{
+    display:inline-block;
+    padding:4px 9px;
+    border-radius:20px;
+    font-size:11px;
+    font-weight:600;
+}
+
+.badge-admin{
+    background:#ede9fe;
+    color:#7c3aed;
+}
+
+.badge-cashier{
+    background:#dcfce7;
+    color:#15803d;
+}
+
+.badge-cash{
+    background:#dcfce7;
+    color:#15803d;
+}
+
+.badge-credit{
+    background:#fef3c7;
+    color:#b45309;
+}
+
+.badge-card{
+    background:#ede9fe;
+    color:#7c3aed;
+}
+
+.empty{
+    text-align:center;
+    padding:30px;
+    color:#94a3b8;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:1000px){
+    .stats{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .pos-layout{
+        grid-template-columns:1fr;
+    }
+
+    .form-grid{
+        grid-template-columns:1fr 1fr;
+    }
+}
+
+@media(max-width:750px){
+
+    .menuBtn{
+        display:block;
+    }
+
+    .topbar{
+        padding:0 12px;
+    }
+
+    .brand{
+        font-size:16px;
+    }
+
+    .top-user{
+        font-size:11px;
+    }
+
+    .sidebar{
+        transform:translateX(-100%);
+        transition:.25s;
+    }
+
+    .sidebar.open{
+        transform:translateX(0);
+    }
+
+    .content{
+        margin-left:0;
+        width:100%;
+        padding:12px;
+    }
+
+    .stats{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .form-grid{
+        grid-template-columns:1fr;
+    }
+
+    .page-header{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:10px;
+    }
+
+    .card{
+        padding:14px;
+        overflow-x:auto;
+    }
+
+    table{
+        min-width:600px;
+    }
+
+    .payment-grid{
+        grid-template-columns:1fr;
+    }
+}
+
+@media(max-width:450px){
+    .stats{
+        grid-template-columns:1fr;
+    }
+
+    .auth-card{
+        padding:25px 18px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ================= AUTH ================= -->
+
+<div id="authBox">
+
+<div class="auth-card">
+
+<div class="auth-logo">
+<h1>⚡ EASY BILL LK</h1>
+<p>Advanced Retail ERP & POS System</p>
+</div>
+
+<div class="tabs">
+<button id="tabLogin" class="active" onclick="switchTab('login')">Login</button>
+<button id="tabSignup" onclick="switchTab('signup')">Sign Up</button>
+</div>
+
+<div id="authMsg" class="authMsg"></div>
+
+<!-- LOGIN -->
+
+<div id="loginForm">
+
+<input id="loginEmail" type="email" placeholder="Email">
+
+<input id="loginPass" type="password" placeholder="Password">
+
+<button class="primary" style="width:100%;margin-top:8px" onclick="login()">
+Login
+</button>
+
+</div>
+
+<!-- SIGNUP -->
+
+<div id="signupForm" style="display:none">
+
+<input id="shopName" placeholder="Shop Name">
+
+<input id="ownerName" placeholder="Owner Name">
+
+<input id="signupEmail" type="email" placeholder="Email">
+
+<input id="signupPass" type="password" placeholder="Password">
+
+<input id="signupPass2" type="password" placeholder="Confirm Password">
+
+<button class="cash" style="width:100%;margin-top:8px" onclick="signup()">
+Create Admin Account
+</button>
+
+</div>
+
+</div>
+</div>
+
+
+<!-- ================= DASHBOARD ================= -->
+
+<div id="dashboard">
+
+<header class="topbar">
+
+<div style="display:flex;align-items:center;gap:12px">
+
+<button class="menuBtn" onclick="toggleSidebar()">☰</button>
+
+<div class="brand">
+⚡ <span id="shopTitle">EASY BILL LK</span>
+</div>
+
+</div>
+
+<div class="top-user">
+👤 <b id="userName"></b>
+<span>|</span>
+<span id="userRole"></span>
+<span>|</span>
+💰 Rs.<b id="cashBal">0</b>
+
+<button class="danger" onclick="logout()">Logout</button>
+</div>
+
+</header>
+
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+
+<aside class="sidebar" id="sidebar">
+
+<div class="sidebar-title">Main</div>
+
+<a onclick="showPage('dash',this)">🏠 Dashboard</a>
+
+<a onclick="toggleSub('salesSub')">🛒 Sales ▾</a>
+
+<div class="submenu" id="salesSub">
+<a onclick="showPage('pos',this)">POS Terminal</a>
+<a onclick="showPage('salesRep',this)">Sales History</a>
+</div>
+
+<a onclick="showPage('items',this)">📦 Products</a>
+
+<a onclick="showPage('stock',this)">📊 Stock Control</a>
+
+
+<div class="sidebar-title">Management</div>
+
+<a id="adminMenu" onclick="toggleSub('adminSub')">👨‍💼 Admin ▾</a>
+
+<div class="submenu" id="adminSub">
+
+<a onclick="showPage('employees',this)">Employees</a>
+
+<a onclick="showPage('users',this)">Users</a>
+
+<a onclick="showPage('discount',this)">Discount</a>
+
+</div>
+
+
+<a onclick="toggleSub('accountsSub')">💰 Accounts ▾</a>
+
+<div class="submenu" id="accountsSub">
+
+<a onclick="showPage('cashbook',this)">Cash Book</a>
+
+<a onclick="showPage('cashRep',this)">Cash Report</a>
+
+</div>
+
+
+<a onclick="toggleSub('reportsSub')">📈 Reports ▾</a>
+
+<div class="submenu" id="reportsSub">
+
+<a onclick="showPage('salesRep',this)">Sales Report</a>
+
+<a onclick="showPage('stock',this)">Stock Report</a>
+
+</div>
+
+</aside>
+
+
+<!-- CONTENT -->
+
+<main class="content">
+
+
+<!-- DASHBOARD -->
+
+<section id="dash" class="page active">
+
+<div class="page-header">
+
+<h2>Dashboard</h2>
+
+<small id="todayText"></small>
+
+</div>
+
+<div class="stats">
+
+<div class="stat" style="background:linear-gradient(135deg,#2563eb,#3b82f6)">
+<h4>Today's Sales</h4>
+<h2 id="todaySales">Rs. 0</h2>
+<small>Today only</small>
+</div>
+
+<div class="stat" style="background:linear-gradient(135deg,#10b981,#059669)">
+<h4>Cash Balance</h4>
+<h2 id="todayCash">Rs. 0</h2>
+<small>Current balance</small>
+</div>
+
+<div class="stat" style="background:linear-gradient(135deg,#f59e0b,#d97706)">
+<h4>Total Sales</h4>
+<h2 id="allSales">Rs. 0</h2>
+<small>All transactions</small>
+</div>
+
+<div class="stat" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed)">
+<h4>Total Products</h4>
+<h2 id="productCount">0</h2>
+<small>Products</small>
+</div>
+
+</div>
+
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+
+<div class="card">
+<h3>Sales Trend</h3>
+<canvas id="salesChart"></canvas>
+</div>
+
+<div class="card">
+<h3>Payment Types</h3>
+<canvas id="paymentChart"></canvas>
+</div>
+
+</div>
+
+</section>
+
+
+<!-- POS -->
+
+<section id="pos" class="page">
+
+<div class="page-header">
+<h2>POS Terminal</h2>
+<span>Cashier: <b id="cashierName"></b></span>
+</div>
+
+<div class="pos-layout">
+
+<div>
+
+<div class="card">
+
+<input
+id="searchProd"
+class="search"
+placeholder="🔍 Search product..."
+oninput="renderProducts()"
+>
+
+<div class="product-grid" id="productGrid"></div>
+
+</div>
+
+</div>
+
+
+<div>
+
+<div class="card">
+
+<h3>Current Order</h3>
+
+<div id="cartList">
+<div class="empty">No items added</div>
+</div>
+
+<div class="total-box">
+
+<p>Subtotal:
+<b>Rs. <span id="subTotal">0.00</span></b>
+</p>
+
+<p id="discountRow" style="display:none">
+Discount:
+<b style="color:red">- Rs. <span id="discountAmt">0.00</span></b>
+</p>
+
+<hr style="margin:10px 0">
+
+<h2>Total:
+Rs. <span id="cartTotal">0.00</span>
+</h2>
+
+</div>
+
+<div id="adminDiscount" style="display:none;margin-top:12px">
+
+<input id="discountPer" type="number" min="0" placeholder="Discount %">
+
+<button class="credit" onclick="applyDiscount()">
+Apply Discount
+</button>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h3>Payment</h3>
+
+<div class="payment-grid">
+
+<button class="cash" onclick="completeSale('cash')">
+💵 Cash
+</button>
+
+<button class="credit" onclick="completeSale('credit')">
+📒 Credit
+</button>
+
+<button class="cardBtn" onclick="completeSale('card')">
+💳 Card
+</button>
+
+</div>
+
+<button class="danger"
+style="width:100%;margin-top:10px"
+onclick="clearCart()">
+Clear Order
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- PRODUCTS -->
+
+<section id="items" class="page">
+
+<div class="page-header">
+
+<h2>Products</h2>
+
+<button class="primary" onclick="focusProductForm()">＋ Add Product</button>
+
+</div>
+
+<div class="card">
+
+<div class="form-grid">
+
+<input id="pName" placeholder="Product Name">
+
+<input id="pPrice" type="number" placeholder="Selling Price">
+
+<input id="pStock" type="number" placeholder="Stock">
+
+</div>
+
+<div style="margin-top:10px">
+
+<button class="cash" onclick="addProduct()">
+Add Product
+</button>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<input
+id="productTableSearch"
+placeholder="🔍 Search products..."
+oninput="renderProductTable()"
+>
+
+<table>
+
+<thead>
+<tr>
+<th>Product</th>
+<th>Price</th>
+<th>Stock</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody id="prodTable"></tbody>
+
+</table>
+
+</div>
+
+</section>
+
+
+<!-- STOCK -->
+
+<section id="stock" class="page">
+
+<div class="page-header">
+<h2>Stock Control</h2>
+</div>
+
+<div class="stats">
+
+<div class="stat" style="background:var(--blue)">
+<h4>Total Stock Units</h4>
+<h2 id="totalStock">0</h2>
+</div>
+
+<div class="stat" style="background:var(--red)">
+<h4>Low Stock Items</h4>
+<h2 id="lowStock">0</h2>
+</div>
+
+</div>
+
+<div class="card">
+
+<table>
+
+<thead>
+<tr>
+<th>Product</th>
+<th>Price</th>
+<th>Current Stock</th>
+<th>Status</th>
+</tr>
+</thead>
+
+<tbody id="stockTable"></tbody>
+
+</table>
+
+</div>
+
+</section>
+
+
+<!-- CASH BOOK -->
+
+<section id="cashbook" class="page">
+
+<div class="page-header">
+<h2>Cash Book</h2>
+</div>
+
+<div class="card">
+
+<div class="form-grid">
+
+<input id="cashDesc" placeholder="Description">
+
+<input id="cashIn" type="number" placeholder="Cash In">
+
+<input id="cashOut" type="number" placeholder="Cash Out">
+
+</div>
+
+<button class="cash" style="margin-top:10px" onclick="addCash()">
+＋ Add Entry
+</button>
+
+</div>
+
+<div class="card">
+
+<table>
+
+<thead>
+<tr>
+<th>Date</th>
+<th>Description</th>
+<th>Cash In</th>
+<th>Cash Out</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody id="cashTable"></tbody>
+
+</table>
+
+</div>
+
+</section>
+
+
+<!-- EMPLOYEES -->
+
+<section id="employees" class="page">
+
+<div class="page-header">
+<h2>Employees & Salary</h2>
+</div>
+
+<div class="card">
+
+<div class="form-grid">
+
+<input id="eName" placeholder="Employee Name">
+
+<input id="eRole" placeholder="Role">
+
+<input id="eSalary" type="number" placeholder="Monthly Salary">
+
+</div>
+
+<button class="cash" style="margin-top:10px" onclick="addEmployee()">
+＋ Add Employee
+</button>
+
+</div>
+
+<div class="card">
+
+<table>
+
+<thead>
+<tr>
+<th>Name</th>
+<th>Role</th>
+<th>Salary</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody id="empTable"></tbody>
+
+</table>
+
+</div>
+
+</section>
+
+
+<!-- USERS -->
+
+<section id="users" class="page">
+
+<div class="page-header">
+<h2>User Management</h2>
+</div>
+
+<div class="card">
+
+<div class="form-grid">
+
+<input id="uName" placeholder="Name">
+
+<input id="uEmail" type="email" placeholder="Email">
+
+<input id="uPass" type="password" placeholder="Password">
+
+</div>
+
+<select id="uRole" style="margin-top:10px">
+<option value="Cashier">Cashier</option>
+<option value="Admin">Admin</option>
+</select>
+
+<button class="cash" style="margin-top:10px" onclick="addUser()">
+＋ Add User
+</button>
+
+</div>
+
+<div class="card">
+
+<table>
+
+<thead>
+<tr>
+<th>Name</th>
+<th>Email</th>
+<th>Role</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody id="userTable"></tbody>
+
+</table>
+
+</div>
+
+</section>
+
+
+<!-- DISCOUNT -->
+
+<section id="discount" class="page">
+
+<div class="page-header">
+<h2>Discount Settings</h2>
+</div>
+
+<div class="card">
+
+<label>Maximum Discount Percentage</label>
+
+<input id="maxDisc" type="number" min="0" max="100">
+
+<button class="cash" style="margin-top:10px" onclick="saveDiscount()">
+Save Settings
+</button>
+
+</div>
+
+</section>
+
+
+<!-- SALES REPORT -->
+
+<section id="salesRep" class="page">
+
+<div class="page-header">
+
+<h2>Sales Report</h2>
+
+<button class="primary" onclick="exportSalesCSV()">
+⬇ Export CSV
+</button>
+
+</div>
+
+<div class="card">
+
+<input
+id="salesSearch"
+placeholder="🔍 Search sales..."
+oninput="renderSalesTable()"
+>
+
+<table>
+
+<thead>
+<tr>
+<th>Date</th>
+<th>Cashier</th>
+<th>Payment</th>
+<th>Items</th>
+<th>Total</th>
+</tr>
+</thead>
+
+<tbody id="salesTable"></tbody>
+
+</table>
+
+</div>
+
+</section>
+
+
+<!-- CASH REPORT -->
+
+<section id="cashRep" class="page">
+
+<div class="page-header">
+<h2>Cash Report</h2>
+</div>
+
+<div class="stats">
+
+<div class="stat" style="background:var(--green)">
+<h4>Total Cash In</h4>
+<h2 id="cashInTotal">Rs.0</h2>
+</div>
+
+<div class="stat" style="background:var(--red)">
+<h4>Total Cash Out</h4>
+<h2 id="cashOutTotal">Rs.0</h2>
+</div>
+
+<div class="stat" style="background:var(--blue)">
+<h4>Balance</h4>
+<h2 id="finalCash">Rs.0</h2>
+</div>
+
+</div>
+
+</section>
+
+</main>
+</div>
+</div>
+
+
+<script>
+
+/* =========================================================
+   EASY BILL LK - ADVANCED ERP
+========================================================= */
+
+let currentUser = null;
+
+let users = JSON.parse(localStorage.getItem("eb_users")) || [];
+
+let products = [];
+let employees = [];
+let sales = [];
+let cashBook = [];
+
+let cart = [];
+
+let discountPer = 0;
+let maxDiscount = 20;
+
+let salesChart = null;
+let paymentChart = null;
+
+
+/* ================= UTILITIES ================= */
+
+function money(n){
+    return Number(n || 0).toLocaleString("en-LK",{
+        minimumFractionDigits:2,
+        maximumFractionDigits:2
+    });
+}
+
+function todayKey(){
+    let d = new Date();
+    return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+
+function save(key,data){
+    localStorage.setItem(key,JSON.stringify(data));
+}
+
+function userKey(prefix){
+    return prefix+"_"+currentUser.id;
+}
+
+
+/* ================= AUTH ================= */
+
+function switchTab(tab){
+
+    document.querySelectorAll(".tabs button")
+        .forEach(x=>x.classList.remove("active"));
+
+    document.getElementById("authMsg").innerText="";
+
+    if(tab==="login"){
+
+        document.getElementById("tabLogin").classList.add("active");
+
+        document.getElementById("loginForm").style.display="block";
+
+        document.getElementById("signupForm").style.display="none";
+
+    }else{
+
+        document.getElementById("tabSignup").classList.add("active");
+
+        document.getElementById("loginForm").style.display="none";
+
+        document.getElementById("signupForm").style.display="block";
+    }
+}
+
+
+function signup(){
+
+    let shop = document.getElementById("shopName").value.trim();
+    let name = document.getElementById("ownerName").value.trim();
+    let email = document.getElementById("signupEmail").value.trim().toLowerCase();
+    let pass = document.getElementById("signupPass").value;
+    let pass2 = document.getElementById("signupPass2").value;
+
+    if(!shop || !name || !email || !pass || !pass2){
+
+        authError("Please fill all fields.");
+        return;
+    }
+
+    if(pass.length < 4){
+
+        authError("Password must contain at least 4 characters.");
+        return;
+    }
+
+    if(pass!==pass2){
+
+        authError("Passwords do not match.");
+        return;
+    }
+
+    if(users.some(u=>u.email===email)){
+
+        authError("Email already exists.");
+        return;
+    }
+
+    let user = {
+
+        id:Date.now(),
+
+        shop:shop,
+
+        name:name,
+
+        email:email,
+
+        pass:pass,
+
+        role:"Admin",
+
+        created:new Date().toLocaleString()
+
+    };
+
+    users.push(user);
+
+    save("eb_users",users);
+
+    alert("Admin account created successfully!");
+
+    document.getElementById("loginEmail").value=email;
+
+    switchTab("login");
+}
+
+
+function authError(msg){
+
+    document.getElementById("authMsg").innerText=msg;
+}
+
+
+function login(){
+
+    let email =
+        document.getElementById("loginEmail").value.trim().toLowerCase();
+
+    let pass =
+        document.getElementById("loginPass").value;
+
+    let user =
+        users.find(u=>u.email===email && u.pass===pass);
+
+    if(!user){
+
+        authError("Invalid email or password.");
+        return;
+    }
+
+    currentUser=user;
+
+    save("eb_currentUser",user);
+
+    openDashboard();
+}
+
+
+function openDashboard(){
+
+    document.getElementById("authBox").style.display="none";
+
+    document.getElementById("dashboard").style.display="block";
+
+    document.getElementById("shopTitle").innerText=currentUser.shop;
+
+    document.getElementById("userName").innerText=currentUser.name;
+
+    document.getElementById("userRole").innerText=currentUser.role;
+
+    document.getElementById("cashierName").innerText=currentUser.name;
+
+    if(currentUser.role==="Admin"){
+
+        document.getElementById("adminMenu").style.display="flex";
+
+        document.getElementById("adminDiscount").style.display="block";
+
+    }else{
+
+        document.getElementById("adminMenu").style.display="none";
+
+        document.getElementById("adminDiscount").style.display="none";
+    }
+
+    loadUserData();
+}
+
+
+function logout(){
+
+    localStorage.removeItem("eb_currentUser");
+
+    location.reload();
+}
+
+
+/* ================= DATA ================= */
+
+function loadUserData(){
+
+    products =
+        JSON.parse(localStorage.getItem(userKey("eb_prod"))) || [];
+
+    employees =
+        JSON.parse(localStorage.getItem(userKey("eb_emp"))) || [];
+
+    sales =
+        JSON.parse(localStorage.getItem(userKey("eb_sales"))) || [];
+
+    cashBook =
+        JSON.parse(localStorage.getItem(userKey("eb_cash"))) || [];
+
+    maxDiscount =
+        Number(localStorage.getItem(userKey("eb_maxDisc"))) || 20;
+
+    document.getElementById("maxDisc").value=maxDiscount;
+
+    loadAll();
+}
+
+
+/* ================= NAVIGATION ================= */
+
+function toggleSub(id){
+
+    let el=document.getElementById(id);
+
+    el.style.display =
+        el.style.display==="block" ? "none" : "block";
+}
+
+
+function toggleSidebar(){
+
+    document.getElementById("sidebar").classList.toggle("open");
+}
+
+
+function showPage(id,element){
+
+    document.querySelectorAll(".page")
+        .forEach(p=>p.classList.remove("active"));
+
+    let page=document.getElementById(id);
+
+    if(page) page.classList.add("active");
+
+    document.querySelectorAll(".sidebar a")
+        .forEach(a=>a.classList.remove("active"));
+
+    if(element) element.classList.add("active");
+
+    if(window.innerWidth<750){
+
+        document.getElementById("sidebar")
+            .classList.remove("open");
+    }
+
+    if(id==="dash") loadDashboard();
+
+    if(id==="pos") renderProducts();
+
+    if(id==="items") renderProductTable();
+
+    if(id==="stock") renderStock();
+
+    if(id==="cashbook") renderCashBook();
+
+    if(id==="employees") renderEmployees();
+
+    if(id==="users") renderUsers();
+
+    if(id==="salesRep") renderSalesTable();
+
+    if(id==="cashRep") renderCashReport();
+}
+
+
+/* ================= PRODUCTS ================= */
+
+function addProduct(){
+
+    let name=document.getElementById("pName").value.trim();
+
+    let price=Number(document.getElementById("pPrice").value);
+
+    let stock=Number(document.getElementById("pStock").value);
+
+    if(!name || price<=0 || stock<0){
+
+        alert("Enter valid product details.");
+        return;
+    }
+
+    if(products.some(p=>p.n.toLowerCase()===name.toLowerCase())){
+
+        alert("Product already exists.");
+        return;
+    }
+
+    products.push({
+
+        id:Date.now(),
+
+        n:name,
+
+        pr:price,
+
+        st:stock,
+
+        created:new Date().toLocaleString()
+
+    });
+
+    save(userKey("eb_prod"),products);
+
+    document.getElementById("pName").value="";
+    document.getElementById("pPrice").value="";
+    document.getElementById("pStock").value="";
+
+    loadAll();
+
+    alert("Product added.");
+}
+
+
+function deleteProduct(id){
+
+    if(!confirm("Delete this product?")) return;
+
+    products=products.filter(p=>p.id!==id);
+
+    save(userKey("eb_prod"),products);
+
+    loadAll();
+}
+
+
+function focusProductForm(){
+
+    showPage("items");
+
+    setTimeout(()=>{
+        document.getElementById("pName").focus();
+    },100);
+}
+
+
+function renderProducts(){
+
+    let grid=document.getElementById("productGrid");
+
+    let search=
+        document.getElementById("searchProd").value.toLowerCase();
+
+    let filtered=products.filter(p=>
+        p.n.toLowerCase().includes(search)
+    );
+
+    if(filtered.length===0){
+
+        grid.innerHTML='<div class="empty">No products found</div>';
+        return;
+    }
+
+    grid.innerHTML="";
+
+    filtered.forEach(p=>{
+
+        let disabled=p.st<=0;
+
+        grid.innerHTML+=`
+
+        <div class="product"
+             style="${disabled?'opacity:.45;pointer-events:none':''}"
+             onclick="addToCart(${p.id})">
+
+            <div class="icon">📦</div>
+
+            <h4>${escapeHTML(p.n)}</h4>
+
+            <p>Rs.${money(p.pr)}</p>
+
+            <small class="${p.st<=5?'stock-low':''}">
+                Stock: ${p.st}
+            </small>
+
+        </div>
+
+        `;
+    });
+}
+
+
+function renderProductTable(){
+
+    let search=
+        (document.getElementById("productTableSearch")?.value||"")
+        .toLowerCase();
+
+    let body=document.getElementById("prodTable");
+
+    let filtered=products.filter(p=>
+        p.n.toLowerCase().includes(search)
+    );
+
+    body.innerHTML="";
+
+    filtered.forEach(p=>{
+
+        let status =
+            p.st<=0
+            ? `<span class="badge" style="background:#fee2e2;color:#b91c1c">Out</span>`
+            : p.st<=5
+            ? `<span class="badge" style="background:#fef3c7;color:#b45309">Low</span>`
+            : `<span class="badge" style="background:#dcfce7;color:#15803d">Available</span>`;
+
+        body.innerHTML+=`
+
+        <tr>
+
+        <td>${escapeHTML(p.n)}</td>
+
+        <td>Rs.${money(p.pr)}</td>
+
+        <td>${p.st}</td>
+
+        <td>${status}</td>
+
+        <td>
+
+        <button class="danger"
+        onclick="deleteProduct(${p.id})">
+        Delete
+        </button>
+
+        </td>
+
+        </tr>
+        `;
+    });
+}
+
+
+/* ================= POS ================= */
+
+function addToCart(productId){
+
+    let p=products.find(x=>x.id===productId);
+
+    if(!p || p.st<=0) return;
+
+    let item=cart.find(x=>x.id===productId);
+
+    if(item){
+
+        if(item.q>=p.st){
+
+            alert("Not enough stock.");
+            return;
+        }
+
+        item.q++;
+
+    }else{
+
+        cart.push({
+
+            id:p.id,
+
+            n:p.n,
+
+            pr:p.pr,
+
+            q:1
+
+        });
+    }
+
+    updateCart();
+}
+
+
+function changeQty(id,amount){
+
+    let item=cart.find(x=>x.id===id);
+
+    let product=products.find(p=>p.id===id);
+
+    if(!item || !product) return;
+
+    item.q+=amount;
+
+    if(item.q<=0){
+
+        cart=cart.filter(x=>x.id!==id);
+
+    }else if(item.q>product.st){
+
+        item.q=product.st;
+
+        alert("Maximum available stock: "+product.st);
+    }
+
+    updateCart();
+}
+
+
+function clearCart(){
+
+    cart=[];
+
+    discountPer=0;
+
+    document.getElementById("discountPer").value="";
+
+    updateCart();
+}
+
+
+function updateCart(){
+
+    let list=document.getElementById("cartList");
+
+    if(cart.length===0){
+
+        list.innerHTML='<div class="empty">No items added</div>';
+
+    }else{
+
+        list.innerHTML="";
+
+        cart.forEach(item=>{
+
+            list.innerHTML+=`
+
+            <div class="cart-item">
+
+            <div>
+                <b>${escapeHTML(item.n)}</b><br>
+                Rs.${money(item.pr)} × ${item.q}
+            </div>
+
+            <div class="qty">
+
+                <button onclick="changeQty(${item.id},-1)">−</button>
+
+                <b>${item.q}</b>
+
+                <button onclick="changeQty(${item.id},1)">+</button>
+
+            </div>
+
+            </div>
+            `;
+        });
+    }
+
+    let subtotal =
+        cart.reduce((sum,item)=>sum+(item.pr*item.q),0);
+
+    let discount =
+        subtotal*(discountPer/100);
+
+    let total=subtotal-discount;
+
+    document.getElementById("subTotal").innerText=money(subtotal);
+
+    document.getElementById("discountAmt").innerText=money(discount);
+
+    document.getElementById("cartTotal").innerText=money(total);
+
+    document.getElementById("discountRow").style.display =
+        discountPer>0 ? "block":"none";
+}
+
+
+function applyDiscount(){
+
+    if(currentUser.role!=="Admin"){
+
+        alert("Only Admin can apply discount.");
+        return;
+    }
+
+    let per=Number(document.getElementById("discountPer").value);
+
+    if(per<0) per=0;
+
+    if(per>maxDiscount){
+
+        alert("Maximum discount is "+maxDiscount+"%");
+        return;
+    }
+
+    discountPer=per;
+
+    updateCart();
+}
+
+
+/* ================= SALES ================= */
+
+function completeSale(type){
+
+    if(cart.length===0){
+
+        alert("Please add products first.");
+        return;
+    }
+
+    let subtotal =
+        cart.reduce((sum,item)=>sum+(item.pr*item.q),0);
+
+    let discount =
+        subtotal*(discountPer/100);
+
+    let total=subtotal-discount;
+
+    let sale={
+
+        id:Date.now(),
+
+        date:new Date().toLocaleString(),
+
+        dateKey:todayKey(),
+
+        cashier:currentUser.name,
+
+        type:type,
+
+        items:JSON.parse(JSON.stringify(cart)),
+
+        subtotal:subtotal,
+
+        discount:discount,
+
+        total:total
+
+    };
+
+    sales.push(sale);
+
+    /* Reduce Stock */
+
+    cart.forEach(item=>{
+
+        let product=products.find(p=>p.id===item.id);
+
+        if(product){
+
+            product.st-=item.q;
+
+            if(product.st<0) product.st=0;
+        }
+    });
+
+    /* Cash payment */
+
+    if(type==="cash"){
+
+        cashBook.push({
+
+            id:Date.now()+1,
+
+            date:new Date().toLocaleString(),
+
+            desc:"POS Sale",
+
+            in:total,
+
+            out:0,
+
+            reference:sale.id
+
+        });
+
+        save(userKey("eb_cash"),cashBook);
+    }
+
+    save(userKey("eb_sales"),sales);
+
+    save(userKey("eb_prod"),products);
+
+    alert(
+        "SALE COMPLETED\n\n"+
+        "Payment: "+type.toUpperCase()+"\n"+
+        "Total: Rs."+money(total)
+    );
+
+    cart=[];
+
+    discountPer=0;
+
+    document.getElementById("discountPer").value="";
+
+    updateCart();
+
+    loadAll();
+}
+
+
+/* ================= CASH BOOK ================= */
+
+function addCash(){
+
+    let desc=document.getElementById("cashDesc").value.trim();
+
+    let cashIn=Number(document.getElementById("cashIn").value)||0;
+
+    let cashOut=Number(document.getElementById("cashOut").value)||0;
+
+    if(!desc || (cashIn<=0 && cashOut<=0)){
+
+        alert("Enter description and amount.");
+        return;
+    }
+
+    if(cashIn>0 && cashOut>0){
+
+        alert("Enter Cash In OR Cash Out.");
+        return;
+    }
+
+    cashBook.push({
+
+        id:Date.now(),
+
+        date:new Date().toLocaleString(),
+
+        desc:desc,
+
+        in:cashIn,
+
+        out:cashOut
+
+    });
+
+    save(userKey("eb_cash"),cashBook);
+
+    document.getElementById("cashDesc").value="";
+    document.getElementById("cashIn").value="";
+    document.getElementById("cashOut").value="";
+
+    loadAll();
+}
+
+
+function deleteCash(id){
+
+    if(!confirm("Delete cash entry?")) return;
+
+    cashBook=cashBook.filter(c=>c.id!==id);
+
+    save(userKey("eb_cash"),cashBook);
+
+    loadAll();
+}
+
+
+function renderCashBook(){
+
+    let body=document.getElementById("cashTable");
+
+    body.innerHTML="";
+
+    cashBook.slice().reverse().forEach(c=>{
+
+        body.innerHTML+=`
+
+        <tr>
+
+        <td>${c.date}</td>
+
+        <td>${escapeHTML(c.desc)}</td>
+
+        <td style="color:#15803d">
+        Rs.${money(c.in)}
+        </td>
+
+        <td style="color:#dc2626">
+        Rs.${money(c.out)}
+        </td>
+
+        <td>
+        <button class="danger"
+        onclick="deleteCash(${c.id})">
+        Delete
+        </button>
+        </td>
+
+        </tr>
+        `;
+    });
+}
+
+
+/* ================= EMPLOYEES ================= */
+
+function addEmployee(){
+
+    let name=document.getElementById("eName").value.trim();
+
+    let role=document.getElementById("eRole").value.trim();
+
+    let salary=Number(document.getElementById("eSalary").value);
+
+    if(!name || !role || salary<=0){
+
+        alert("Enter valid employee details.");
+        return;
+    }
+
+    employees.push({
+
+        id:Date.now(),
+
+        n:name,
+
+        r:role,
+
+        s:salary
+
+    });
+
+    save(userKey("eb_emp"),employees);
+
+    document.getElementById("eName").value="";
+    document.getElementById("eRole").value="";
+    document.getElementById("eSalary").value="";
+
+    renderEmployees();
+}
+
+
+function deleteEmployee(id){
+
+    if(!confirm("Delete employee?")) return;
+
+    employees=employees.filter(e=>e.id!==id);
+
+    save(userKey("eb_emp"),employees);
+
+    renderEmployees();
+}
+
+
+function renderEmployees(){
+
+    let body=document.getElementById("empTable");
+
+    body.innerHTML="";
+
+    employees.forEach(e=>{
+
+        body.innerHTML+=`
+
+        <tr>
+
+        <td>${escapeHTML(e.n)}</td>
+
+        <td>${escapeHTML(e.r)}</td>
+
+        <td>Rs.${money(e.s)}</td>
+
+        <td>
+        <button class="danger"
+        onclick="deleteEmployee(${e.id})">
+        Delete
+        </button>
+        </td>
+
+        </tr>
+        `;
+    });
+}
+
+
+/* ================= USERS ================= */
+
+function addUser(){
+
+    if(currentUser.role!=="Admin"){
+
+        alert("Admin only.");
+        return;
+    }
+
+    let name=document.getElementById("uName").value.trim();
+
+    let email=document.getElementById("uEmail").value.trim().toLowerCase();
+
+    let pass=document.getElementById("uPass").value;
+
+    let role=document.getElementById("uRole").value;
+
+    if(!name || !email || !pass){
+
+        alert("Fill all fields.");
+        return;
+    }
+
+    if(users.some(u=>u.email===email)){
+
+        alert("Email already exists.");
+        return;
+    }
+
+    users.push({
+
+        id:Date.now(),
+
+        shop:currentUser.shop,
+
+        name:name,
+
+        email:email,
+
+        pass:pass,
+
+        role:role,
+
+        created:new Date().toLocaleString()
+
+    });
+
+    save("eb_users",users);
+
+    document.getElementById("uName").value="";
+    document.getElementById("uEmail").value="";
+    document.getElementById("uPass").value="";
+
+    renderUsers();
+}
+
+
+function deleteUser(id){
+
+    if(id===currentUser.id){
+
+        alert("You cannot delete your own account.");
+        return;
+    }
+
+    if(!confirm("Delete this user?")) return;
+
+    users=users.filter(u=>u.id!==id);
+
+    save("eb_users",users);
+
+    renderUsers();
+}
+
+
+function renderUsers(){
+
+    let body=document.getElementById("userTable");
+
+    body.innerHTML="";
+
+    users
+    .filter(u=>u.shop===currentUser.shop)
+    .forEach(u=>{
+
+        body.innerHTML+=`
+
+        <tr>
+
+        <td>${escapeHTML(u.name)}</td>
+
+        <td>${escapeHTML(u.email)}</td>
+
+        <td>
+        <span class="badge ${
+            u.role==="Admin"
+            ?"badge-admin"
+            :"badge-cashier"
+        }">
+        ${u.role}
+        </span>
+        </td>
+
+        <td>
+        ${
+            u.id===currentUser.id
+            ? "<small>Current User</small>"
+            : `<button class="danger"
+              onclick="deleteUser(${u.id})">
+              Delete
+              </button>`
+        }
+        </td>
+
+        </tr>
+        `;
+    });
+}
+
+
+/* ================= DISCOUNT ================= */
+
+function saveDiscount(){
+
+    let value=Number(document.getElementById("maxDisc").value);
+
+    if(value<0 || value>100){
+
+        alert("Discount must be between 0 and 100.");
+        return;
+    }
+
+    maxDiscount=value;
+
+    localStorage.setItem(
+        userKey("eb_maxDisc"),
+        value
+    );
+
+    alert("Discount settings saved.");
+}
+
+
+/* ================= REPORTS ================= */
+
+function renderSalesTable(){
+
+    let search=
+        (document.getElementById("salesSearch")?.value||"")
+        .toLowerCase();
+
+    let body=document.getElementById("salesTable");
+
+    body.innerHTML="";
+
+    let filtered=sales.filter(s=>
+
+        s.cashier.toLowerCase().includes(search) ||
+
+        s.type.toLowerCase().includes(search) ||
+
+        s.date.toLowerCase().includes(search)
+
+    );
+
+    filtered.slice().reverse().forEach(s=>{
+
+        let itemCount=
+            s.items.reduce((a,b)=>a+b.q,0);
+
+        let badge=
+            s.type==="cash"
+            ?"badge-cash"
+            :s.type==="credit"
+            ?"badge-credit"
+            :"badge-card";
+
+        body.innerHTML+=`
+
+        <tr>
+
+        <td>${s.date}</td>
+
+        <td>${escapeHTML(s.cashier)}</td>
+
+        <td>
+        <span class="badge ${badge}">
+        ${s.type.toUpperCase()}
+        </span>
+        </td>
+
+        <td>${itemCount}</td>
+
+        <td>
+        <b>Rs.${money(s.total)}</b>
+        </td>
+
+        </tr>
+        `;
+    });
+}
+
+
+function exportSalesCSV(){
+
+    if(sales.length===0){
+
+        alert("No sales to export.");
+        return;
+    }
+
+    let csv="Date,Cashier,Payment,Subtotal,Discount,Total\n";
+
+    sales.forEach(s=>{
+
+        csv+=
+        `"${s.date}","${s.cashier}","${s.type}",`+
+        `${s.subtotal},${s.discount},${s.total}\n`;
+    });
+
+    let blob=new Blob([csv],{
+        type:"text/csv;charset=utf-8;"
+    });
+
+    let url=URL.createObjectURL(blob);
+
+    let a=document.createElement("a");
+
+    a.href=url;
+
+    a.download="easy_bill_sales_"+todayKey()+".csv";
+
+    a.click();
+
+    URL.revokeObjectURL(url);
+}
+
+
+/* ================= STOCK ================= */
+
+function renderStock(){
+
+    let body=document.getElementById("stockTable");
+
+    body.innerHTML="";
+
+    let total=0;
+
+    let low=0;
+
+    products.forEach(p=>{
+
+        total+=p.st;
+
+        if(p.st<=5) low++;
+
+        let status=
+
+            p.st<=0
+            ? "OUT OF STOCK"
+            : p.st<=5
+            ? "LOW STOCK"
+            : "AVAILABLE";
+
+        body.innerHTML+=`
+
+        <tr>
+
+        <td>${escapeHTML(p.n)}</td>
+
+        <td>Rs.${money(p.pr)}</td>
+
+        <td><b>${p.st}</b></td>
+
+        <td>${status}</td>
+
+        </tr>
+        `;
+    });
+
+    document.getElementById("totalStock").innerText=total;
+
+    document.getElementById("lowStock").innerText=low;
+}
+
+
+/* ================= CASH REPORT ================= */
+
+function renderCashReport(){
+
+    let cashIn=
+        cashBook.reduce((a,b)=>a+Number(b.in||0),0);
+
+    let cashOut=
+        cashBook.reduce((a,b)=>a+Number(b.out||0),0);
+
+    let balance=cashIn-cashOut;
+
+    document.getElementById("cashInTotal").innerText=
+        "Rs."+money(cashIn);
+
+    document.getElementById("cashOutTotal").innerText=
+        "Rs."+money(cashOut);
+
+    document.getElementById("finalCash").innerText=
+        "Rs."+money(balance);
+}
+
+
+/* ================= DASHBOARD ================= */
+
+function loadDashboard(){
+
+    let today=todayKey();
+
+    let todaySales=
+        sales
+        .filter(s=>s.dateKey===today)
+        .reduce((a,b)=>a+b.total,0);
+
+    let allSales=
+        sales.reduce((a,b)=>a+b.total,0);
+
+    let cash=
+        cashBook.reduce(
+            (a,b)=>a+Number(b.in||0)-Number(b.out||0),
+            0
+        );
+
+    document.getElementById("todaySales").innerText=
+        "Rs."+money(todaySales);
+
+    document.getElementById("allSales").innerText=
+        "Rs."+money(allSales);
+
+    document.getElementById("todayCash").innerText=
+        "Rs."+money(cash);
+
+    document.getElementById("cashBal").innerText=
+        money(cash);
+
+    document.getElementById("productCount").innerText=
+        products.length;
+
+    document.getElementById("todayText").innerText=
+        new Date().toLocaleDateString();
+
+    createCharts();
+}
+
+
+function createCharts(){
+
+    if(salesChart) salesChart.destroy();
+
+    if(paymentChart) paymentChart.destroy();
+
+    let days=[];
+
+    let values=[];
+
+    for(let i=6;i>=0;i--){
+
+        let d=new Date();
+
+        d.setDate(d.getDate()-i);
+
+        let key=
+            d.getFullYear()+"-"+
+            String(d.getMonth()+1).padStart(2,"0")+"-"+
+            String(d.getDate()).padStart(2,"0");
+
+        days.push(
+            d.toLocaleDateString("en",{weekday:"short"})
+        );
+
+        values.push(
+
+            sales
+            .filter(s=>s.dateKey===key)
+            .reduce((a,b)=>a+b.total,0)
+        );
+    }
+
+
+    salesChart=new Chart(
+        document.getElementById("salesChart"),
+        {
+            type:"bar",
+
+            data:{
+                labels:days,
+
+                datasets:[
+                    {
+                        label:"Sales",
+
+                        data:values,
+
+                        backgroundColor:"#06b6d4",
+
+                        borderRadius:6
+                    }
+                ]
+            },
+
+            options:{
+                responsive:true,
+
+                plugins:{
+                    legend:{
+                        display:false
+                    }
+                }
+            }
+        }
+    );
+
+
+    let cash=
+        sales
+        .filter(s=>s.type==="cash")
+        .reduce((a,b)=>a+b.total,0);
+
+    let credit=
+        sales
+        .filter(s=>s.type==="credit")
+        .reduce((a,b)=>a+b.total,0);
+
+    let card=
+        sales
+        .filter(s=>s.type==="card")
+        .reduce((a,b)=>a+b.total,0);
+
+
+    paymentChart=new Chart(
+        document.getElementById("paymentChart"),
+        {
+            type:"doughnut",
+
+            data:{
+                labels:["Cash","Credit","Card"],
+
+                datasets:[
+                    {
+                        data:[cash,credit,card],
+
+                        backgroundColor:[
+                            "#10b981",
+                            "#f59e0b",
+                            "#8b5cf6"
+                        ]
+                    }
+                ]
+            },
+
+            options:{
+                responsive:true
+            }
+        }
+    );
+}
+
+
+/* ================= LOAD ALL ================= */
+
+function loadAll(){
+
+    renderProducts();
+
+    renderProductTable();
+
+    renderStock();
+
+    renderCashBook();
+
+    renderEmployees();
+
+    renderUsers();
+
+    renderSalesTable();
+
+    renderCashReport();
+
+    loadDashboard();
+
+    updateCart();
+}
+
+
+/* ================= SECURITY / HTML ================= */
+
+function escapeHTML(str){
+
+    return String(str)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+
+/* ================= START ================= */
+
+window.onload=function(){
+
+    let saved=
+        JSON.parse(localStorage.getItem("eb_currentUser"));
+
+    if(saved){
+
+        currentUser=saved;
+
+        openDashboard();
+
+    }else{
+
+        document.getElementById("authBox").style.display="flex";
+
+        document.getElementById("dashboard").style.display="none";
+    }
+};
+
+</script>
+
+</body>
+</html>
