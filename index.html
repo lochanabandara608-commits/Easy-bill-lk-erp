@@ -1,0 +1,534 @@
+<script>
+/* =========================================================
+   EASY BILL LK ERP POS
+   FIXED SIGN UP / LOGIN AUTHENTICATION
+   ========================================================= */
+
+const STORAGE_KEY = "easy_bill_lk_erp_v12";
+
+let state = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+
+if (!state) {
+    state = {
+        shops: [],
+        users: [],
+        data: {}
+    };
+}
+
+let currentUser = null;
+let shop = null;
+let cart = [];
+let editingId = null;
+let lastInvoice = null;
+
+
+/* =========================
+   BASIC HELPERS
+========================= */
+
+function uid() {
+    return Date.now().toString(36) +
+        Math.random().toString(36).substring(2, 9);
+}
+
+function saveState() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function getShopData() {
+    if (!shop) return null;
+
+    if (!state.data[shop.id]) {
+        state.data[shop.id] = createEmptyShopData();
+        saveState();
+    }
+
+    return state.data[shop.id];
+}
+
+function createEmptyShopData() {
+    return {
+        products: [],
+        sales: [],
+        purchases: [],
+        customers: [],
+        suppliers: [],
+        cash: [],
+        expenses: [],
+        employees: [],
+        settings: {
+            shop: "",
+            phone: "",
+            currency: "Rs.",
+            low: 5,
+            discount: 20
+        }
+    };
+}
+
+
+/* =========================
+   AUTH UI
+========================= */
+
+function authTab(type) {
+
+    const loginForm =
+        document.getElementById("loginForm");
+
+    const signupForm =
+        document.getElementById("signupForm");
+
+    const loginTab =
+        document.getElementById("loginTab");
+
+    const signupTab =
+        document.getElementById("signupTab");
+
+    const msg =
+        document.getElementById("authMsg");
+
+    if (msg) {
+        msg.classList.add("hidden");
+        msg.innerText = "";
+    }
+
+    if (type === "login") {
+
+        loginForm.classList.remove("hidden");
+        signupForm.classList.add("hidden");
+
+        loginTab.classList.add("active");
+        signupTab.classList.remove("active");
+
+    } else {
+
+        loginForm.classList.add("hidden");
+        signupForm.classList.remove("hidden");
+
+        loginTab.classList.remove("active");
+        signupTab.classList.add("active");
+    }
+}
+
+
+function showAuthMessage(message, success = false) {
+
+    const msg =
+        document.getElementById("authMsg");
+
+    if (!msg) return;
+
+    msg.innerText = message;
+    msg.classList.remove("hidden");
+
+    msg.style.background =
+        success ? "#dcfce7" : "#fee2e2";
+
+    msg.style.color =
+        success ? "#166534" : "#991b1b";
+}
+
+
+/* =========================
+   SIGN UP
+========================= */
+
+function signup() {
+
+    const shopName =
+        document.getElementById("sshop").value.trim();
+
+    const ownerName =
+        document.getElementById("sowner").value.trim();
+
+    const email =
+        document.getElementById("se").value.trim().toLowerCase();
+
+    const password =
+        document.getElementById("sp").value;
+
+    if (!shopName) {
+        showAuthMessage("Shop Name is required.");
+        return;
+    }
+
+    if (!ownerName) {
+        showAuthMessage("Owner Name is required.");
+        return;
+    }
+
+    if (!email) {
+        showAuthMessage("Email is required.");
+        return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showAuthMessage("Enter a valid email address.");
+        return;
+    }
+
+    if (!password) {
+        showAuthMessage("Password is required.");
+        return;
+    }
+
+    if (password.length < 4) {
+        showAuthMessage(
+            "Password must contain at least 4 characters."
+        );
+        return;
+    }
+
+
+    /* Check duplicate email */
+
+    const existingUser =
+        state.users.find(
+            user => user.email.toLowerCase() === email
+        );
+
+    if (existingUser) {
+        showAuthMessage(
+            "This email is already registered."
+        );
+        return;
+    }
+
+
+    /* Create shop */
+
+    const newShop = {
+        id: "shop_" + uid(),
+        name: shopName,
+        phone: "",
+        createdAt: new Date().toISOString()
+    };
+
+
+    /* Create empty ERP database */
+
+    const shopData =
+        createEmptyShopData();
+
+    shopData.settings.shop =
+        shopName;
+
+
+    /* Create Admin user */
+
+    const newUser = {
+        id: "user_" + uid(),
+        shopId: newShop.id,
+        name: ownerName,
+        email: email,
+        pass: password,
+        role: "Admin",
+        active: true,
+        createdAt: new Date().toISOString()
+    };
+
+
+    /* Save everything */
+
+    state.shops.push(newShop);
+
+    state.data[newShop.id] =
+        shopData;
+
+    state.users.push(newUser);
+
+    saveState();
+
+
+    /* Clear signup form */
+
+    document.getElementById("sshop").value = "";
+    document.getElementById("sowner").value = "";
+    document.getElementById("se").value = "";
+    document.getElementById("sp").value = "";
+
+
+    /* Put email into login */
+
+    document.getElementById("le").value =
+        email;
+
+    document.getElementById("lp").value =
+        "";
+
+    authTab("login");
+
+    showAuthMessage(
+        "Shop account created successfully. Please login.",
+        true
+    );
+}
+
+
+/* =========================
+   LOGIN
+========================= */
+
+function login() {
+
+    const email =
+        document.getElementById("le").value
+            .trim()
+            .toLowerCase();
+
+    const password =
+        document.getElementById("lp").value;
+
+
+    if (!email) {
+        showAuthMessage("Enter your email.");
+        return;
+    }
+
+    if (!password) {
+        showAuthMessage("Enter your password.");
+        return;
+    }
+
+
+    const user =
+        state.users.find(
+            u =>
+                u.email.toLowerCase() === email &&
+                u.pass === password &&
+                u.active !== false
+        );
+
+
+    if (!user) {
+
+        showAuthMessage(
+            "Invalid email or password."
+        );
+
+        return;
+    }
+
+
+    const selectedShop =
+        state.shops.find(
+            s => s.id === user.shopId
+        );
+
+
+    if (!selectedShop) {
+
+        showAuthMessage(
+            "Shop account could not be found."
+        );
+
+        return;
+    }
+
+
+    currentUser = user;
+    shop = selectedShop;
+
+
+    if (!state.data[shop.id]) {
+        state.data[shop.id] =
+            createEmptyShopData();
+    }
+
+
+    localStorage.setItem(
+        "easy_bill_current_user",
+        JSON.stringify({
+            userId: user.id,
+            shopId: shop.id
+        })
+    );
+
+
+    saveState();
+
+
+    openERP();
+}
+
+
+/* =========================
+   OPEN ERP
+========================= */
+
+function openERP() {
+
+    const auth =
+        document.getElementById("auth");
+
+    const app =
+        document.getElementById("app");
+
+
+    if (auth)
+        auth.style.display = "none";
+
+    if (app)
+        app.style.display = "block";
+
+
+    const topShop =
+        document.getElementById("topShop");
+
+    const topUser =
+        document.getElementById("topUser");
+
+    const topRole =
+        document.getElementById("topRole");
+
+    const cashier =
+        document.getElementById("cashier");
+
+
+    if (topShop)
+        topShop.innerText =
+            shop.name;
+
+    if (topUser)
+        topUser.innerText =
+            currentUser.name;
+
+    if (topRole)
+        topRole.innerText =
+            currentUser.role;
+
+    if (cashier)
+        cashier.innerText =
+            currentUser.name;
+
+
+    /* Admin menu */
+
+    document
+        .querySelectorAll(".admin-only")
+        .forEach(element => {
+
+            if (currentUser.role === "Admin") {
+                element.style.display = "";
+            } else {
+                element.style.display = "none";
+            }
+
+        });
+
+
+    if (typeof refresh === "function") {
+        refresh();
+    }
+
+    if (typeof go === "function") {
+        go("dashboard");
+    }
+}
+
+
+/* =========================
+   LOGOUT
+========================= */
+
+function logout() {
+
+    currentUser = null;
+    shop = null;
+    cart = [];
+
+    localStorage.removeItem(
+        "easy_bill_current_user"
+    );
+
+    location.reload();
+}
+
+
+/* =========================
+   AUTO LOGIN
+========================= */
+
+function checkSavedLogin() {
+
+    const saved =
+        localStorage.getItem(
+            "easy_bill_current_user"
+        );
+
+    if (!saved) {
+        return;
+    }
+
+
+    try {
+
+        const session =
+            JSON.parse(saved);
+
+
+        const user =
+            state.users.find(
+                u =>
+                    u.id === session.userId &&
+                    u.shopId === session.shopId &&
+                    u.active !== false
+            );
+
+
+        if (!user) {
+            localStorage.removeItem(
+                "easy_bill_current_user"
+            );
+            return;
+        }
+
+
+        const selectedShop =
+            state.shops.find(
+                s => s.id === session.shopId
+            );
+
+
+        if (!selectedShop) {
+            localStorage.removeItem(
+                "easy_bill_current_user"
+            );
+            return;
+        }
+
+
+        currentUser = user;
+        shop = selectedShop;
+
+        openERP();
+
+    } catch (error) {
+
+        console.error(
+            "Session error:",
+            error
+        );
+
+        localStorage.removeItem(
+            "easy_bill_current_user"
+        );
+    }
+}
+
+
+/* =========================
+   START SYSTEM
+========================= */
+
+window.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        checkSavedLogin();
+
+    }
+);
+</script>
