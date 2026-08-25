@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>EASY BILL LK - ERP</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif}
+:root{--blue:#2563eb;--green:#10b981;--orange:#f59e0b;--purple:#8b5cf6;--dark:#0f172a;--red:#ef4444;--cyan:#06b6d4}
+body{background:#f1f5f9;color:#333}
+button{cursor:pointer;border:none;border-radius:8px;padding:12px 18px;font-weight:600}
+input,select{padding:12px;border:1px solid #ddd;border-radius:8px;margin:5px 0;width:100%;font-size:15px}
+#authBox{display:flex;position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#06b6d4,#2563eb);justify-content:center;align-items:center;z-index:99}
+.auth-card{background:white;padding:40px;border-radius:16px;width:420px;text-align:center}
+.tabs{display:flex;margin-bottom:20px} .tabs button{flex:1;background:none;border-bottom:3px solid #eee;padding:12px}
+.tabs button.active{border-color:var(--cyan);color:var(--cyan);font-weight:700}
+#dashboard{display:none}
+.dash-nav{background:white;padding:12px 30px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;box-shadow:0 2px 10px rgba(0,0,0,0.05)}
+.dash-body{display:flex}
+.sidebar{width:260px;background:var(--dark);color:white;height:100vh;position:sticky;top:69px;overflow-y:auto;padding-top:15px}
+.sidebar a{display:flex;align-items:center;gap:12px;padding:14px 25px;color:#cbd5e1;text-decoration:none;cursor:pointer;font-size:14px}
+.sidebar a.active{background:var(--cyan);color:white;border-radius:8px;margin:0 10px}
+.submenu{display:none;background:#020617}
+.submenu a{padding:10px 25px 10px 50px;font-size:13px}
+.dash-content{flex:1;padding:20px;overflow-y:auto}
+.card{background:white;padding:20px;border-radius:12px;box-shadow:0 4px 15px rgba(0,0,0,0.05);margin-bottom:20px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;margin-bottom:20px}
+.stat-card{padding:18px;border-radius:12px;color:white}
+.pos-layout{display:grid;grid-template-columns:2.2fr 1fr;gap:20px}
+.product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+.prod-card{background:white;border-radius:10px;padding:10px;text-align:center;cursor:pointer}
+.prod-card img{width:100%;height:90px;object-fit:cover;border-radius:8px}
+.cash{background:var(--green);color:white} .credit{background:var(--orange);color:white} .image{background:var(--purple);color:white} .danger{background:var(--red);color:white}
+table{width:100%;border-collapse:collapse} th{background:#f1f5f9} th,td{padding:10px;text-align:left;border-bottom:1px solid #eee}
+.badge{background:var(--red);color:white;padding:2px 8px;border-radius:10px;font-size:12px;margin-left:auto}
+</style>
+</head>
+<body>
+
+<!-- LOGIN / SIGNUP -->
+<div id="authBox">
+  <div class="auth-card">
+    <h2>EASY BILL LK - ERP v10</h2>
+    <div class="tabs">
+      <button id="tabLogin" class="active" onclick="switchTab('login')">Login</button>
+      <button id="tabSignup" onclick="switchTab('signup')">Sign Up</button>
+    </div>
+    <p id="authMsg" style="color:red;height:20px"></p>
+    <div id="loginForm">
+      <input id="loginEmail" type="email" placeholder="Email">
+      <input id="loginPass" type="password" placeholder="Password">
+      <button class="cash" style="width:100%" onclick="login()">Login</button>
+    </div>
+    <div id="signupForm" style="display:none">
+      <input id="shopName" placeholder="Shop Name">
+      <input id="ownerName" placeholder="Owner Name">
+      <input id="signupEmail" type="email" placeholder="Email">
+      <input id="signupPass" type="password" placeholder="Password">
+      <button class="credit" style="width:100%" onclick="signup()">Create Admin Account</button>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <div class="dash-nav">
+    <div class="logo"><span id="shopTitle"></span></div>
+    <div>👤 <span id="userName"></span> | <span id="userRole"></span> | Cash: Rs.<span id="cashBal">0</span> <button onclick="logout()" style="background:var(--red);color:white">Logout</button></div>
+  </div>
+  <div class="dash-body">
+    <div class="sidebar">
+      <a onclick="showPage('dash')">🏠 Dashboard</a>
+      
+      <a onclick="toggleSub('billSub')">🛒 Sales ▼</a>
+      <div id="billSub" class="submenu">
+        <a onclick="showPage('pos')">POS Terminal</a>
+        <a onclick="showPage('orders')">Sales Orders</a>
+        <a onclick="showPage('returns')">Returns</a>
+      </div>
+
+      <a onclick="showPage('items')">📦 Products</a>
+      <a onclick="showPage('cust')">👥 Customers</a>
+      <a onclick="showPage('suppliers')">🚚 Suppliers</a>
+
+      <a onclick="toggleSub('invSub')">🏬 Inventory ▼</a>
+      <div id="invSub" class="submenu">
+        <a onclick="showPage('stock')">Stock</a>
+        <a onclick="showPage('purchase')">Purchase</a>
+        <a onclick="showPage('adjust')">Stock Adjust</a>
+      </div>
+
+      <a id="adminMenu" onclick="toggleSub('adminSub')">👨‍💼 Admin ▼</a>
+      <div id="adminSub" class="submenu">
+        <a onclick="showPage('employees')">Employees & Salary</a>
+        <a onclick="showPage('users')">User Management</a>
+        <a onclick="showPage('discount')">Discount Settings</a>
+      </div>
+
+      <a onclick="toggleSub('accSub')">💰 Accounts ▼</a>
+      <div id="accSub" class="submenu">
+        <a onclick="showPage('cashbook')">Cash Book</a>
+        <a onclick="showPage('expense')">Expense</a>
+      </div>
+
+      <a onclick="toggleSub('repSub')">📈 Reports ▼</a>
+      <div id="repSub" class="submenu">
+        <a onclick="showPage('salesRep')">Sales Report</a>
+        <a onclick="showPage('profitRep')">Profit & Loss</a>
+        <a onclick="showPage('cashRep')">Cash Report</a>
+      </div>
+    </div>
+    
+    <div class="dash-content">
+      <div id="dash" class="page">
+        <h2>Dashboard</h2>
+        <div class="stats">
+          <div class="stat-card" style="background:var(--blue)"><h4>Today Sales</h4><h2 id="tSales">Rs. 0</h2></div>
+          <div class="stat-card" style="background:var(--green)"><h4>Cash Balance</h4><h2 id="tCash">Rs. 0</h2></div>
+          <div class="stat-card" style="background:var(--orange)"><h4>Total Profit</h4><h2 id="tProfit">Rs. 0</h2></div>
+          <div class="stat-card" style="background:var(--purple)"><h4>Credit Due</h4><h2 id="tCredit">Rs. 0</h2></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+          <div class="card"><h4>Sales Trend</h4><canvas id="barChart"></canvas></div>
+          <div class="card"><h4>Sales by Type</h4><canvas id="pieChart"></canvas></div>
+        </div>
+      </div>
+
+      <!-- POS WITH DISCOUNT -->
+      <div id="pos" class="page" style="display:none">
+        <h2>POS Terminal</h2>
+        <div class="pos-layout">
+          <div>
+            <input id="searchProd" placeholder="🔍 Search Product">
+            <div class="product-grid" id="productGrid"></div>
+          </div>
+          <div>
+            <div class="card">
+              <h4>Order</h4>
+              <p id="cashierName"></p>
+              <div id="cartList"></div>
+              <hr>
+              <p>Sub Total: Rs.<span id="subTotal">0</span></p>
+              <p id="discountRow" style="display:none">Discount: -Rs.<span id="discountAmt">0</span></p>
+              <h3>Total: Rs.<span id="cartTotal">0</span></h3>
+              
+              <div id="adminDiscount" style="display:none">
+                <input id="discountPer" type="number" placeholder="Discount %">
+                <button class="credit" onclick="applyDiscount()">Apply Discount</button>
+              </div>
+            </div>
+            <div class="card">
+              <h4>Payment</h4>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                <button class="cash" onclick="completeSale('cash')">Cash</button>
+                <button class="credit" onclick="completeSale('credit')">Credit</button>
+                <button class="image" onclick="completeSale('card')">Card</button>
+                <button style="background:#64748b;color:white" onclick="completeSale('other')">Other</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- OTHER PAGES -->
+      <div id="cashbook" class="page" style="display:none"><h2>Cash Book</h2><div class="card"><input id="cashDesc" placeholder="Description"><input id="cashIn" type="number" placeholder="Cash In"><input id="cashOut" type="number" placeholder="Cash Out"><button class="cash" onclick="addCash()">Add Entry</button></div><div class="card"><table id="cashTable"></table></div></div>
+      <div id="discount" class="page" style="display:none"><h2>Discount Settings - Admin Only</h2><div class="card"><p>Max Discount %: <input id="maxDisc" type="number" value="20"> <button class="cash" onclick="saveDiscount()">Save</button></p></div></div>
+      <div id="employees" class="page" style="display:none"><h2>Employees & Salary</h2><div class="card"><input id="eName" placeholder="Name"><input id="eRole" placeholder="Role"><input id="eSalary" type="number" placeholder="Salary"><button class="cash" onclick="addEmployee()">Add</button></div><div class="card"><table id="empTable"></table></div></div>
+      <div id="users" class="page" style="display:none"><h2>User Management</h2><div class="card"><input id="uName" placeholder="Name"><input id="uEmail" placeholder="Email"><input id="uPass" placeholder="Password"><select id="uRole"><option>Admin</option><option>Cashier</option></select><button class="cash" onclick="addUser()">Add User</button></div><div class="card"><table id="userTable"></table></div></div>
+      <div id="items" class="page" style="display:none"><h2>Products</h2><div class="card"><input id="pName" placeholder="Name"><input id="pPrice" type="number" placeholder="Price"><input id="pStock" type="number" placeholder="Stock"><button class="cash" onclick="addProduct()">Add</button></div><div class="card"><table id="prodTable"></table></div></div>
+      <div id="salesRep" class="page" style="display:none"><h2>Sales Report</h2><div class="card"><table id="salesTable"></table></div></div>
+      <div id="cashRep" class="page" style="display:none"><h2>Cash Report</h2><div class="card"><h3>Current Cash: Rs.<span id="finalCash">0</span></h3></div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentUser = null;
+let users = JSON.parse(localStorage.getItem('eb_users')) || [];
+let products = [], employees = [], sales = [], cart = [], cashBook = [];
+let cartTotal = 0, subTotal = 0, discount = 0, maxDiscount = 20;
+
+// AUTH
+function switchTab(tab){
+  document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('active'));
+  if(tab=='login'){tabLogin.classList.add('active'); loginForm.style.display='block'; signupForm.style.display='none';}
+  else {tabSignup.classList.add('active'); signupForm.style.display='block'; loginForm.style.display='none';}
+function signup(){
+  users.push({id:Date.now(), shop:shopName.value, name:ownerName.value, email:signupEmail.value, pass:signupPass.value, role:'Admin'});
+  localStorage.setItem('eb_users',JSON.stringify(users)); alert('Admin Created!'); switchTab('login');
+}
+function login(){
+  let user = users.find(u=>u.email==loginEmail.value && u.pass==loginPass.value);
+  if(!user){authMsg.innerText='Invalid Login'; return;}
+  currentUser = user; localStorage.setItem('eb_currentUser', JSON.stringify(user));
+  authBox.style.display='none'; dashboard.style.display='block'; 
+  userName.innerText = user.name; userRole.innerText = user.role; shopTitle.innerText = user.shop;
+  cashierName.innerText = 'Cashier: ' + user.name;
+  if(user.role!='Admin'){adminMenu.style.display='none'; adminDiscount.style.display='none';}
+  else {adminDiscount.style.display='block';}
+  loadUserData();
+}
+function logout(){localStorage.removeItem('eb_currentUser'); location.reload();}
+function loadUserData(){
+  products = JSON.parse(localStorage.getItem('eb_prod_'+currentUser.id)) || [];
+  employees = JSON.parse(localStorage.getItem('eb_emp_'+currentUser.id)) || [];
+  sales = JSON.parse(localStorage.getItem('eb_sales_'+currentUser.id)) || [];
+  cashBook = JSON.parse(localStorage.getItem('eb_cash_'+currentUser.id)) || [];
+  maxDiscount = JSON.parse(localStorage.getItem('eb_maxDisc_'+currentUser.id)) || 20;
+  loadAll();
+}
+
+function toggleSub(id){document.getElementById(id).style.display = document.getElementById(id).style.display=='block'?'none':'block';}
+function showPage(id){document.querySelectorAll('.page').forEach(p=>p.style.display='none'); document.getElementById(id).style.display='block';}
+
+// POS + DISCOUNT
+function loadProducts(){productGrid.innerHTML=''; products.forEach(p=>productGrid.innerHTML+=`<div class="prod-card" onclick="addToCart('${p.n}',${p.pr})"><img src="https://via.placeholder.com/140"><h5>${p.n}</h5><p>Rs.${p.pr}</p></div>`);}
+function addToCart(name,price){let item = cart.find(x=>x.n==name); if(item) item.q++; else cart.push({n:name,pr:price,q:1}); updateCart();}
+function updateCart(){
+  cartList.innerHTML=''; subTotal=0;
+  cart.forEach(it=>{subTotal+=it.pr*it.q; cartList.innerHTML+=`<div>${it.n} x${it.q} - Rs.${it.pr*it.q}</div>`;});
+  discount = subTotal * (discount/100);
+  cartTotal = subTotal - discount;
+  subTotal.innerText=subTotal; discountAmt.innerText=discount; cartTotal.innerText=cartTotal;
+  if(discount>0) discountRow.style.display='block';
+}
+function applyDiscount(){
+  let per = +discountPer.value;
+  if(per > maxDiscount){alert('Max discount is '+maxDiscount+'%'); return;}
+  discount = per; updateCart();
+}
+function completeSale(type){
+  if(cart.length==0){alert('Add items'); return;}
+  sales.push({date:new Date().toLocaleString(),type, cashier:currentUser.name, items:cart, total:cartTotal, discount});
+  if(type=='cash') cashBook.push({date:new Date().toLocaleString(), desc:'Sale', in:cartTotal, out:0});
+  localStorage.setItem('eb_sales_'+currentUser.id,JSON.stringify(sales));
+  localStorage.setItem('eb_cash_'+currentUser.id,JSON.stringify(cashBook));
+  alert('Sale Completed!'); cart=[]; discount=0; updateCart(); loadAll();
+}
+
+// CASH BALANCE AUTO
+function addCash(){cashBook.push({date:new Date().toLocaleString(), desc:cashDesc.value, in:+cashIn.value||0, out:+cashOut.value||0}); localStorage.setItem('eb_cash_'+currentUser.id,JSON.stringify(cashBook)); loadCash();}
+function loadCash(){
+  cashTable.innerHTML='<tr><th>Date</th><th>Desc</th><th>In</th><th>Out</th></tr>';
+  cashBook.forEach(c=>cashTable.innerHTML+=`<tr><td>${c.date}</td><td>${c.desc}</td><td>${c.in}</td><td>${c.out}</td></tr>`);
+  let balance = cashBook.reduce((a,b)=>a+b.in-b.out,0);
+  cashBal.innerText=balance; tCash.innerText='Rs.'+balance; finalCash.innerText=balance;
+}
+
+// DISCOUNT SETTINGS
+function saveDiscount(){maxDiscount=+maxDisc.value; localStorage.setItem('eb_maxDisc_'+currentUser.id,maxDiscount); alert('Saved!');}
+
+// EMPLOYEES, USERS, PRODUCTS
+function addEmployee(){employees.push({n:eName.value,r:eRole.value,s:+eSalary.value}); localStorage.setItem('eb_emp_'+currentUser.id,JSON.stringify(employees)); loadEmployees();}
+function loadEmployees(){empTable.innerHTML='<tr><th>Name</th><th>Role</th><th>Salary</th></tr>'; employees.forEach(e=>empTable.innerHTML+=`<tr><td>${e.n}</td><td>${e.r}</td><td>Rs.${e.s}</td></tr>`);}
+function addUser(){users.push({id:Date.now(), shop:currentUser.shop, name:uName.value, email:uEmail.value, pass:uPass.value, role:uRole.value}); localStorage.setItem('eb_users',JSON.stringify(users)); loadUsers();}
+function loadUsers(){userTable.innerHTML='<tr><th>Name</th><th>Email</th><th>Role</th></tr>'; users.filter(u=>u.shop==currentUser.shop).forEach(u=>userTable.innerHTML+=`<tr><td>${u.name}</td><td>${u.email}</td><td>${u.role}</td></tr>`);}
+function addProduct(){products.push({n:pName.value,pr:+pPrice.value,st:+pStock.value}); localStorage.setItem('eb_prod_'+currentUser.id,JSON.stringify(products)); loadAll();}
+
+// REPORTS
+function loadAll(){
+  loadProducts(); loadEmployees(); loadUsers(); loadCash();
+  tSales.innerText='Rs.'+sales.reduce((a,b)=>a+b.total,0);
+  tProfit.innerText='Rs.'+Math.round(sales.reduce((a,b)=>a+b.total*0.2,0));
+  tCredit.innerText='Rs.'+sales.filter(s=>s.type=='credit').reduce((a,b)=>a+b.total,0);
+  salesTable.innerHTML='<tr><th>Date</th><th>Cashier</th><th>Type</th><th>Total</th></tr>'; sales.forEach(s=>salesTable.innerHTML+=`<tr><td>${s.date}</td><td>${s.cashier}</td><td>${s.type}</td><td>Rs.${s.total}</td></tr>`);
+  new Chart(barChart,{type:'bar',data:{labels:['Mon','Tue','Wed','Thu','Fri'],datasets:[{label:'Sales',data:[12000,19000,15000,22000,18000],backgroundColor:'#06b6d4'}]}});
+  new Chart(pieChart,{type:'pie',data:{labels:['Cash','Credit','Card'],datasets:[{data:[40,30,30],backgroundColor:['#10b981','#f59e0b','#8b5cf6']}]}});
+}
+
+window.onload = ()=>{let saved=JSON.parse(localStorage.getItem('eb_currentUser')); if(saved){currentUser=saved; authBox.style.display='none'; dashboard.style.display='block'; loadUserData();}}
+</script>
+</body>
+</html>
