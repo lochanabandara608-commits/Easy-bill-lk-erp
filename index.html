@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>EASY BILL LK - ERP</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif}
+:root{--blue:#2563eb;--green:#10b981;--orange:#f59e0b;--purple:#8b5cf6;--dark:#0f172a;--red:#ef4444}
+body{background:#f8fafc;color:#333}
+button{cursor:pointer;border:none;border-radius:8px;padding:10px 18px;font-weight:600}
+input,select{padding:10px;border:1px solid #ddd;border-radius:8px;margin:5px 0;width:100%}
+
+#authBox{display:flex;position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#2563eb,#8b5cf6);justify-content:center;align-items:center;z-index:99}
+.auth-card{background:white;padding:40px;border-radius:16px;width:420px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,0.2)}
+
+#dashboard{display:none}
+.dash-nav{background:white;color:#333;padding:12px 30px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10;box-shadow:0 2px 10px rgba(0,0,0,0.05)}
+.logo{display:flex;align-items:center;gap:12px;font-weight:700;font-size:18px;color:var(--blue)}
+.logo-img{height:45px;width:45px;border-radius:50%;background:transparent;object-fit:contain}
+.dash-body{display:flex}
+.sidebar{width:260px;background:var(--dark);color:white;height:100vh;position:sticky;top:69px;overflow-y:auto;padding-top:15px}
+.sidebar a{display:flex;align-items:center;gap:12px;padding:12px 25px;color:#cbd5e1;text-decoration:none;cursor:pointer;font-size:15px}
+.sidebar a.active,.sidebar a:hover{background:var(--blue);color:white;border-radius:8px;margin:0 10px}
+.dash-content{flex:1;padding:30px;overflow-y:auto}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;margin-bottom:30px}
+.stat-card{padding:20px;border-radius:12px;color:white;box-shadow:0 4px 15px rgba(0,0,0,0.1)}
+.card{background:white;padding:20px;border-radius:12px;box-shadow:0 4px 15px rgba(0,0,0,0.05);margin-bottom:20px}
+.grid-2{display:grid;grid-template-columns:2fr 1fr;gap:20px}
+table{width:100%;border-collapse:collapse} th,td{padding:12px;text-align:left;border-bottom:1px solid #eee}
+.red{color:var(--red)}.btn-primary{background:var(--blue);color:white}.btn-green{background:var(--green);color:white}
+.login-logo{height:80px;width:80px;border-radius:50%;background:transparent;object-fit:contain;margin-bottom:15px}
+.badge{background:var(--red);color:white;padding:2px 8px;border-radius:10px;font-size:12px}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="authBox">
+  <div class="auth-card">
+    <img src="https://i.postimg.cc/CBq7QYxq/logo.png" class="login-logo">
+    <h2>EASY BILL LK - ERP</h2>
+    <p style="color:#888;margin-bottom:20px">Complete Billing & Inventory System</p>
+    <input id="loginEmail" type="email" placeholder="Admin Email">
+    <input id="loginPass" type="password" placeholder="Password">
+    <button class="btn-primary" style="width:100%;margin-top:10px" onclick="login()">Login</button>
+    <p style="margin-top:15px;font-size:13px">Demo: admin@test.com / 1234</p>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <div class="dash-nav">
+    <div class="logo">
+      <img src="https://i.postimg.cc/CBq7QYxq/logo.png" class="logo-img">
+      <span id="shopTitle">EASY BILL LK</span>
+    </div>
+    <div><span id="userName"></span> <button id="logoutBtn" style="background:var(--red);color:white">Logout</button></div>
+  </div>
+  <div class="dash-body">
+    <div class="sidebar">
+      <a class="active" onclick="showPage('dash')">🏠 Dashboard</a>
+      <a onclick="showPage('bill')">🛒 POS / Billing</a>
+      <a onclick="showPage('items')">📦 Products</a>
+      <a onclick="showPage('purchase')">🛍️ Purchase</a>
+      <a onclick="showPage('stock')">🏬 Inventory <span class="badge" id="lowBadge">0</span></a>
+      <a onclick="showPage('cust')">👥 Customers</a>
+      <a onclick="showPage('suppliers')">🚚 Suppliers</a>
+      <a onclick="showPage('accounts')">💰 Accounts</a>
+      <a onclick="showPage('reports')">📈 Reports</a>
+      <a onclick="showPage('users')">👤 Users</a>
+      <a onclick="showPage('backup')">💾 Backup</a>
+    </div>
+    <div class="dash-content">
+      <div id="dash" class="page">
+        <h2>Dashboard Overview</h2>
+        <div class="stats">
+          <div class="stat-card" style="background:var(--blue)"><h4>Today's Sales</h4><h2 id="tSales">Rs. 0</h2></div>
+          <div class="stat-card" style="background:var(--green)"><h4>Total Profit</h4><h2 id="tProfit">Rs. 0</h2></div>
+          <div class="stat-card" style="background:var(--orange)"><h4>Total Products</h4><h2 id="tProd">0</h2></div>
+          <div class="stat-card" style="background:var(--purple)"><h4>Low Stock</h4><h2 id="tLow">0</h2></div>
+        </div>
+        <div class="grid-2">
+          <div class="card"><h4>Monthly Sales Trend</h4><canvas id="salesChart"></canvas></div>
+          <div class="card"><h4>Top Selling Items</h4><canvas id="topChart"></canvas></div>
+        </div>
+      </div>
+
+      <div id="bill" class="page" style="display:none">
+        <h2>POS Billing</h2>
+        <div class="grid-2">
+          <div class="card"><h4>Add Items</h4><select id="billProd"></select><input id="billQty" type="number" value="1"><button class="btn-primary" onclick="addToCart()">Add</button></div>
+          <div class="card"><h4>Bill</h4><table id="billTable"><tr><th>Item</th><th>Qty</th><th>Total</th></tr></table><h3>Total: Rs.<span id="billTotal">0</span></h3><button class="btn-green" style="width:100%" onclick="completeSale()">Complete & Print</button></div>
+        </div>
+      </div>
+
+      <div id="items" class="page" style="display:none"><h2>Product Management</h2><div class="card"><input id="pName" placeholder="Product Name"><input id="pCost" type="number" placeholder="Cost Price"><input id="pPrice" type="number" placeholder="Selling Price"><input id="pStock" type="number" placeholder="Stock"><button class="btn-primary" onclick="addProduct()">Add Product</button></div><div class="card"><table id="prodTable"><tr><th>Product</th><th>Cost</th><th>Price</th><th>Stock</th><th>Action</th></tr></table></div></div>
+
+      <div id="purchase" class="page" style="display:none"><h2>Purchase Orders</h2><div class="card"><select id="purSup"></select><input id="purProd" placeholder="Product"><input id="purQty" type="number" placeholder="Qty"><input id="purCost" type="number" placeholder="Cost"><button class="btn-primary" onclick="addPurchase()">Add Purchase</button></div><div class="card"><table id="purTable"><tr><th>Date</th><th>Supplier</th><th>Product</th><th>Qty</th><th>Total</th></tr></table></div></div>
+
+      <div id="stock" class="page" style="display:none"><h2>Inventory</h2><div class="card" id="stockList"></div></div>
+      <div id="cust" class="page" style="display:none"><h2>Customers</h2><div class="card"><input id="cName" placeholder="Name"><input id="cPhone" placeholder="Phone"><button class="btn-primary" onclick="addCustomer()">Add</button></div><div class="card"><table id="custTable"><tr><th>Name</th><th>Phone</th></tr></table></div></div>
+      <div id="suppliers" class="page" style="display:none"><h2>Suppliers</h2><div class="card"><input id="sName" placeholder="Name"><input id="sPhone" placeholder="Phone"><button class="btn-primary" onclick="addSupplier()">Add</button></div><div class="card"><table id="supTable"><tr><th>Name</th><th>Phone</th></tr></table></div></div>
+      <div id="accounts" class="page" style="display:none"><h2>Accounts</h2><div class="card"><h4>Income: Rs.<span id="income">0</span></h4><h4>Expense: Rs.<span id="expense">0</span></h4><h4>Net: Rs.<span id="net">0</span></h4></div></div>
+      <div id="reports" class="page" style="display:none"><h2>Sales Reports</h2><div class="card"><table id="salesTable"><tr><th>Date</th><th>Items</th><th>Total</th><th>Profit</th></tr></table></div></div>
+      <div id="users" class="page" style="display:none"><h2>User Management</h2><div class="card"><input id="uName" placeholder="Name"><input id="uEmail" placeholder="Email"><select id="uRole"><option>Admin</option><option>Cashier</option></select><button class="btn-primary" onclick="addUser()">Add User</button></div><div class="card"><table id="userTable"><tr><th>Name</th><th>Email</th><th>Role</th></tr></table></div></div>
+      <div id="backup" class="page" style="display:none"><h2>Backup & Export</h2><div class="card"><button class="btn-primary" onclick="exportData()">Download Backup JSON</button><button class="btn-green" onclick="importData()">Import Backup</button></div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentUser = {id:1, name:"Admin", role:"Admin"};
+let products = JSON.parse(localStorage.getItem('erp_prod')) || [];
+let customers = JSON.parse(localStorage.getItem('erp_cust')) || [];
+let suppliers = JSON.parse(localStorage.getItem('erp_sup')) || [];
+let sales = JSON.parse(localStorage.getItem('erp_sales')) || [];
+let purchases = JSON.parse(localStorage.getItem('erp_pur')) || [];
+let users = JSON.parse(localStorage.getItem('erp_users')) || [{name:"Admin",email:"admin@test.com",role:"Admin"}];
+let cart = [], cartTotal = 0;
+
+// AUTH
+function login(){
+  if(loginEmail.value=="admin@test.com" && loginPass.value=="1234"){
+    authBox.style.display='none'; dashboard.style.display='block'; loadAll(); drawCharts();
+  } else alert('Wrong Login');
+}
+document.getElementById('logoutBtn').onclick = ()=>{location.reload();}
+
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.style.display='none');
+  document.getElementById(id).style.display='block';
+  document.querySelectorAll('.sidebar a').forEach(a=>a.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+// PRODUCTS
+function addProduct(){
+  products.push({n:pName.value, cost:+pCost.value, pr:+pPrice.value, st:+pStock.value});
+  localStorage.setItem('erp_prod',JSON.stringify(products)); loadProducts();
+}
+function loadProducts(){
+  prodTable.innerHTML='<tr><th>Product</th><th>Cost</th><th>Price</th><th>Stock</th><th>Action</th></tr>';
+  products.forEach((p,i)=>prodTable.innerHTML+=`<tr><td>${p.n}</td><td>${p.cost}</td><td>${p.pr}</td><td class="${p.st<5?'red':''}">${p.st}</td><td><button onclick="delProd(${i})" style="background:var(--red)">Del</button></td></tr>`);
+  tProd.innerText=products.length; loadBillProd();
+}
+function delProd(i){products.splice(i,1); localStorage.setItem('erp_prod',JSON.stringify(products)); loadProducts();}
+
+// BILLING
+function loadBillProd(){billProd.innerHTML='<option>Select Product</option>'; products.forEach(p=>billProd.innerHTML+=`<option>${p.n}</option>`);}
+function addToCart(){let p=products.find(x=>x.n==billProd.value); let q=+billQty.value; if(p.st<q){alert('Low Stock'); return;} cart.push({n:p.n, pr:p.pr, cost:p.cost, q}); cartTotal+=p.pr*q; billTotal.innerText=cartTotal; billTable.innerHTML+=`<tr><td>${p.n}</td><td>${q}</td><td>${p.pr*q}</td></tr>`;}
+function completeSale(){
+  let profit = cart.reduce((a,b)=>a+((b.pr-b.cost)*b.q),0);
+  cart.forEach(it=>{let p=products.find(x=>x.n==it.n); p.st-=it.q;});
+  sales.push({date:new Date().toLocaleString(), items:cart.length, total:cartTotal, profit});
+  localStorage.setItem('erp_sales',JSON.stringify(sales)); localStorage.setItem('erp_prod',JSON.stringify(products));
+  alert('Sale Saved! Profit: Rs.'+profit); cart=[]; cartTotal=0; billTable.innerHTML='<tr><th>Item</th><th>Qty</th><th>Total</th></tr>'; billTotal.innerText=0; loadAll(); drawCharts();
+}
+
+// OTHER MODULES
+function addPurchase(){purchases.push({d:new Date().toLocaleDateString(), s:purSup.value, p:purProd.value, q:+purQty.value, t:+purQty.value*+purCost.value}); localStorage.setItem('erp_pur',JSON.stringify(purchases)); loadPurchases();}
+function loadPurchases(){purTable.innerHTML='<tr><th>Date</th><th>Supplier</th><th>Product</th><th>Qty</th><th>Total</th></tr>'; purchases.forEach(p=>purTable.innerHTML+=`<tr><td>${p.d}</td><td>${p.s}</td><td>${p.p}</td><td>${p.q}</td><td>${p.t}</td></tr>`); supTable.innerHTML='<tr><th>Name</th><th>Phone</th></tr>'; suppliers.forEach(s=>supTable.innerHTML+=`<tr><td>${s.n}</td><td>${s.ph}</td></tr>`);}
+function addSupplier(){suppliers.push({n:sName.value, ph:sPhone.value}); localStorage.setItem('erp_sup',JSON.stringify(suppliers)); loadPurchases();}
+function addCustomer(){customers.push({n:cName.value, ph:cPhone.value}); localStorage.setItem('erp_cust',JSON.stringify(customers)); loadCustomers();}
+function loadCustomers(){custTable.innerHTML='<tr><th>Name</th><th>Phone</th></tr>'; customers.forEach(c=>custTable.innerHTML+=`<tr><td>${c.n}</td><td>${c.ph}</td></tr>`);}
+function addUser(){users.push({n:uName.value,e:uEmail.value,r:uRole.value}); localStorage.setItem('erp_users',JSON.stringify(users)); loadUsers();}
+function loadUsers(){userTable.innerHTML='<tr><th>Name</th><th>Email</th><th>Role</th></tr>'; users.forEach(u=>userTable.innerHTML+=`<tr><td>${u.n}</td><td>${u.e}</td><td>${u.r}</td></tr>`);}
+
+function loadAll(){
+  loadProducts(); loadCustomers(); loadPurchases(); loadUsers();
+  let totalSales = sales.reduce((a,b)=>a+b.total,0);
+  let totalProfit = sales.reduce((a,b)=>a+b.profit,0);
+  tSales.innerText='Rs. '+totalSales; tProfit.innerText='Rs. '+totalProfit;
+  let low=products.filter(p=>p.st<5).length; tLow.innerText=low; lowBadge.innerText=low;
+  stockList.innerHTML = products.map(p=>`<p>${p.n} - Stock: <span class="${p.st<5?'red':''}">${p.st}</span></p>`).join('');
+  income.innerText=totalSales; expense.innerText=purchases.reduce((a,b)=>a+b.t,0); net.innerText=totalSales-purchases.reduce((a,b)=>a+b.t,0);
+  salesTable.innerHTML='<tr><th>Date</th><th>Items</th><th>Total</th><th>Profit</th></tr>'; sales.slice(-10).reverse().forEach(s=>salesTable.innerHTML+=`<tr><td>${s.date}</td><td>${s.items}</td><td>Rs.${s.total}</td><td>Rs.${s.profit}</td></tr>`);
+  purSup.innerHTML='<option>Select Supplier</option>'; suppliers.forEach(s=>purSup.innerHTML+=`<option>${s.n}</option>`);
+}
+
+// CHARTS
+function drawCharts(){
+  let months = ['Jan','Feb','Mar','Apr','May','Jun'];
+  let data = months.map(()=>Math.floor(Math.random()*50000)+10000);
+  new Chart(document.getElementById('salesChart'), {type:'line', data:{labels:months, datasets:[{label:'Sales', data, borderColor:'#2563eb', tension:0.4}]}});
+  let top = products.slice(0,5).map(p=>p.n); let topData = products.slice(0,5).map(p=>p.st);
+  new Chart(document.getElementById('topChart'), {type:'bar', data:{labels:top, datasets:[{label:'Stock', data:topData, backgroundColor:'#10b981'}]}});
+}
+
+// BACKUP
+function exportData(){let data={products,customers,suppliers,sales,purchases}; let blob=new Blob([JSON.stringify(data)],{type:'application/json'}); let a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='erp-backup.json'; a.click();}
+function importData(){alert('Import feature coming soon')}
+</script>
+</body>
+</html>
