@@ -1,0 +1,4421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>EASY BILL LK - Restaurant ERP POS</title>
+
+<style>
+*{
+  box-sizing:border-box;
+}
+
+:root{
+  --primary:#2563eb;
+  --primary2:#1d4ed8;
+  --dark:#111827;
+  --dark2:#1f2937;
+  --light:#f3f4f6;
+  --white:#fff;
+  --green:#16a34a;
+  --red:#dc2626;
+  --orange:#f59e0b;
+  --border:#d1d5db;
+  --text:#111827;
+  --muted:#6b7280;
+}
+
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+}
+
+body{
+  font-family:Arial,Helvetica,sans-serif;
+  background:#eef2f7;
+  color:var(--text);
+  overflow:hidden;
+}
+
+button,input,select{
+  font:inherit;
+}
+
+button{
+  cursor:pointer;
+  border:0;
+}
+
+.app{
+  width:100%;
+  height:100vh;
+}
+
+/* ================= SIDEBAR ================= */
+
+.sidebar{
+  position:fixed;
+  left:0;
+  top:0;
+  width:250px;
+  height:100vh;
+  background:var(--dark);
+  color:white;
+  z-index:2000;
+  overflow-y:auto;
+  transition:.25s ease;
+}
+
+.sidebar.closed{
+  transform:translateX(-100%);
+}
+
+.logo{
+  height:68px;
+  display:flex;
+  align-items:center;
+  padding:0 20px;
+  border-bottom:1px solid #374151;
+  font-size:20px;
+  font-weight:bold;
+}
+
+.logo span{
+  color:#60a5fa;
+  margin-right:8px;
+}
+
+.menu{
+  padding:10px;
+}
+
+.menu-title{
+  color:#9ca3af;
+  font-size:11px;
+  text-transform:uppercase;
+  padding:12px 10px 6px;
+}
+
+.menu-item{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px 13px;
+  margin:3px 0;
+  border-radius:7px;
+  color:#e5e7eb;
+  user-select:none;
+}
+
+.menu-item:hover,
+.menu-item.active{
+  background:var(--primary);
+  color:white;
+}
+
+.menu-left{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.arrow{
+  transition:.2s;
+}
+
+.menu-item.open .arrow{
+  transform:rotate(90deg);
+}
+
+.submenu{
+  display:none;
+  padding-left:17px;
+}
+
+.submenu.show{
+  display:block;
+}
+
+.sub-item{
+  padding:9px 12px;
+  margin:2px 0;
+  border-radius:6px;
+  color:#cbd5e1;
+  cursor:pointer;
+}
+
+.sub-item:hover{
+  background:#374151;
+  color:white;
+}
+
+/* ================= MAIN ================= */
+
+.main{
+  width:100%;
+  height:100vh;
+  margin-left:250px;
+  transition:.25s ease;
+}
+
+.main.full{
+  margin-left:0;
+}
+
+.topbar{
+  height:64px;
+  background:white;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 18px;
+}
+
+.left-top{
+  display:flex;
+  align-items:center;
+  gap:15px;
+}
+
+.hamburger{
+  width:42px;
+  height:40px;
+  background:#eef2ff;
+  color:#1d4ed8;
+  border-radius:7px;
+  font-size:22px;
+}
+
+.page-title{
+  font-size:19px;
+  font-weight:bold;
+}
+
+.user-box{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.user-circle{
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  background:#2563eb;
+  color:white;
+  display:grid;
+  place-items:center;
+  font-weight:bold;
+}
+
+.content{
+  height:calc(100vh - 64px);
+  overflow:auto;
+  padding:15px;
+}
+
+/* ================= COMMON ================= */
+
+.page{
+  display:none;
+}
+
+.page.active{
+  display:block;
+}
+
+.card{
+  background:white;
+  border:1px solid var(--border);
+  border-radius:9px;
+  padding:15px;
+  margin-bottom:15px;
+}
+
+.btn{
+  padding:10px 15px;
+  border-radius:7px;
+  color:white;
+  font-weight:bold;
+}
+
+.btn-blue{background:#2563eb}
+.btn-green{background:#16a34a}
+.btn-red{background:#dc2626}
+.btn-orange{background:#f59e0b}
+.btn-gray{background:#6b7280}
+
+.btn-light{
+  background:#e5e7eb;
+  color:#111827;
+}
+
+input,select{
+  width:100%;
+  padding:10px;
+  border:1px solid var(--border);
+  border-radius:6px;
+  outline:none;
+}
+
+input:focus,
+select:focus{
+  border-color:#2563eb;
+}
+
+/* ================= DASHBOARD ================= */
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:15px;
+}
+
+.stat{
+  background:white;
+  border:1px solid var(--border);
+  border-radius:9px;
+  padding:18px;
+}
+
+.stat small{
+  color:var(--muted);
+}
+
+.stat h2{
+  margin:8px 0;
+}
+
+/* ================= POS ================= */
+
+.pos-layout{
+  display:grid;
+  grid-template-columns:minmax(500px,1fr) 420px;
+  gap:15px;
+  min-height:calc(100vh - 100px);
+}
+
+.pos-left{
+  min-width:0;
+}
+
+.pos-right{
+  min-width:0;
+}
+
+.pos-head{
+  display:flex;
+  gap:8px;
+  margin-bottom:10px;
+}
+
+.pos-head input{
+  flex:1;
+}
+
+.category-bar{
+  display:flex;
+  gap:7px;
+  overflow-x:auto;
+  margin-bottom:10px;
+}
+
+.cat-btn{
+  background:#e5e7eb;
+  padding:8px 13px;
+  border-radius:20px;
+  white-space:nowrap;
+}
+
+.cat-btn.active{
+  background:#2563eb;
+  color:white;
+}
+
+.products{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+  max-height:calc(100vh - 220px);
+  overflow:auto;
+}
+
+.product{
+  background:white;
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:10px;
+  min-height:110px;
+  cursor:pointer;
+}
+
+.product:hover{
+  border-color:#2563eb;
+  box-shadow:0 2px 7px #0001;
+}
+
+.product-name{
+  font-weight:bold;
+  margin-bottom:7px;
+}
+
+.product-price{
+  color:#2563eb;
+  font-weight:bold;
+}
+
+.product-stock{
+  font-size:12px;
+  color:#6b7280;
+  margin-top:6px;
+}
+
+/* ================= BILL ================= */
+
+.bill-card{
+  min-height:calc(100vh - 100px);
+  display:flex;
+  flex-direction:column;
+  padding:12px;
+}
+
+.bill-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-bottom:1px solid var(--border);
+  padding-bottom:10px;
+}
+
+.bill-no{
+  font-weight:bold;
+}
+
+.order-type{
+  display:flex;
+  gap:5px;
+  margin:10px 0;
+}
+
+.order-type button{
+  flex:1;
+  padding:9px;
+  border-radius:6px;
+  background:#e5e7eb;
+}
+
+.order-type button.active{
+  background:#2563eb;
+  color:white;
+}
+
+.selected-table{
+  font-weight:bold;
+  color:#2563eb;
+  margin-bottom:7px;
+}
+
+.bill-items{
+  flex:1;
+  overflow:auto;
+}
+
+.bill-table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:13px;
+}
+
+.bill-table th,
+.bill-table td{
+  border-bottom:1px solid #e5e7eb;
+  padding:7px 4px;
+  text-align:left;
+}
+
+.qty{
+  display:flex;
+  align-items:center;
+  gap:4px;
+}
+
+.qty button{
+  width:24px;
+  height:24px;
+  border-radius:4px;
+  background:#e5e7eb;
+}
+
+.total-area{
+  border-top:2px solid #111827;
+  padding-top:8px;
+}
+
+.total-row{
+  display:flex;
+  justify-content:space-between;
+  padding:4px 0;
+}
+
+.grand{
+  font-size:21px;
+  font-weight:bold;
+}
+
+.discount-box{
+  display:flex;
+  gap:5px;
+  margin:7px 0;
+}
+
+.discount-box input{
+  width:110px;
+}
+
+/* ================= PAYMENT ================= */
+
+.payment-box{
+  margin-top:8px;
+}
+
+.payment-methods{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:5px;
+  margin-top:7px;
+}
+
+.pay-btn{
+  padding:9px;
+  border-radius:6px;
+  background:#e5e7eb;
+}
+
+.pay-btn.active{
+  background:#111827;
+  color:white;
+}
+
+.cash-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+  margin-top:7px;
+}
+
+.change{
+  background:#ecfdf5;
+  color:#15803d;
+  padding:10px;
+  border-radius:6px;
+  font-weight:bold;
+}
+
+.bill-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+  margin-top:8px;
+}
+
+.bill-actions button{
+  padding:11px 5px;
+}
+
+/* ================= KEYPAD ================= */
+
+.keypad{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:5px;
+  margin-top:8px;
+}
+
+.key{
+  padding:10px;
+  background:#e5e7eb;
+  border-radius:6px;
+  font-weight:bold;
+}
+
+.key.zero{
+  grid-column:span 2;
+}
+
+.key:active{
+  transform:scale(.97);
+}
+
+/* ================= TABLES ================= */
+
+.tables{
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:12px;
+}
+
+.table-box{
+  min-height:110px;
+  background:#ecfdf5;
+  border:2px solid #22c55e;
+  border-radius:10px;
+  padding:12px;
+  cursor:pointer;
+}
+
+.table-box:hover{
+  transform:translateY(-2px);
+}
+
+.table-box.occupied{
+  background:#fff7ed;
+  border-color:#f97316;
+}
+
+.table-name{
+  font-weight:bold;
+  font-size:18px;
+}
+
+.table-status{
+  margin-top:8px;
+  font-size:13px;
+}
+
+.table-total{
+  margin-top:5px;
+  font-weight:bold;
+}
+
+/* ================= TABLE DETAIL ================= */
+
+.table-detail-card{
+  display:none;
+  margin-top:15px;
+}
+
+.table-list{
+  width:100%;
+  border-collapse:collapse;
+}
+
+.table-list th,
+.table-list td{
+  padding:10px;
+  border-bottom:1px solid var(--border);
+}
+
+/* ================= HELD BILLS ================= */
+
+.held-bills{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
+
+.held-card{
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:12px;
+  background:#fff;
+}
+
+.held-card h4{
+  margin:0 0 6px;
+}
+
+/* ================= MODAL ================= */
+
+.modal{
+  position:fixed;
+  inset:0;
+  background:#0008;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:4000;
+}
+
+.modal.show{
+  display:flex;
+}
+
+.modal-box{
+  width:450px;
+  max-width:95%;
+  max-height:90vh;
+  overflow:auto;
+  background:white;
+  border-radius:12px;
+  padding:20px;
+}
+
+.modal-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:15px;
+}
+
+.modal-head h2{
+  margin:0;
+}
+
+.table-selector{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+}
+
+.select-table{
+  padding:14px 5px;
+  border-radius:7px;
+  background:#ecfdf5;
+  border:2px solid #22c55e;
+  font-weight:bold;
+}
+
+.select-table.occupied{
+  background:#fff7ed;
+  border-color:#f97316;
+}
+
+.select-table:hover{
+  background:#dbeafe;
+}
+
+/* ================= LOGIN ================= */
+
+.login-screen{
+  position:fixed;
+  inset:0;
+  background:#111827;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:5000;
+}
+
+.login-box{
+  width:390px;
+  max-width:94%;
+  background:white;
+  padding:25px;
+  border-radius:12px;
+}
+
+.login-box h1{
+  text-align:center;
+  margin-top:0;
+}
+
+.login-box .field{
+  margin-bottom:12px;
+}
+
+.login-box button{
+  width:100%;
+}
+
+.auth-switch{
+  text-align:center;
+  margin-top:15px;
+}
+
+.auth-switch button{
+  background:none;
+  color:#2563eb;
+  font-weight:bold;
+  width:auto;
+}
+
+/* ================= PRINT ================= */
+
+#printArea{
+  display:none;
+}
+
+@media print{
+
+  body *{
+    visibility:hidden !important;
+  }
+
+  #printArea,
+  #printArea *{
+    visibility:visible !important;
+  }
+
+  #printArea{
+    display:block !important;
+    position:absolute;
+    left:0;
+    top:0;
+    width:80mm;
+    background:white;
+    color:#000;
+  }
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media(max-width:1300px){
+
+  .products{
+    grid-template-columns:repeat(3,1fr);
+  }
+
+  .tables{
+    grid-template-columns:repeat(5,1fr);
+  }
+
+  .pos-layout{
+    grid-template-columns:minmax(450px,1fr) 390px;
+  }
+}
+
+@media(max-width:1000px){
+
+  .stats{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .tables{
+    grid-template-columns:repeat(4,1fr);
+  }
+
+  .pos-layout{
+    grid-template-columns:1fr;
+  }
+
+  .bill-card{
+    min-height:auto;
+  }
+}
+
+@media(max-width:900px){
+
+  body{
+    overflow:auto;
+  }
+
+  .sidebar{
+    transform:translateX(-100%);
+  }
+
+  .sidebar.mobile-open{
+    transform:translateX(0);
+  }
+
+  .main{
+    margin-left:0 !important;
+  }
+
+  .products{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .tables{
+    grid-template-columns:repeat(3,1fr);
+  }
+
+  .held-bills{
+    grid-template-columns:1fr;
+  }
+}
+
+@media(max-width:600px){
+
+  .stats{
+    grid-template-columns:1fr;
+  }
+
+  .products{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .tables{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .topbar{
+    padding:0 8px;
+  }
+
+  .page-title{
+    font-size:16px;
+  }
+
+  .user-box span{
+    display:none;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ================= LOGIN ================= -->
+
+<div class="login-screen" id="loginScreen">
+
+  <div class="login-box">
+
+    <h1>EASY BILL LK</h1>
+
+    <p style="text-align:center;color:#6b7280">
+      Restaurant ERP POS
+    </p>
+
+    <div class="field">
+      <label>Username</label>
+      <input id="loginUser" placeholder="Username">
+    </div>
+
+    <div class="field">
+      <label>Password</label>
+      <input id="loginPass" type="password" placeholder="Password">
+    </div>
+
+    <button class="btn btn-blue" onclick="login()">
+      LOGIN
+    </button>
+
+    <p id="loginMsg"
+       style="color:red;text-align:center"></p>
+
+    <div class="auth-switch">
+
+      Don't have an account?
+
+      <button onclick="showCreateAccount()">
+        Create New Account
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ================= APP ================= -->
+
+<div class="app">
+
+<!-- ================= SIDEBAR ================= -->
+
+<aside class="sidebar" id="sidebar">
+
+  <div class="logo">
+    <span>●</span> EASY BILL LK
+  </div>
+
+  <div class="menu">
+
+    <div class="menu-title">Main</div>
+
+    <div class="menu-item active"
+         onclick="openPage('dashboard',this)">
+
+      <div class="menu-left">
+        🏠 Dashboard
+      </div>
+
+    </div>
+
+    <div class="menu-item"
+         onclick="openPage('billing',this)">
+
+      <div class="menu-left">
+        🧾 Billing / POS
+      </div>
+
+    </div>
+
+    <div class="menu-item"
+         onclick="openPage('tables',this)">
+
+      <div class="menu-left">
+        🪑 Tables
+      </div>
+
+    </div>
+
+    <!-- SALES -->
+
+    <div class="menu-item"
+         onclick="toggleSub(this,'salesSub')">
+
+      <div class="menu-left">
+        💰 Sales
+      </div>
+
+      <span class="arrow">▶</span>
+
+    </div>
+
+    <div class="submenu" id="salesSub">
+
+      <div class="sub-item"
+           onclick="openPage('billing')">
+        New Bill
+      </div>
+
+      <div class="sub-item"
+           onclick="openPage('sales')">
+        Sales List
+      </div>
+
+      <div class="sub-item"
+           onclick="openPage('returns')">
+        Returns / Refunds
+      </div>
+
+    </div>
+
+    <!-- ITEMS -->
+
+    <div class="menu-item"
+         onclick="toggleSub(this,'itemsSub')">
+
+      <div class="menu-left">
+        📦 Items
+      </div>
+
+      <span class="arrow">▶</span>
+
+    </div>
+
+    <div class="submenu" id="itemsSub">
+
+      <div class="sub-item"
+           onclick="openPage('items')">
+        Items List
+      </div>
+
+      <div class="sub-item"
+           onclick="openPage('categories')">
+        Categories
+      </div>
+
+      <div class="sub-item"
+           onclick="openPage('inventory')">
+        Inventory
+      </div>
+
+      <div class="sub-item"
+           onclick="openPage('expiry')">
+        Expiry
+      </div>
+
+    </div>
+
+    <!-- PURCHASING -->
+
+    <div class="menu-item"
+         onclick="toggleSub(this,'purchaseSub')">
+
+      <div class="menu-left">
+        🛒 Purchasing
+      </div>
+
+      <span class="arrow">▶</span>
+
+    </div>
+
+    <div class="submenu" id="purchaseSub">
+
+      <div class="sub-item"
+           onclick="openPage('purchases')">
+        Purchases
+      </div>
+
+      <div class="sub-item"
+           onclick="openPage('dailyPurchase')">
+        Daily Purchasing
+      </div>
+
+      <div class="sub-item"
+           onclick="openPage('suppliers')">
+        Suppliers
+      </div>
+
+    </div>
+
+    <!-- CUSTOMERS -->
+
+    <div class="menu-item"
+         onclick="toggleSub(this,'customerSub')">
+
+      <div class="menu-left">
+        👥 Customers
+      </div>
+
+      <span class="arrow">▶</span>
+
+    </div>
+
+    <div class="submenu" id="customerSub">
+
+      <div class="sub-item"
+           onclick="openPage('customers')">
+        Customer List
+      </div>
+
+      <div class="sub-item"
+           onclick="openPage('credit')">
+        Credit
+      </div>
+
+      <div class="sub-item"
+           onclick="openPage('statements')">
+        Statements
+      </div>
+
+    </div>
+
+    <!-- ACCOUNTS -->
+
+    <div class="menu-item"
+         onclick="toggleSub(this,'accountsSub')">
+
+      <div class="menu-left">
+        📒 Accounts
+      </div>
+
+      <span class="arrow">▶</span>
+
+    </div>
+
+    <div class="submenu" id="accountsSub">
+
+      <div class="sub-item"
+           onclick="openPage('cashbook')">
+        Cash Book
+      </div>
+
+      <div class="sub-item"
+           onclick="openPage('expenses')">
+        Expenses
+      </div>
+
+      <div class="sub-item"
+           onclick="openPage('income')">
+        Income
+      </div>
+
+      <div class="sub-item"
+           onclick="openPage('profit')">
+        Profit
+      </div>
+
+    </div>
+
+    <!-- REPORTS -->
+
+    <div class="menu-item"
+         onclick="toggleSub(this,'reportsSub')">
+
+      <div class="menu-left">
+        📊 Reports
+      </div>
+
+      <span class="arrow">▶</span>
+
+    </div>
+
+    <div class="submenu" id="reportsSub">
+
+      <div class="sub-item"
+           onclick="openPage('dailyReport')">
+        Daily Sales
+      </div>
+
+      <div class="sub-item"
+           onclick="openPage('stockReport')">
+        Stock Report
+      </div>
+
+      <div class="sub-item"
+           onclick="openPage('profitReport')">
+        Profit Report
+      </div>
+
+    </div>
+
+    <!-- EMPLOYEES -->
+
+    <div class="menu-item"
+         onclick="toggleSub(this,'employeeSub')">
+
+      <div class="menu-left">
+        👨‍💼 Employees
+      </div>
+
+      <span class="arrow">▶</span>
+
+    </div>
+
+    <div class="submenu" id="employeeSub">
+
+      <div class="sub-item"
+           onclick="openPage('employees')">
+        Employees
+      </div>
+
+      <div class="sub-item"
+           onclick="openPage('attendance')">
+        Attendance
+      </div>
+
+      <div class="sub-item"
+           onclick="openPage('salary')">
+        Salary
+      </div>
+
+      <div class="sub-item"
+           onclick="openPage('commission')">
+        Commission
+      </div>
+
+    </div>
+
+    <!-- SETTINGS -->
+
+    <div class="menu-item"
+         onclick="toggleSub(this,'settingsSub')">
+
+      <div class="menu-left">
+        ⚙ Settings
+      </div>
+
+      <span class="arrow">▶</span>
+
+    </div>
+
+    <div class="submenu" id="settingsSub">
+
+      <div class="sub-item"
+           onclick="openPage('settings')">
+        General Settings
+      </div>
+
+      <div class="sub-item"
+           onclick="openPage('users')">
+        Users / Accounts
+      </div>
+
+      <div class="sub-item"
+           onclick="openPage('configs')">
+        Configurations
+      </div>
+
+    </div>
+
+  </div>
+
+</aside>
+
+<!-- ================= MAIN ================= -->
+
+<main class="main" id="main">
+
+<header class="topbar">
+
+  <div class="left-top">
+
+    <button class="hamburger"
+            onclick="toggleSidebar()">
+      ☰
+    </button>
+
+    <div class="page-title"
+         id="pageTitle">
+      Dashboard
+    </div>
+
+  </div>
+
+  <div class="user-box">
+
+    <span id="userName">Admin</span>
+
+    <div class="user-circle"
+         id="userCircle">
+      A
+    </div>
+
+    <button class="btn btn-red"
+            onclick="logout()">
+      Logout
+    </button>
+
+  </div>
+
+</header>
+
+<section class="content">
+
+<!-- ================= DASHBOARD ================= -->
+
+<div class="page active" id="dashboard">
+
+  <div class="stats">
+
+    <div class="stat">
+      <small>Today's Sales</small>
+      <h2 id="dashSales">Rs. 0.00</h2>
+    </div>
+
+    <div class="stat">
+      <small>Today's Bills</small>
+      <h2 id="dashBills">0</h2>
+    </div>
+
+    <div class="stat">
+      <small>Open Tables</small>
+      <h2 id="dashTables">0</h2>
+    </div>
+
+    <div class="stat">
+      <small>Items</small>
+      <h2 id="dashItems">0</h2>
+    </div>
+
+  </div>
+
+  <div class="card" style="margin-top:15px">
+
+    <h3>Restaurant POS</h3>
+
+    <p>
+      Use Billing / POS for Takeaway or Table orders.
+    </p>
+
+    <button class="btn btn-blue"
+            onclick="newBill()">
+      Open New Bill
+    </button>
+
+    <button class="btn btn-orange"
+            onclick="openPage('tables')">
+      Open Tables
+    </button>
+
+  </div>
+
+</div>
+
+<!-- ================= BILLING ================= -->
+
+<div class="page" id="billing">
+
+<div class="pos-layout">
+
+<div class="pos-left">
+
+  <div class="card">
+
+    <div class="pos-head">
+
+      <input id="productSearch"
+             placeholder="Search item / barcode..."
+             oninput="renderProducts()">
+
+      <button class="btn btn-blue"
+              onclick="newBill()">
+        ＋ New Bill
+      </button>
+
+    </div>
+
+    <div class="category-bar"
+         id="categoryBar">
+    </div>
+
+    <div class="products"
+         id="products">
+    </div>
+
+  </div>
+
+  <!-- HELD BILLS -->
+
+  <div class="card">
+
+    <div style="
+      display:flex;
+      justify-content:space-between;
+      align-items:center">
+
+      <h3 style="margin:0">
+        Held / Previous Bills
+      </h3>
+
+      <button class="btn btn-light"
+              onclick="renderHeldBills()">
+        Refresh
+      </button>
+
+    </div>
+
+    <div class="held-bills"
+         id="heldBills"
+         style="margin-top:10px">
+    </div>
+
+  </div>
+
+</div>
+
+<!-- BILL -->
+
+<div class="pos-right">
+
+<div class="card bill-card">
+
+  <div class="bill-header">
+
+    <div>
+
+      <div style="
+        font-size:17px;
+        font-weight:bold">
+        CURRENT BILL
+      </div>
+
+      <div class="bill-no"
+           id="billNo">
+        KOT-0001
+      </div>
+
+    </div>
+
+    <button class="btn btn-light"
+            onclick="holdBill()">
+      Hold
+    </button>
+
+  </div>
+
+  <div class="order-type">
+
+    <button id="takeawayBtn"
+            class="active"
+            onclick="setOrderType('Takeaway')">
+
+      🥡 Takeaway
+
+    </button>
+
+    <button id="tableBtn"
+            onclick="openTableSelector()">
+
+      🪑 Table
+
+    </button>
+
+  </div>
+
+  <div class="selected-table"
+       id="selectedTableText">
+
+    Takeaway Order
+
+  </div>
+
+  <div class="bill-items">
+
+    <table class="bill-table">
+
+      <thead>
+
+        <tr>
+          <th>Item</th>
+          <th>Qty</th>
+          <th>Total</th>
+        </tr>
+
+      </thead>
+
+      <tbody id="billItems">
+      </tbody>
+
+    </table>
+
+  </div>
+
+  <div class="total-area">
+
+    <div class="total-row">
+
+      <span>Subtotal</span>
+
+      <b id="subtotal">
+        Rs. 0.00
+      </b>
+
+    </div>
+
+    <div class="discount-box"
+         id="discountBox">
+
+      <span style="padding-top:9px">
+        Discount
+      </span>
+
+      <input id="discount"
+             type="number"
+             min="0"
+             value="0"
+             oninput="calculateBill()">
+
+      <span style="padding-top:9px">
+        Rs.
+      </span>
+
+    </div>
+
+    <div class="total-row">
+
+      <span>Grand Total</span>
+
+      <b class="grand"
+         id="grandTotal">
+        Rs. 0.00
+      </b>
+
+    </div>
+
+    <div class="payment-box">
+
+      <b>Payment Method</b>
+
+      <div class="payment-methods">
+
+        <button class="pay-btn active"
+                onclick="setPayment('Cash',this)">
+          💵 Cash
+        </button>
+
+        <button class="pay-btn"
+                onclick="setPayment('Card',this)">
+          💳 Card
+        </button>
+
+        <button class="pay-btn"
+                onclick="setPayment('Credit',this)">
+          📒 Credit
+        </button>
+
+        <button class="pay-btn"
+                onclick="setPayment('Bank Transfer',this)">
+          🏦 Bank Transfer
+        </button>
+
+      </div>
+
+      <div class="cash-row">
+
+        <div>
+
+          <label>
+            Cash Amount
+          </label>
+
+          <input id="cashAmount"
+                 type="number"
+                 placeholder="Enter cash"
+                 oninput="calculateChange()">
+
+        </div>
+
+        <div>
+
+          <label>
+            Change
+          </label>
+
+          <div class="change"
+               id="change">
+            Rs. 0.00
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- NUMERIC KEYPAD -->
+
+      <div class="keypad">
+
+        <button class="key"
+                onclick="keypad('7')">7</button>
+
+        <button class="key"
+                onclick="keypad('8')">8</button>
+
+        <button class="key"
+                onclick="keypad('9')">9</button>
+
+        <button class="key"
+                onclick="keypad('4')">4</button>
+
+        <button class="key"
+                onclick="keypad('5')">5</button>
+
+        <button class="key"
+                onclick="keypad('6')">6</button>
+
+        <button class="key"
+                onclick="keypad('1')">1</button>
+
+        <button class="key"
+                onclick="keypad('2')">2</button>
+
+        <button class="key"
+                onclick="keypad('3')">3</button>
+
+        <button class="key zero"
+                onclick="keypad('0')">
+          0
+        </button>
+
+        <button class="key"
+                onclick="keypad('.')">
+          .
+        </button>
+
+        <button class="key btn-red"
+                onclick="clearCash()">
+          C
+        </button>
+
+      </div>
+
+      <div class="bill-actions">
+
+        <button class="btn btn-gray"
+                onclick="printBill()">
+          🖨 Print Bill
+        </button>
+
+        <button class="btn btn-green"
+                onclick="settleBill()">
+          ✓ Settle
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ================= TABLES ================= -->
+
+<div class="page" id="tables">
+
+  <div class="card">
+
+    <div style="
+      display:flex;
+      justify-content:space-between;
+      align-items:center">
+
+      <div>
+
+        <h2 style="margin:0">
+          Restaurant Tables
+        </h2>
+
+        <p style="
+          margin:5px 0;
+          color:#6b7280">
+          Touch a table to view items.
+        </p>
+
+      </div>
+
+      <button class="btn btn-blue"
+              onclick="newTableBill()">
+        ＋ New Table Bill
+      </button>
+
+    </div>
+
+  </div>
+
+  <div class="tables"
+       id="tablesGrid">
+  </div>
+
+  <div class="card table-detail-card"
+       id="tableDetailCard">
+
+    <div style="
+      display:flex;
+      justify-content:space-between">
+
+      <h3 id="detailTitle">
+        Table
+      </h3>
+
+      <button class="btn btn-red"
+              onclick="closeTableDetail()">
+        Close
+      </button>
+
+    </div>
+
+    <table class="table-list">
+
+      <thead>
+
+        <tr>
+          <th>Item</th>
+          <th>Qty</th>
+          <th>Price</th>
+          <th>Total</th>
+        </tr>
+
+      </thead>
+
+      <tbody id="tableDetailItems">
+      </tbody>
+
+    </table>
+
+    <h3 style="text-align:right"
+        id="tableDetailTotal">
+      Rs. 0.00
+    </h3>
+
+    <button class="btn btn-blue"
+            onclick="continueTableBill()">
+      Continue Billing
+    </button>
+
+  </div>
+
+</div>
+
+<!-- ================= GENERIC PAGES ================= -->
+
+<div class="page" id="items">
+
+  <div class="card">
+
+    <h2>Items</h2>
+
+    <button class="btn btn-blue"
+            onclick="addItem()">
+      ＋ Add Item
+    </button>
+
+    <table class="table-list"
+           style="margin-top:15px">
+
+      <thead>
+
+        <tr>
+          <th>Item</th>
+          <th>Category</th>
+          <th>Price</th>
+          <th>Stock</th>
+        </tr>
+
+      </thead>
+
+      <tbody id="itemsList">
+      </tbody>
+
+    </table>
+
+  </div>
+
+</div>
+
+<div class="page" id="categories">
+  <div class="card">
+    <h2>Categories</h2>
+    <p>Food, Drinks, Short Eats, Rice, Noodles...</p>
+  </div>
+</div>
+
+<div class="page" id="inventory">
+  <div class="card">
+    <h2>Inventory</h2>
+    <p>Stock In / Stock Out / Opening Stock / Low Stock</p>
+  </div>
+</div>
+
+<div class="page" id="expiry">
+  <div class="card">
+    <h2>Expiry Management</h2>
+  </div>
+</div>
+
+<div class="page" id="sales">
+
+  <div class="card">
+
+    <h2>Sales</h2>
+
+    <table class="table-list">
+
+      <thead>
+        <tr>
+          <th>Bill</th>
+          <th>Type</th>
+          <th>Amount</th>
+          <th>Payment</th>
+        </tr>
+      </thead>
+
+      <tbody id="salesList">
+      </tbody>
+
+    </table>
+
+  </div>
+
+</div>
+
+<div class="page" id="dailyReport">
+
+  <div class="card">
+
+    <h2>Daily Sales Report</h2>
+
+    <h3 id="dailyReportTotal">
+      Rs. 0.00
+    </h3>
+
+    <table class="table-list">
+
+      <thead>
+
+        <tr>
+          <th>Item Name</th>
+          <th>Qty</th>
+          <th>Total</th>
+        </tr>
+
+      </thead>
+
+      <tbody id="dailyItems">
+      </tbody>
+
+    </table>
+
+  </div>
+
+</div>
+
+<div class="page" id="returns">
+  <div class="card"><h2>Returns / Refunds</h2></div>
+</div>
+
+<div class="page" id="purchases">
+  <div class="card"><h2>Purchases</h2></div>
+</div>
+
+<div class="page" id="dailyPurchase">
+  <div class="card"><h2>Daily Purchasing</h2></div>
+</div>
+
+<div class="page" id="suppliers">
+  <div class="card"><h2>Suppliers</h2></div>
+</div>
+
+<div class="page" id="customers">
+  <div class="card"><h2>Customers</h2></div>
+</div>
+
+<div class="page" id="credit">
+  <div class="card"><h2>Credit Customers</h2></div>
+</div>
+
+<div class="page" id="statements">
+  <div class="card"><h2>Customer Statements</h2></div>
+</div>
+
+<div class="page" id="cashbook">
+  <div class="card"><h2>Cash Book</h2></div>
+</div>
+
+<div class="page" id="expenses">
+  <div class="card"><h2>Expenses</h2></div>
+</div>
+
+<div class="page" id="income">
+  <div class="card"><h2>Income</h2></div>
+</div>
+
+<div class="page" id="profit">
+  <div class="card"><h2>Profit & Loss</h2></div>
+</div>
+
+<div class="page" id="employees">
+  <div class="card"><h2>Employees</h2></div>
+</div>
+
+<div class="page" id="attendance">
+  <div class="card"><h2>Attendance</h2></div>
+</div>
+
+<div class="page" id="salary">
+  <div class="card"><h2>Salary</h2></div>
+</div>
+
+<div class="page" id="commission">
+  <div class="card"><h2>Commission</h2></div>
+</div>
+
+<div class="page" id="stockReport">
+  <div class="card"><h2>Stock Report</h2></div>
+</div>
+
+<div class="page" id="profitReport">
+  <div class="card"><h2>Profit Report</h2></div>
+</div>
+
+<div class="page" id="settings">
+  <div class="card"><h2>General Settings</h2></div>
+</div>
+
+<div class="page" id="users">
+  <div class="card"><h2>Users / Accounts</h2></div>
+</div>
+
+<div class="page" id="configs">
+  <div class="card"><h2>Configurations</h2></div>
+</div>
+
+</section>
+</main>
+</div>
+
+<!-- ================= TABLE SELECT MODAL ================= -->
+
+<div class="modal"
+     id="tableModal">
+
+  <div class="modal-box">
+
+    <div class="modal-head">
+
+      <h2>Select Table</h2>
+
+      <button class="btn btn-red"
+              onclick="closeTableSelector()">
+        ×
+      </button>
+
+    </div>
+
+    <div class="table-selector"
+         id="tableSelector">
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ================= CREATE ACCOUNT MODAL ================= -->
+
+<div class="modal"
+     id="accountModal">
+
+  <div class="modal-box">
+
+    <div class="modal-head">
+
+      <h2>Create New Account</h2>
+
+      <button class="btn btn-red"
+              onclick="closeCreateAccount()">
+        ×
+      </button>
+
+    </div>
+
+    <div style="margin-bottom:10px">
+
+      <label>Full Name</label>
+
+      <input id="newName"
+             placeholder="Your name">
+
+    </div>
+
+    <div style="margin-bottom:10px">
+
+      <label>Username</label>
+
+      <input id="newUsername"
+             placeholder="Create username">
+
+    </div>
+
+    <div style="margin-bottom:10px">
+
+      <label>Password</label>
+
+      <input id="newPassword"
+             type="password"
+             placeholder="Create password">
+
+    </div>
+
+    <div style="margin-bottom:10px">
+
+      <label>Confirm Password</label>
+<script>
+
+/* =====================================================
+   EASY BILL LK - RESTAURANT ERP POS
+===================================================== */
+
+/* ================= USERS ================= */
+
+let users = JSON.parse(
+  localStorage.getItem("eb_users") || "[]"
+);
+
+/* Default admin */
+
+if(!users.some(u=>u.username==="admin")){
+
+  users.push({
+    id:1,
+    name:"Admin",
+    username:"admin",
+    password:"1234",
+    role:"admin"
+  });
+
+  localStorage.setItem(
+    "eb_users",
+    JSON.stringify(users)
+  );
+}
+
+let currentUser = null;
+let userRole = "cashier";
+
+/* ================= DATA ================= */
+
+let categories=[
+  "All",
+  "Rice",
+  "Kottu",
+  "Noodles",
+  "Short Eats",
+  "Drinks",
+  "Desserts"
+];
+
+let products = JSON.parse(
+  localStorage.getItem("eb_products") || "null"
+);
+
+if(!products){
+
+  products=[
+    {id:1,name:"Chicken Rice",category:"Rice",price:850,stock:50},
+    {id:2,name:"Chicken Kottu",category:"Kottu",price:950,stock:40},
+    {id:3,name:"Cheese Kottu",category:"Kottu",price:1200,stock:30},
+    {id:4,name:"Chicken Noodles",category:"Noodles",price:850,stock:35},
+    {id:5,name:"Egg Noodles",category:"Noodles",price:700,stock:35},
+    {id:6,name:"Fish Bun",category:"Short Eats",price:180,stock:60},
+    {id:7,name:"Chicken Roll",category:"Short Eats",price:160,stock:60},
+    {id:8,name:"Coca Cola",category:"Drinks",price:250,stock:100},
+    {id:9,name:"Sprite",category:"Drinks",price:250,stock:100},
+    {id:10,name:"Water",category:"Drinks",price:100,stock:100},
+    {id:11,name:"Watalappan",category:"Desserts",price:300,stock:20},
+    {id:12,name:"Ice Cream",category:"Desserts",price:350,stock:30}
+  ];
+
+  saveProducts();
+}
+
+function saveProducts(){
+
+  localStorage.setItem(
+    "eb_products",
+    JSON.stringify(products)
+  );
+}
+
+/* ================= SALES ================= */
+
+let sales=JSON.parse(
+  localStorage.getItem("eb_sales") || "[]"
+);
+
+/* ================= TABLES ================= */
+
+let tables=JSON.parse(
+  localStorage.getItem("eb_tables") || "null"
+);
+
+if(!tables){
+
+  tables=[];
+
+  for(let i=1;i<=18;i++){
+
+    tables.push({
+      id:i,
+      name:"Table "+i,
+      items:[],
+      total:0,
+      occupied:false
+    });
+
+  }
+
+  saveTables();
+}
+
+function saveTables(){
+
+  localStorage.setItem(
+    "eb_tables",
+    JSON.stringify(tables)
+  );
+}
+
+/* ================= HELD BILLS ================= */
+
+let heldBills=JSON.parse(
+  localStorage.getItem("eb_heldBills") || "[]"
+);
+
+function saveHeldBills(){
+
+  localStorage.setItem(
+    "eb_heldBills",
+    JSON.stringify(heldBills)
+  );
+}
+
+/* ================= CURRENT BILL ================= */
+
+let cart=[];
+
+let currentCategory="All";
+
+let orderType="Takeaway";
+
+let selectedTable=null;
+
+let paymentMethod="Cash";
+
+let billCounter=parseInt(
+  localStorage.getItem("eb_billCounter") || "1"
+);
+
+let editingHeldId=null;
+
+/* ================= LOGIN ================= */
+
+function login(){
+
+  const username=
+    document.getElementById("loginUser").value.trim();
+
+  const password=
+    document.getElementById("loginPass").value;
+
+  const user=users.find(
+    u=>u.username===username &&
+       u.password===password
+  );
+
+  if(!user){
+
+    document.getElementById("loginMsg").textContent=
+      "Invalid username or password.";
+
+    return;
+  }
+
+  currentUser=user;
+  userRole=user.role;
+
+  document.getElementById("loginScreen")
+    .style.display="none";
+
+  document.getElementById("userName")
+    .textContent=user.name;
+
+  document.getElementById("userCircle")
+    .textContent=user.name.charAt(0).toUpperCase();
+
+  if(user.role!=="admin"){
+
+    document.getElementById("discountBox")
+      .style.display="none";
+
+  }else{
+
+    document.getElementById("discountBox")
+      .style.display="flex";
+
+  }
+
+  init();
+}
+
+/* ================= CREATE ACCOUNT ================= */
+
+function showCreateAccount(){
+
+  document.getElementById("accountModal")
+    .classList.add("show");
+
+}
+
+function closeCreateAccount(){
+
+  document.getElementById("accountModal")
+    .classList.remove("show");
+
+}
+
+function createAccount(){
+
+  const name=
+    document.getElementById("newName")
+      .value.trim();
+
+  const username=
+    document.getElementById("newUsername")
+      .value.trim();
+
+  const password=
+    document.getElementById("newPassword")
+      .value;
+
+  const password2=
+    document.getElementById("newPassword2")
+      .value;
+
+  const msg=
+    document.getElementById("accountMsg");
+
+  if(!name || !username || !password){
+
+    msg.style.color="red";
+    msg.textContent=
+      "Please fill all fields.";
+
+    return;
+  }
+
+  if(password!==password2){
+
+    msg.style.color="red";
+    msg.textContent=
+      "Passwords do not match.";
+
+    return;
+  }
+
+  if(username.length<3){
+
+    msg.style.color="red";
+    msg.textContent=
+      "Username must have at least 3 characters.";
+
+    return;
+  }
+
+  if(users.some(
+    u=>u.username.toLowerCase()===username.toLowerCase()
+  )){
+
+    msg.style.color="red";
+    msg.textContent=
+      "Username already exists.";
+
+    return;
+  }
+
+  const newUser={
+
+    id:Date.now(),
+
+    name:name,
+
+    username:username,
+
+    password:password,
+
+    role:"cashier"
+
+  };
+
+  users.push(newUser);
+
+  localStorage.setItem(
+    "eb_users",
+    JSON.stringify(users)
+  );
+
+  msg.style.color="green";
+
+  msg.textContent=
+    "Account created successfully.";
+
+  setTimeout(()=>{
+
+    closeCreateAccount();
+
+    document.getElementById("loginUser")
+      .value=username;
+
+    document.getElementById("loginPass")
+      .value="";
+
+  },700);
+
+}
+
+/* ================= LOGOUT ================= */
+
+function logout(){
+
+  location.reload();
+
+}
+
+/* ================= SIDEBAR ================= */
+
+function toggleSidebar(){
+
+  const side=
+    document.getElementById("sidebar");
+
+  const main=
+    document.getElementById("main");
+
+  if(window.innerWidth<=900){
+
+    side.classList.toggle("mobile-open");
+
+  }else{
+
+    side.classList.toggle("closed");
+
+    main.classList.toggle("full");
+
+  }
+
+}
+
+/* ================= SUBMENU ================= */
+
+function toggleSub(el,id){
+
+  const sub=
+    document.getElementById(id);
+
+  if(!sub)return;
+
+  sub.classList.toggle("show");
+
+  el.classList.toggle("open");
+
+}
+
+/* ================= PAGE ================= */
+
+function openPage(id,el=null){
+
+  document.querySelectorAll(".page")
+    .forEach(p=>{
+      p.classList.remove("active");
+    });
+
+  const page=
+    document.getElementById(id);
+
+  if(!page)return;
+
+  page.classList.add("active");
+
+  const titles={
+
+    dashboard:"Dashboard",
+    billing:"Billing / POS",
+    tables:"Restaurant Tables",
+    items:"Items",
+    inventory:"Inventory",
+    expiry:"Expiry",
+    sales:"Sales",
+    returns:"Returns / Refunds",
+    purchases:"Purchases",
+    dailyPurchase:"Daily Purchasing",
+    suppliers:"Suppliers",
+    customers:"Customers",
+    credit:"Credit",
+    statements:"Statements",
+    cashbook:"Cash Book",
+    expenses:"Expenses",
+    income:"Income",
+    profit:"Profit & Loss",
+    employees:"Employees",
+    attendance:"Attendance",
+    salary:"Salary",
+    commission:"Commission",
+    dailyReport:"Daily Sales Report",
+    stockReport:"Stock Report",
+    profitReport:"Profit Report",
+    settings:"General Settings",
+    users:"Users / Accounts",
+    configs:"Configurations"
+  };
+
+  document.getElementById("pageTitle")
+    .textContent=titles[id] || id;
+
+  document.querySelectorAll(".menu-item")
+    .forEach(x=>x.classList.remove("active"));
+
+  if(el){
+    el.classList.add("active");
+  }
+
+  if(id==="billing"){
+
+    renderProducts();
+    renderCart();
+    renderHeldBills();
+
+  }
+
+  if(id==="tables"){
+    renderTables();
+  }
+
+  if(id==="items"){
+    renderItems();
+  }
+
+  if(id==="sales"){
+    renderSales();
+  }
+
+  if(id==="dailyReport"){
+    renderDailyReport();
+  }
+
+  if(window.innerWidth<=900){
+
+    document.getElementById("sidebar")
+      .classList.remove("mobile-open");
+
+  }
+
+}
+
+/* ================= BILL NUMBER ================= */
+
+function generateBillNo(){
+
+  return "KOT-"+
+    String(billCounter).padStart(4,"0");
+
+}
+
+function saveCounter(){
+
+  localStorage.setItem(
+    "eb_billCounter",
+    billCounter
+  );
+
+}
+
+/* ================= PRODUCTS ================= */
+
+function renderCategories(){
+
+  const bar=
+    document.getElementById("categoryBar");
+
+  if(!bar)return;
+
+  bar.innerHTML=
+    categories.map(c=>`
+
+      <button
+        class="cat-btn ${c===currentCategory?'active':''}"
+        onclick="selectCategory('${c}')">
+
+        ${c}
+
+      </button>
+
+    `).join("");
+
+}
+
+function selectCategory(category){
+
+  currentCategory=category;
+
+  renderProducts();
+
+}
+
+function renderProducts(){
+
+  renderCategories();
+
+  const container=
+    document.getElementById("products");
+
+  if(!container)return;
+
+  const input=
+    document.getElementById("productSearch");
+
+  const search=
+    input ? input.value.toLowerCase().trim() : "";
+
+  const list=products.filter(p=>{
+
+    const cat=
+      currentCategory==="All" ||
+      p.category===currentCategory;
+
+    const text=
+      p.name.toLowerCase().includes(search);
+
+    return cat && text;
+
+  });
+
+  container.innerHTML=list.map(p=>`
+
+    <div class="product"
+         onclick="addToCart(${p.id})">
+
+      <div class="product-name">
+        ${p.name}
+      </div>
+
+      <div class="product-price">
+        Rs. ${p.price.toFixed(2)}
+      </div>
+
+      <div class="product-stock">
+        Stock: ${p.stock}
+      </div>
+
+      <div style="
+        margin-top:7px;
+        color:#16a34a;
+        font-size:12px">
+
+        + Add Item
+
+      </div>
+
+    </div>
+
+  `).join("");
+
+}
+
+/* ================= ADD ITEM ================= */
+
+function addToCart(id){
+
+  const product=
+    products.find(p=>p.id===id);
+
+  if(!product){
+    return;
+  }
+
+  if(product.stock<=0){
+
+    alert("Out of stock");
+
+    return;
+
+  }
+
+  const item=
+    cart.find(x=>x.id===id);
+
+  if(item){
+
+    if(item.qty>=product.stock){
+
+      alert("Not enough stock");
+
+      return;
+
+    }
+
+    item.qty++;
+
+  }else{
+
+    cart.push({
+
+      id:product.id,
+
+      name:product.name,
+
+      price:product.price,
+
+      qty:1
+
+    });
+
+  }
+
+  saveTableDraft();
+
+  renderCart();
+
+}
+
+/* ================= CART ================= */
+
+function renderCart(){
+
+  const body=
+    document.getElementById("billItems");
+
+  if(!body)return;
+
+  if(!cart.length){
+
+    body.innerHTML=`
+
+      <tr>
+
+        <td colspan="3"
+            style="
+            text-align:center;
+            color:#9ca3af;
+            padding:30px">
+
+          No items added
+
+        </td>
+
+      </tr>
+
+    `;
+
+  }else{
+
+    body.innerHTML=
+      cart.map((item,index)=>`
+
+      <tr>
+
+        <td>
+
+          <b>${item.name}</b>
+
+          <br>
+
+          <small>
+            Rs. ${item.price.toFixed(2)}
+          </small>
+
+        </td>
+
+        <td>
+
+          <div class="qty">
+
+            <button
+              onclick="changeQty(${index},-1)">
+              −
+            </button>
+
+            <b>${item.qty}</b>
+
+            <button
+              onclick="changeQty(${index},1)">
+              +
+            </button>
+
+          </div>
+
+        </td>
+
+        <td>
+
+          Rs.
+          ${(item.price*item.qty).toFixed(2)}
+
+          <br>
+
+          <button
+            onclick="removeItem(${index})"
+            style="
+            color:#dc2626;
+            background:none;
+            font-size:18px">
+
+            ×
+
+          </button>
+
+        </td>
+
+      </tr>
+
+    `).join("");
+
+  }
+
+  calculateBill();
+
+}
+
+/* ================= QUANTITY ================= */
+
+function changeQty(index,amount){
+
+  const item=cart[index];
+
+  if(!item)return;
+
+  const product=
+    products.find(p=>p.id===item.id);
+
+  item.qty+=amount;
+
+  if(item.qty<=0){
+
+    cart.splice(index,1);
+
+  }else if(
+    product &&
+    item.qty>product.stock
+  ){
+
+    item.qty=product.stock;
+
+  }
+
+  saveTableDraft();
+
+  renderCart();
+
+}
+
+function removeItem(index){
+
+  cart.splice(index,1);
+
+  saveTableDraft();
+
+  renderCart();
+
+}
+
+/* ================= BILL CALCULATION ================= */
+
+function calculateBill(){
+
+  const subtotal=
+    cart.reduce(
+      (sum,item)=>
+        sum+(item.price*item.qty),
+      0
+    );
+
+  let discount=0;
+
+  const discountInput=
+    document.getElementById("discount");
+
+  if(userRole==="admin" && discountInput){
+
+    discount=
+      parseFloat(discountInput.value)||0;
+
+  }
+
+  if(discount>subtotal){
+
+    discount=subtotal;
+
+    if(discountInput){
+      discountInput.value=discount;
+    }
+
+  }
+
+  const total=
+    Math.max(0,subtotal-discount);
+
+  document.getElementById("subtotal")
+    .textContent=
+    "Rs. "+subtotal.toFixed(2);
+
+  document.getElementById("grandTotal")
+    .textContent=
+    "Rs. "+total.toFixed(2);
+
+  calculateChange();
+
+}
+
+function getGrandTotal(){
+
+  const subtotal=
+    cart.reduce(
+      (sum,item)=>
+        sum+(item.price*item.qty),
+      0
+    );
+
+  let discount=0;
+
+  if(userRole==="admin"){
+
+    discount=
+      parseFloat(
+        document.getElementById("discount").value
+      )||0;
+
+  }
+
+  return Math.max(
+    0,
+    subtotal-discount
+  );
+
+}
+
+/* ================= PAYMENT ================= */
+
+function setPayment(method,button){
+
+  paymentMethod=method;
+
+  document.querySelectorAll(".pay-btn")
+    .forEach(b=>{
+      b.classList.remove("active");
+    });
+
+  button.classList.add("active");
+
+  if(method!=="Cash"){
+
+    document.getElementById("cashAmount")
+      .value="";
+
+    document.getElementById("change")
+      .textContent="Rs. 0.00";
+
+  }
+
+}
+
+function calculateChange(){
+
+  const total=getGrandTotal();
+
+  const cash=
+    parseFloat(
+      document.getElementById("cashAmount").value
+    )||0;
+
+  let change=0;
+
+  if(paymentMethod==="Cash"){
+
+    change=
+      Math.max(0,cash-total);
+
+  }
+
+  document.getElementById("change")
+    .textContent=
+    "Rs. "+change.toFixed(2);
+
+}
+
+/* ================= KEYPAD ================= */
+
+function keypad(value){
+
+  const input=
+    document.getElementById("cashAmount");
+
+  if(value==="." &&
+     input.value.includes(".")){
+
+    return;
+
+  }
+
+  input.value+=value;
+
+  calculateChange();
+
+}
+
+function clearCash(){
+
+  document.getElementById("cashAmount")
+    .value="";
+
+  calculateChange();
+
+}
+
+/* ================= ORDER TYPE ================= */
+
+function setOrderType(type){
+
+  orderType=type;
+
+  const takeaway=
+    document.getElementById("takeawayBtn");
+
+  const table=
+    document.getElementById("tableBtn");
+
+  takeaway.classList.toggle(
+    "active",
+    type==="Takeaway"
+  );
+
+  table.classList.toggle(
+    "active",
+    type==="Table"
+  );
+
+  if(type==="Takeaway"){
+
+    selectedTable=null;
+
+    document.getElementById(
+      "selectedTableText"
+    ).textContent=
+      "Takeaway Order";
+
+  }
+
+}
+
+/* ================= TABLE SELECTOR ================= */
+
+function openTableSelector(){
+
+  orderType="Table";
+
+  const selector=
+    document.getElementById("tableSelector");
+
+  selector.innerHTML=
+    tables.map(t=>`
+
+      <button
+        class="select-table ${t.occupied?'occupied':''}"
+        onclick="selectTable(${t.id})">
+
+        🪑 Table ${t.id}
+
+        <br>
+
+        <small>
+          ${
+            t.occupied
+            ? "🔴 Occupied"
+            : "🟢 Available"
+          }
+        </small>
+
+      </button>
+
+    `).join("");
+
+  document.getElementById("tableModal")
+    .classList.add("show");
+
+}
+
+function closeTableSelector(){
+
+  document.getElementById("tableModal")
+    .classList.remove("show");
+
+}
+
+function selectTable(id){
+
+  const table=
+    tables.find(t=>t.id===id);
+
+  if(!table)return;
+
+  selectedTable=id;
+
+  orderType="Table";
+
+  document.getElementById("takeawayBtn")
+    .classList.remove("active");
+
+  document.getElementById("tableBtn")
+    .classList.add("active");
+
+  document.getElementById(
+    "selectedTableText"
+  ).textContent=
+    table.name+" selected";
+
+  /*
+    If table already has items,
+    load them into current bill.
+  */
+
+  if(table.items && table.items.length){
+
+    cart=
+      JSON.parse(
+        JSON.stringify(table.items)
+      );
+
+  }
+
+  closeTableSelector();
+
+  renderCart();
+
+}
+
+/* ================= TABLE PAGE ================= */
+
+function renderTables(){
+
+  const grid=
+    document.getElementById("tablesGrid");
+
+  if(!grid)return;
+
+  grid.innerHTML=
+    tables.map(t=>`
+
+      <div
+        class="table-box ${t.occupied?'occupied':''}"
+        onclick="openTable(${t.id})">
+
+        <div class="table-name">
+          🪑 ${t.name}
+        </div>
+
+        <div class="table-status">
+
+          ${
+            t.occupied
+            ? "🔴 Occupied"
+            : "🟢 Available"
+          }
+
+        </div>
+
+        <div class="table-total">
+
+          ${
+            t.occupied
+            ? "Rs. "+t.total.toFixed(2)
+            : "Empty"
+          }
+
+        </div>
+
+      </div>
+
+    `).join("");
+
+  document.getElementById("dashTables")
+    .textContent=
+    tables.filter(t=>t.occupied).length;
+
+}
+
+function openTable(id){
+
+  const table=
+    tables.find(t=>t.id===id);
+
+  if(!table)return;
+
+  selectedTable=id;
+
+  const card=
+    document.getElementById(
+      "tableDetailCard"
+    );
+
+  card.style.display="block";
+
+  document.getElementById(
+    "detailTitle"
+  ).textContent=
+    table.name+" - Current Items";
+
+  const body=
+    document.getElementById(
+      "tableDetailItems"
+    );
+
+  if(!table.items.length){
+
+    body.innerHTML=`
+
+      <tr>
+
+        <td colspan="4"
+            style="text-align:center">
+
+          No items in this table
+
+        </td>
+
+      </tr>
+
+    `;
+
+  }else{
+
+    body.innerHTML=
+      table.items.map(i=>`
+
+      <tr>
+
+        <td>${i.name}</td>
+
+        <td>${i.qty}</td>
+
+        <td>
+          Rs. ${i.price.toFixed(2)}
+        </td>
+
+        <td>
+          Rs. ${(i.price*i.qty).toFixed(2)}
+        </td>
+
+      </tr>
+
+    `).join("");
+
+  }
+
+  document.getElementById(
+    "tableDetailTotal"
+  ).textContent=
+    "Rs. "+table.total.toFixed(2);
+
+  card.scrollIntoView({
+    behavior:"smooth"
+  });
+
+}
+
+function closeTableDetail(){
+
+  document.getElementById(
+    "tableDetailCard"
+  ).style.display="none";
+
+}
+
+function continueTableBill(){
+
+  if(selectedTable===null){
+
+    alert("Please select a table.");
+
+    return;
+
+  }
+
+  const table=
+    tables.find(t=>t.id===selectedTable);
+
+  cart=
+    JSON.parse(
+      JSON.stringify(table.items||[])
+    );
+
+  orderType="Table";
+
+  document.getElementById(
+    "selectedTableText"
+  ).textContent=
+    table.name+" selected";
+
+  openPage("billing");
+
+}
+
+function newTableBill(){
+
+  const free=
+    tables.find(t=>!t.occupied);
+
+  if(!free){
+
+    alert("No free table available.");
+
+    return;
+
+  }
+
+  selectedTable=free.id;
+
+  cart=[];
+
+  orderType="Table";
+
+  document.getElementById(
+    "takeawayBtn"
+  ).classList.remove("active");
+
+  document.getElementById(
+    "tableBtn"
+  ).classList.add("active");
+
+  document.getElementById(
+    "selectedTableText"
+  ).textContent=
+    free.name+" selected";
+
+  openPage("billing");
+
+}
+
+/* ================= SAVE TABLE DRAFT ================= */
+
+function saveTableDraft(){
+
+  if(
+    orderType!=="Table" ||
+    selectedTable===null
+  ){
+
+    return;
+
+  }
+
+  const table=
+    tables.find(
+      t=>t.id===selectedTable
+    );
+
+  if(!table)return;
+
+  table.items=
+    JSON.parse(
+      JSON.stringify(cart)
+    );
+
+  table.total=
+    cart.reduce(
+      (sum,i)=>
+        sum+(i.price*i.qty),
+      0
+    );
+
+  table.occupied=
+    cart.length>0;
+
+  saveTables();
+
+}
+
+/* ================= NEW BILL ================= */
+
+function newBill(){
+
+  /*
+    Save current table before creating
+    new bill.
+  */
+
+  if(
+    cart.length &&
+    orderType==="Table" &&
+    selectedTable!==null
+  ){
+
+    saveTableDraft();
+
+  }
+
+  if(cart.length){
+
+    const ok=
+      confirm(
+        "Current bill has items.\n\n"+
+        "Start a NEW BILL?\n"+
+        "Current bill will be saved to Held Bills."
+      );
+
+    if(!ok)return;
+
+    holdBill(true);
+
+  }
+
+  cart=[];
+
+  selectedTable=null;
+
+  orderType="Takeaway";
+
+  paymentMethod="Cash";
+
+  editingHeldId=null;
+
+  billCounter++;
+
+  saveCounter();
+
+  resetBillUI();
+
+  openPage("billing");
+
+}
+
+/* ================= RESET BILL ================= */
+
+function resetBillUI(){
+
+  document.getElementById("billNo")
+    .textContent=
+    generateBillNo();
+
+  document.getElementById("discount")
+    .value=0;
+
+  document.getElementById("cashAmount")
+    .value="";
+
+  document.getElementById("change")
+    .textContent="Rs. 0.00";
+
+  document.getElementById(
+    "takeawayBtn"
+  ).classList.add("active");
+
+  document.getElementById(
+    "tableBtn"
+  ).classList.remove("active");
+
+  document.getElementById(
+    "selectedTableText"
+  ).textContent=
+    "Takeaway Order";
+
+  document.querySelectorAll(".pay-btn")
+    .forEach((b,i)=>{
+      b.classList.toggle(
+        "active",
+        i===0
+      );
+    });
+
+  renderCart();
+
+  renderHeldBills();
+
+}
+
+/* ================= HOLD BILL ================= */
+
+function holdBill(silent=false){
+
+  if(!cart.length){
+
+    if(!silent){
+      alert("No items to hold.");
+    }
+
+    return false;
+
+  }
+
+  const total=getGrandTotal();
+
+  const held={
+
+    id:
+      editingHeldId ||
+      Date.now(),
+
+    bill:
+      document.getElementById("billNo")
+        .textContent,
+
+    type:orderType,
+
+    table:selectedTable,
+
+    items:
+      JSON.parse(
+        JSON.stringify(cart)
+      ),
+
+    discount:
+      userRole==="admin"
+      ? parseFloat(
+          document.getElementById("discount").value
+        )||0
+      : 0,
+
+    total:total,
+
+    payment:paymentMethod,
+
+    createdAt:
+      new Date().toISOString()
+
+  };
+
+  const index=
+    heldBills.findIndex(
+      x=>x.id===held.id
+    );
+
+  if(index>=0){
+
+    heldBills[index]=held;
+
+  }else{
+
+    heldBills.push(held);
+
+  }
+
+  saveHeldBills();
+
+  /*
+    Table remains occupied.
+  */
+
+  saveTableDraft();
+
+  if(!silent){
+
+    alert(
+      "Bill saved to Held Bills."
+    );
+
+    cart=[];
+
+    selectedTable=null;
+
+    orderType="Takeaway";
+
+    editingHeldId=null;
+
+    resetBillUI();
+
+  }
+
+  renderHeldBills();
+
+  return true;
+
+}
+
+/* ================= HELD BILLS ================= */
+
+function renderHeldBills(){
+
+  const box=
+    document.getElementById("heldBills");
+
+  if(!box)return;
+
+  if(!heldBills.length){
+
+    box.innerHTML=`
+
+      <div style="
+        color:#9ca3af;
+        padding:20px">
+
+        No previous / held bills.
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+  box.innerHTML=
+    heldBills
+    .slice()
+    .reverse()
+    .map(b=>`
+
+      <div class="held-card">
+
+        <h4>
+          ${b.bill}
+        </h4>
+
+        <div>
+          ${b.type}
+          ${
+            b.table
+            ? " / Table "+b.table
+            : ""
+          }
+        </div>
+
+        <div style="
+          font-weight:bold;
+          margin-top:5px">
+
+          Rs. ${b.total.toFixed(2)}
+
+        </div>
+
+        <div style="
+          font-size:11px;
+          color:#6b7280;
+          margin:5px 0">
+
+          ${b.items.length} item type(s)
+
+        </div>
+
+        <button
+          class="btn btn-blue"
+          style="width:100%"
+          onclick="recallBill(${b.id})">
+
+          Recall Bill
+
+        </button>
+
+        <button
+          class="btn btn-red"
+          style="
+          width:100%;
+          margin-top:5px"
+          onclick="deleteHeldBill(${b.id})">
+
+          Delete
+
+        </button>
+
+      </div>
+
+    `).join("");
+
+}
+
+function recallBill(id){
+
+  const held=
+    heldBills.find(
+      b=>b.id===id
+    );
+
+  if(!held)return;
+
+  if(cart.length){
+
+    const ok=
+      confirm(
+        "Current bill has items.\n"+
+        "Replace it with this held bill?"
+      );
+
+    if(!ok)return;
+
+  }
+
+  cart=
+    JSON.parse(
+      JSON.stringify(held.items)
+    );
+
+  orderType=held.type;
+
+  selectedTable=held.table;
+
+  paymentMethod=held.payment || "Cash";
+
+  editingHeldId=held.id;
+
+  document.getElementById(
+    "billNo"
+  ).textContent=held.bill;
+
+  if(userRole==="admin"){
+
+    document.getElementById(
+      "discount"
+    ).value=held.discount||0;
+
+  }
+
+  if(orderType==="Table"){
+
+    document.getElementById(
+      "takeawayBtn"
+    ).classList.remove("active");
+
+    document.getElementById(
+      "tableBtn"
+    ).classList.add("active");
+
+    document.getElementById(
+      "selectedTableText"
+    ).textContent=
+      "Table "+selectedTable+" selected";
+
+  }else{
+
+    document.getElementById(
+      "takeawayBtn"
+    ).classList.add("active");
+
+    document.getElementById(
+      "tableBtn"
+    ).classList.remove("active");
+
+    document.getElementById(
+      "selectedTableText"
+    ).textContent=
+      "Takeaway Order";
+
+  }
+
+  document.querySelectorAll(".pay-btn")
+    .forEach(b=>{
+
+      b.classList.toggle(
+        "active",
+        b.textContent
+          .toLowerCase()
+          .includes(
+            paymentMethod.toLowerCase()
+          )
+      );
+
+    });
+
+  openPage("billing");
+
+  renderCart();
+
+}
+
+function deleteHeldBill(id){
+
+  const ok=
+    confirm(
+      "Delete this held bill?"
+    );
+
+  if(!ok)return;
+
+  heldBills=
+    heldBills.filter(
+      b=>b.id!==id
+    );
+
+  saveHeldBills();
+
+  renderHeldBills();
+
+}
+
+/* ================= SETTLE ================= */
+
+function settleBill(){
+
+  if(!cart.length){
+
+    alert("Please add items first.");
+
+    return;
+
+  }
+
+  const total=getGrandTotal();
+
+  let cash=0;
+
+  if(paymentMethod==="Cash"){
+
+    cash=
+      parseFloat(
+        document.getElementById("cashAmount")
+          .value
+      )||0;
+
+    if(cash<total){
+
+      alert(
+        "Cash amount is not enough.\n\n"+
+        "Required: Rs. "+
+        total.toFixed(2)
+      );
+
+      return;
+
+    }
+
+  }
+
+  const sale={
+
+    id:Date.now(),
+
+    bill:
+      document.getElementById("billNo")
+        .textContent,
+
+    date:
+      new Date().toISOString(),
+
+    type:orderType,
+
+    table:selectedTable,
+
+    items:
+      JSON.parse(
+        JSON.stringify(cart)
+      ),
+
+    discount:
+      userRole==="admin"
+      ? parseFloat(
+          document.getElementById("discount")
+            .value
+        )||0
+      : 0,
+
+    total:total,
+
+    payment:paymentMethod,
+
+    cash:cash,
+
+    change:
+      paymentMethod==="Cash"
+      ? Math.max(0,cash-total)
+      : 0,
+
+    cashier:
+      currentUser
+      ? currentUser.username
+      : "admin"
+
+  };
+
+  sales.push(sale);
+
+  localStorage.setItem(
+    "eb_sales",
+    JSON.stringify(sales)
+  );
+
+  /* STOCK */
+
+  cart.forEach(item=>{
+
+    const p=
+      products.find(
+        x=>x.id===item.id
+      );
+
+    if(p){
+
+      p.stock=
+        Math.max(
+          0,
+          p.stock-item.qty
+        );
+
+    }
+
+  });
+
+  saveProducts();
+
+  /* CLEAR TABLE */
+
+  if(
+    orderType==="Table" &&
+    selectedTable!==null
+  ){
+
+    const table=
+      tables.find(
+        t=>t.id===selectedTable
+      );
+
+    if(table){
+
+      table.items=[];
+
+      table.total=0;
+
+      table.occupied=false;
+
+    }
+
+    saveTables();
+
+  }
+
+  /*
+    Remove recalled bill
+  */
+
+  if(editingHeldId){
+
+    heldBills=
+      heldBills.filter(
+        b=>b.id!==editingHeldId
+      );
+
+    saveHeldBills();
+
+  }
+
+  alert(
+    "Bill settled successfully!\n\n"+
+    sale.bill+
+    "\nRs. "+
+    total.toFixed(2)
+  );
+
+  printBill();
+
+  cart=[];
+
+  selectedTable=null;
+
+  orderType="Takeaway";
+
+  paymentMethod="Cash";
+
+  editingHeldId=null;
+
+  billCounter++;
+
+  saveCounter();
+
+  resetBillUI();
+
+  updateDashboard();
+
+  renderTables();
+
+}
+
+/* ================= PRINT ================= */
+
+function printBill(){
+
+  if(!cart.length){
+
+    alert("No items to print.");
+
+    return;
+
+  }
+
+  const subtotal=
+    cart.reduce(
+      (sum,i)=>
+        sum+(i.price*i.qty),
+      0
+    );
+
+  const discount=
+    userRole==="admin"
+    ? parseFloat(
+        document.getElementById("discount")
+          .value
+      )||0
+    : 0;
+
+  const total=
+    Math.max(
+      0,
+      subtotal-discount
+    );
+
+  const cash=
+    parseFloat(
+      document.getElementById("cashAmount")
+        .value
+    )||0;
+
+  const change=
+    paymentMethod==="Cash"
+    ? Math.max(0,cash-total)
+    : 0;
+
+  const tableText=
+    selectedTable
+    ? "Table "+selectedTable
+    : "Takeaway";
+
+  const itemRows=
+    cart.map(i=>`
+
+      <tr>
+
+        <td>${i.name}</td>
+
+        <td>${i.qty}</td>
+
+        <td style="text-align:right">
+          Rs. ${(i.price*i.qty).toFixed(2)}
+        </td>
+
+      </tr>
+
+    `).join("");
+
+  const html=`
+
+    <div style="
+      width:80mm;
+      font-family:Arial;
+      padding:8px;
+      color:#000">
+
+      <div style="
+        text-align:center">
+
+        <h2 style="
+          margin:0">
+          EASY BILL LK
+        </h2>
+
+        <div>
+          RESTAURANT ERP POS
+        </div>
+
+        <hr>
+
+      </div>
+
+      <div style="font-size:12px">
+
+        <b>Bill:</b>
+        ${document.getElementById("billNo").textContent}
+
+        <br>
+
+        <b>Type:</b>
+        ${orderType}
+
+        <br>
+
+        <b>Table:</b>
+        ${tableText}
+
+        <br>
+
+        <b>Date:</b>
+        ${new Date().toLocaleString()}
+
+      </div>
+
+      <hr>
+
+      <table style="
+        width:100%;
+        font-size:12px">
+
+        ${itemRows}
+
+      </table>
+
+      <hr>
+
+      <div style="
+        display:flex;
+        justify-content:space-between">
+
+        <span>Subtotal</span>
+
+        <b>
+          Rs. ${subtotal.toFixed(2)}
+        </b>
+
+      </div>
+
+      <div style="
+        display:flex;
+        justify-content:space-between">
+
+        <span>Discount</span>
+
+        <b>
+          Rs. ${discount.toFixed(2)}
+        </b>
+
+      </div>
+
+      <div style="
+        display:flex;
+        justify-content:space-between;
+        font-size:18px;
+        font-weight:bold">
+
+        <span>TOTAL</span>
+
+        <span>
+          Rs. ${total.toFixed(2)}
+        </span>
+
+      </div>
+
+      <hr>
+
+      <div>
+
+        Payment:
+        <b>${paymentMethod}</b>
+
+      </div>
+
+      ${
+        paymentMethod==="Cash"
+        ? `
+
+        <div style="
+          display:flex;
+          justify-content:space-between">
+
+          <span>Cash</span>
+
+          <b>
+            Rs. ${cash.toFixed(2)}
+          </b>
+
+        </div>
+
+        <div style="
+          display:flex;
+          justify-content:space-between">
+
+          <span>Change</span>
+
+          <b>
+            Rs. ${change.toFixed(2)}
+          </b>
+
+        </div>
+
+        `
+        :""
+      }
+
+      <hr>
+
+      <div style="
+        text-align:center;
+        font-weight:bold">
+
+        THANK YOU!
+
+      </div>
+
+      <div style="
+        text-align:center;
+        font-size:11px;
+        margin-top:8px">
+
+        Powered by EASY BILL LK
+
+      </div>
+
+    </div>
+
+  `;
+
+  document.getElementById(
+    "printArea"
+  ).innerHTML=html;
+
+  window.print();
+
+}
+
+/* ================= ITEMS ================= */
+
+function renderItems(){
+
+  const list=
+    document.getElementById("itemsList");
+
+  if(!list)return;
+
+  list.innerHTML=
+    products.map(p=>`
+
+      <tr>
+
+        <td>${p.name}</td>
+
+        <td>${p.category}</td>
+
+        <td>
+          Rs. ${p.price.toFixed(2)}
+        </td>
+
+        <td>${p.stock}</td>
+
+      </tr>
+
+    `).join("");
+
+}
+
+function addItem(){
+
+  if(userRole!=="admin"){
+
+    alert(
+      "Only Admin can add items."
+    );
+
+    return;
+
+  }
+
+  const name=
+    prompt("Item name:");
+
+  if(!name)return;
+
+  const price=
+    parseFloat(
+      prompt("Selling price:")
+    );
+
+  if(
+    isNaN(price) ||
+    price<=0
+  ){
+
+    alert("Invalid price.");
+
+    return;
+
+  }
+
+  const category=
+    prompt(
+      "Category:",
+      "Rice"
+    );
+
+  products.push({
+
+    id:Date.now(),
+
+    name:name,
+
+    category:
+      category || "Other",
+
+    price:price,
+
+    stock:100
+
+  });
+
+  saveProducts();
+
+  renderItems();
+
+  renderProducts();
+
+}
+
+/* ================= SALES ================= */
+
+function renderSales(){
+
+  const body=
+    document.getElementById("salesList");
+
+  if(!body)return;
+
+  body.innerHTML=
+    sales
+    .slice()
+    .reverse()
+    .map(s=>`
+
+      <tr>
+
+        <td>${s.bill}</td>
+
+        <td>
+
+          ${s.type}
+
+          ${
+            s.table
+            ? " / Table "+s.table
+            : ""
+          }
+
+        </td>
+
+        <td>
+          Rs. ${s.total.toFixed(2)}
+        </td>
+
+        <td>
+          ${s.payment}
+        </td>
+
+      </tr>
+
+    `).join("");
+
+}
+
+/* ================= DAILY REPORT ================= */
+
+function renderDailyReport(){
+
+  const today=
+    new Date().toDateString();
+
+  const todaySales=
+    sales.filter(
+      s=>
+        new Date(s.date)
+          .toDateString()===today
+    );
+
+  const total=
+    todaySales.reduce(
+      (sum,s)=>sum+s.total,
+      0
+    );
+
+  document.getElementById(
+    "dailyReportTotal"
+  ).textContent=
+    "Today's Total: Rs. "+
+    total.toFixed(2);
+
+  const map={};
+
+  todaySales.forEach(s=>{
+
+    s.items.forEach(i=>{
+
+      if(!map[i.name]){
+
+        map[i.name]={
+          qty:0,
+          total:0
+        };
+
+      }
+
+      map[i.name].qty+=i.qty;
+
+      map[i.name].total+=
+        i.qty*i.price;
+
+    });
+
+  });
+
+  document.getElementById(
+    "dailyItems"
+  ).innerHTML=
+    Object.keys(map)
+    .map(name=>`
+
+      <tr>
+
+        <td>${name}</td>
+
+        <td>
+          ${map[name].qty}
+        </td>
+
+        <td>
+          Rs. ${map[name].total.toFixed(2)}
+        </td>
+
+      </tr>
+
+    `).join("");
+
+}
+
+/* ================= DASHBOARD ================= */
+
+function updateDashboard(){
+
+  const today=
+    new Date().toDateString();
+
+  const todaySales=
+    sales.filter(
+      s=>
+        new Date(s.date)
+          .toDateString()===today
+    );
+
+  const total=
+    todaySales.reduce(
+      (sum,s)=>sum+s.total,
+      0
+    );
+
+  document.getElementById(
+    "dashSales"
+  ).textContent=
+    "Rs. "+total.toFixed(2);
+
+  document.getElementById(
+    "dashBills"
+  ).textContent=
+    todaySales.length;
+
+  document.getElementById(
+    "dashItems"
+  ).textContent=
+    products.length;
+
+  document.getElementById(
+    "dashTables"
+  ).textContent=
+    tables.filter(
+      t=>t.occupied
+    ).length;
+
+}
+
+/* ================= INIT ================= */
+
+function init(){
+
+  document.getElementById(
+    "billNo"
+  ).textContent=
+    generateBillNo();
+
+  renderCategories();
+
+  renderProducts();
+
+  renderCart();
+
+  renderTables();
+
+  renderItems();
+
+  renderSales();
+
+  renderDailyReport();
+
+  renderHeldBills();
+
+  updateDashboard();
+
+}
+
+/* ================= AUTO LOGIN CHECK ================= */
+
+/*
+  Default login screen is shown.
+  Admin:
+      username: admin
+      password: 1234
+
+  New accounts can be created
+  from Create New Account.
+*/
+
+document.getElementById("loginUser")
+  .addEventListener("keydown",function(e){
+
+    if(e.key==="Enter"){
+      login();
+    }
+
+  });
+
+document.getElementById("loginPass")
+  .addEventListener("keydown",function(e){
+
+    if(e.key==="Enter"){
+      login();
+    }
+
+  });
+
+</script>
+
+</body>
+</html>
+      <input id="newPassword2"
+             type="password"
+             placeholder="Confirm password">
+
+    </div>
+
+    <button class="btn btn-blue"
+            onclick="createAccount()">
+      CREATE ACCOUNT
+    </button>
+
+    <p id="accountMsg"
+       style="text-align:center">
+    </p>
+
+  </div>
+
+</div>
+
+<div id="printArea"></div>
+
+<!-- PART 2 JAVASCRIPT GOES BELOW -->
