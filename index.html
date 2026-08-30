@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>EASY BILL LK - Restaurant POS</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial,Helvetica,sans-serif;
+  background:#f1f3f6;
+  color:#222;
+  overflow:hidden;
+}
+button,input,select{font:inherit}
+button{cursor:pointer;border:0}
+
+:root{
+  --blue:#2563eb;
+  --dark:#172033;
+  --green:#16a34a;
+  --red:#dc2626;
+  --orange:#f59e0b;
+  --border:#d9dee7;
+}
+
+/* LOGIN */
+#loginScreen{
+  position:fixed;
+  inset:0;
+  background:linear-gradient(135deg,#172033,#2563eb);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+}
+.loginBox{
+  width:390px;
+  background:white;
+  padding:35px;
+  border-radius:18px;
+  box-shadow:0 20px 60px #0005;
+}
+.loginBox h1{text-align:center;margin:0 0 8px}
+.loginBox p{text-align:center;color:#777}
+.loginBox input{
+  width:100%;
+  padding:14px;
+  margin:8px 0;
+  border:1px solid var(--border);
+  border-radius:9px;
+}
+.loginBtn{
+  width:100%;
+  padding:14px;
+  background:var(--blue);
+  color:#fff;
+  border-radius:9px;
+  margin-top:10px;
+  font-weight:bold;
+}
+
+/* APP */
+#app{display:none;height:100vh}
+
+.sidebar{
+  position:fixed;
+  left:0;
+  top:0;
+  bottom:0;
+  width:230px;
+  background:var(--dark);
+  color:white;
+  z-index:1000;
+  transition:.25s;
+}
+.sidebar.hide{left:-230px}
+
+.logo{
+  height:70px;
+  display:flex;
+  align-items:center;
+  padding:0 20px;
+  font-size:21px;
+  font-weight:bold;
+  border-bottom:1px solid #ffffff18;
+}
+.logo span{color:#60a5fa}
+
+.menu{
+  padding:12px;
+}
+.menu button{
+  width:100%;
+  background:transparent;
+  color:#dbe3f0;
+  padding:13px 15px;
+  text-align:left;
+  border-radius:8px;
+  margin-bottom:4px;
+}
+.menu button:hover,.menu button.active{
+  background:#2563eb;
+  color:#fff;
+}
+
+.main{
+  margin-left:230px;
+  height:100vh;
+  transition:.25s;
+  display:flex;
+  flex-direction:column;
+}
+.main.full{margin-left:0}
+
+.topbar{
+  height:65px;
+  min-height:65px;
+  background:#fff;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  padding:0 18px;
+  gap:15px;
+}
+.menuToggle{
+  width:42px;
+  height:42px;
+  border-radius:9px;
+  background:#eef2f7;
+  font-size:22px;
+}
+.topTitle{font-size:19px;font-weight:bold}
+.userInfo{margin-left:auto}
+.logout{
+  padding:9px 15px;
+  background:#fee2e2;
+  color:#b91c1c;
+  border-radius:7px;
+}
+
+.page{
+  flex:1;
+  overflow:auto;
+  padding:15px;
+}
+
+/* POS */
+.pos{
+  height:calc(100vh - 95px);
+  display:grid;
+  grid-template-columns:1.2fr 1fr;
+  gap:15px;
+}
+
+.panel{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:12px;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+
+.panelHead{
+  padding:12px 15px;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.panelHead h3{margin:0}
+.panelHead .right{margin-left:auto}
+
+.modeBtn{
+  padding:8px 13px;
+  border-radius:7px;
+  background:#eef2f7;
+}
+.modeBtn.active{
+  background:var(--blue);
+  color:white;
+}
+
+/* TABLES */
+.tables{
+  padding:15px;
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:12px;
+  overflow:auto;
+}
+.table{
+  min-height:95px;
+  border-radius:12px;
+  border:2px solid #cbd5e1;
+  background:#f8fafc;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  font-weight:bold;
+  position:relative;
+}
+.table small{
+  font-weight:normal;
+  margin-top:5px;
+  color:#64748b;
+}
+.table.open{
+  border-color:var(--orange);
+  background:#fff7ed;
+}
+.table.printed{
+  border-color:var(--red);
+  background:#fee2e2;
+}
+.table.open small{color:#c2410c}
+.table.printed small{color:#b91c1c}
+
+.badge{
+  position:absolute;
+  right:5px;
+  top:5px;
+  background:var(--red);
+  color:white;
+  border-radius:20px;
+  padding:2px 6px;
+  font-size:10px;
+}
+
+/* PRODUCTS */
+.productArea{
+  display:flex;
+  flex-direction:column;
+  height:100%;
+}
+.search{
+  padding:10px 15px;
+  border-bottom:1px solid var(--border);
+}
+.search input{
+  width:100%;
+  padding:11px;
+  border:1px solid var(--border);
+  border-radius:8px;
+}
+.products{
+  flex:1;
+  overflow:auto;
+  padding:12px;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+}
+.product{
+  border:1px solid #dbe1e8;
+  background:#fff;
+  border-radius:10px;
+  padding:12px;
+  min-height:85px;
+  text-align:left;
+}
+.product:hover{
+  border-color:var(--blue);
+  box-shadow:0 3px 10px #0001;
+}
+.product strong{display:block}
+.product span{
+  color:var(--blue);
+  font-weight:bold;
+  display:block;
+  margin-top:7px;
+}
+
+/* BILL */
+.bill{
+  min-height:0;
+}
+.billHead{
+  padding:12px 15px;
+  border-bottom:1px solid var(--border);
+}
+.billInfo{
+  display:flex;
+  justify-content:space-between;
+  font-size:13px;
+}
+.billItems{
+  flex:1;
+  overflow:auto;
+  padding:10px 15px;
+}
+.billRow{
+  display:grid;
+  grid-template-columns:1fr 55px 85px 28px;
+  gap:5px;
+  align-items:center;
+  padding:9px 0;
+  border-bottom:1px solid #edf0f3;
+}
+.qtyBtns{
+  display:flex;
+  align-items:center;
+  gap:4px;
+}
+.qtyBtns button{
+  width:25px;
+  height:25px;
+  border-radius:5px;
+  background:#e9eef5;
+}
+.remove{
+  color:var(--red);
+  background:transparent;
+  font-size:18px;
+}
+
+.totals{
+  padding:12px 15px;
+  border-top:1px solid var(--border);
+}
+.totalLine{
+  display:flex;
+  justify-content:space-between;
+  padding:4px 0;
+}
+.grand{
+  font-size:20px;
+  font-weight:bold;
+}
+
+.cashBox{
+  padding:10px 15px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+.cashBox label{
+  font-size:12px;
+  color:#64748b;
+}
+.cashBox input{
+  width:100%;
+  padding:11px;
+  border:1px solid var(--border);
+  border-radius:7px;
+  margin-top:3px;
+}
+
+.actions{
+  padding:12px 15px;
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:8px;
+}
+.action{
+  padding:12px;
+  border-radius:8px;
+  font-weight:bold;
+}
+.new{background:#e0f2fe;color:#0369a1}
+.save{background:#dcfce7;color:#15803d}
+.print{background:#fee2e2;color:#b91c1c}
+
+/* NUMERIC KEYPAD */
+.keypad{
+  padding:10px 15px 15px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:6px;
+}
+.keypad button{
+  height:38px;
+  border-radius:7px;
+  background:#eef2f7;
+  font-weight:bold;
+}
+.keypad button.clear{background:#fee2e2;color:#b91c1c}
+.keypad button.ok{background:#dcfce7;color:#15803d}
+
+/* SETTINGS / ITEMS */
+.section{
+  background:white;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:18px;
+  margin-bottom:15px;
+}
+.formGrid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+}
+.formGrid input,.formGrid select{
+  padding:11px;
+  border:1px solid var(--border);
+  border-radius:7px;
+}
+.primary{
+  padding:11px 18px;
+  background:var(--blue);
+  color:white;
+  border-radius:7px;
+}
+.danger{
+  padding:8px 12px;
+  background:#fee2e2;
+  color:#b91c1c;
+  border-radius:7px;
+}
+
+.itemTable{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:15px;
+}
+.itemTable th,.itemTable td{
+  padding:11px;
+  border-bottom:1px solid #e5e7eb;
+  text-align:left;
+}
+
+.hidden{display:none!important}
+
+@media(max-width:1100px){
+  .pos{grid-template-columns:1fr}
+  .products{grid-template-columns:repeat(3,1fr)}
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="loginBox">
+    <h1>EASY BILL <span style="color:#2563eb">LK</span></h1>
+    <p>Restaurant ERP / POS</p>
+    <input id="loginUser" placeholder="Username" value="admin">
+    <input id="loginPass" type="password" placeholder="Password" value="1234">
+    <button class="loginBtn" onclick="login()">SIGN IN</button>
+    <p style="font-size:12px">Admin: admin / 1234</p>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="logo">EASY BILL <span>LK</span></div>
+
+    <div class="menu">
+      <button class="active" onclick="showPage('billing',this)">🧾 Billing</button>
+      <button onclick="showPage('tables',this)">🪑 Tables</button>
+      <button onclick="showPage('items',this)">📦 Items</button>
+      <button onclick="showPage('reports',this)">📊 Reports</button>
+      <button onclick="showPage('settings',this)">⚙ Settings</button>
+    </div>
+  </aside>
+
+  <main class="main" id="main">
+
+    <div class="topbar">
+      <button class="menuToggle" onclick="toggleMenu()">☰</button>
+      <div class="topTitle" id="pageTitle">Restaurant Billing</div>
+      <div class="userInfo">👤 <span id="userName"></span></div>
+      <button class="logout" onclick="logout()">Logout</button>
+    </div>
+
+    <div class="page">
+
+      <!-- BILLING -->
+      <section id="billingPage">
+
+        <div class="pos">
+
+          <!-- LEFT -->
+          <div class="panel">
+            <div class="panelHead">
+              <h3>Order</h3>
+              <div class="right">
+                <button class="modeBtn active" id="tableModeBtn" onclick="setMode('table')">🪑 Table</button>
+                <button class="modeBtn" id="takeModeBtn" onclick="setMode('takeaway')">🥡 Takeaway</button>
+              </div>
+            </div>
+
+            <div id="tableSelector" class="tables"></div>
+
+            <div class="productArea">
+              <div class="search">
+                <input id="search" placeholder="🔎 Search item / barcode..." oninput="renderProducts()">
+              </div>
+              <div class="products" id="products"></div>
+            </div>
+          </div>
+
+          <!-- RIGHT -->
+          <div class="panel bill">
+
+            <div class="billHead">
+              <div class="billInfo">
+                <div>
+                  <b id="orderName">No Table Selected</b><br>
+                  <span>KOT: <b id="kotNo"></b></span>
+                </div>
+                <div style="text-align:right">
+                  Bill: <b id="billNo"></b><br>
+                  <span id="billTime"></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="billItems" id="billItems"></div>
+
+            <div class="totals">
+              <div class="totalLine">
+                <span>Subtotal</span>
+                <b id="subtotal">Rs. 0.00</b>
+              </div>
+
+              <div class="totalLine" id="discountLine">
+                <span>Discount</span>
+                <b id="discountDisplay">Rs. 0.00</b>
+              </div>
+
+              <div class="totalLine grand">
+                <span>Total</span>
+                <b id="total">Rs. 0.00</b>
+              </div>
+
+              <div class="totalLine">
+                <span>Change</span>
+                <b id="change">Rs. 0.00</b>
+              </div>
+            </div>
+
+            <div class="cashBox">
+              <div>
+                <label>Cash Amount</label>
+                <input id="cashAmount"
+                       type="number"
+                       placeholder="0.00"
+                       oninput="calculateChange()">
+              </div>
+
+              <div>
+                <label>Discount <span style="color:#dc2626">(Admin)</span></label>
+                <input id="discountAmount"
+                       type="number"
+                       placeholder="0.00"
+                       disabled
+                       oninput="updateBill()">
+              </div>
+            </div>
+
+            <div class="actions">
+              <button class="action new" onclick="newBill()">＋ New Bill</button>
+              <button class="action save" onclick="saveBill()">💾 Save</button>
+              <button class="action print" onclick="printBill()">🖨 Print</button>
+            </div>
+
+            <div class="keypad">
+              <button onclick="key('7')">7</button>
+              <button onclick="key('8')">8</button>
+              <button onclick="key('9')">9</button>
+              <button onclick="key('4')">4</button>
+              <button onclick="key('5')">5</button>
+              <button onclick="key('6')">6</button>
+              <button onclick="key('1')">1</button>
+              <button onclick="key('2')">2</button>
+              <button onclick="key('3')">3</button>
+              <button onclick="key('0')">0</button>
+              <button onclick="key('.')">.</button>
+              <button class="clear" onclick="clearCash()">C</button>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- TABLE PAGE -->
+      <section id="tablesPage" class="hidden">
+        <div class="section">
+          <h2>Restaurant Tables</h2>
+          <p>Touch a table to open its current order.</p>
+          <div class="tables" id="allTables"></div>
+        </div>
+      </section>
+
+      <!-- ITEMS -->
+      <section id="itemsPage" class="hidden">
+
+        <div class="section">
+          <h2>Items</h2>
+
+          <div id="discountAdminBox" class="section" style="background:#fff7ed;border-color:#fed7aa">
+            <h3>🔐 Admin Discount</h3>
+            <p style="color:#9a3412">
+              Discount settings are available only for Admin.
+            </p>
+
+            <div class="formGrid">
+              <input id="discountPercent" type="number" placeholder="Default Discount %">
+              <button class="primary" onclick="saveDiscount()">Save Discount</button>
+            </div>
+          </div>
+
+          <div class="formGrid">
+            <input id="itemName" placeholder="Item name">
+            <input id="itemPrice" type="number" placeholder="Selling price">
+            <input id="itemBarcode" placeholder="Barcode">
+            <button class="primary" onclick="addItem()">＋ Add Item</button>
+          </div>
+
+          <table class="itemTable">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Barcode</th>
+                <th>Price</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="itemTableBody"></tbody>
+          </table>
+        </div>
+
+      </section>
+
+      <!-- REPORTS -->
+      <section id="reportsPage" class="hidden">
+        <div class="section">
+          <h2>Sales Report</h2>
+          <div id="reportContent"></div>
+        </div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section id="settingsPage" class="hidden">
+        <div class="section">
+          <h2>Settings</h2>
+          <p>Restaurant: <b>EASY BILL LK</b></p>
+          <p>System: Restaurant ERP / POS</p>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<script>
+
+/* =========================
+   DATA
+========================= */
+
+let currentUser=null;
+let role="admin";
+
+let tables=JSON.parse(localStorage.getItem("eb_tables")||"{}");
+let items=JSON.parse(localStorage.getItem("eb_items")||"null");
+let sales=JSON.parse(localStorage.getItem("eb_sales")||"[]");
+
+if(!items){
+  items=[
+    {id:1,name:"Chicken Fried Rice",price:850,barcode:"1001"},
+    {id:2,name:"Chicken Kottu",price:950,barcode:"1002"},
+    {id:3,name:"Cheese Kottu",price:1100,barcode:"1003"},
+    {id:4,name:"Egg Rice",price:650,barcode:"1004"},
+    {id:5,name:"Noodles",price:750,barcode:"1005"},
+    {id:6,name:"Chicken Burger",price:900,barcode:"1006"},
+    {id:7,name:"French Fries",price:550,barcode:"1007"},
+    {id:8,name:"Coca Cola",price:250,barcode:"1008"},
+    {id:9,name:"Sprite",price:250,barcode:"1009"},
+    {id:10,name:"Water",price:150,barcode:"1010"},
+    {id:11,name:"Tea",price:180,barcode:"1011"},
+    {id:12,name:"Coffee",price:300,barcode:"1012"}
+  ];
+  saveItems();
+}
+
+let selectedTable=null;
+let mode="table";
+let currentBill=[];
+let billNumber=Number(localStorage.getItem("eb_bill_no")||1000);
+let kotNumber=Number(localStorage.getItem("eb_kot_no")||5000);
+
+let discount=0;
+let activeInput="cashAmount";
+
+/* =========================
+   LOGIN
+========================= */
+
+function login(){
+
+  const u=document.getElementById("loginUser").value.trim();
+  const p=document.getElementById("loginPass").value;
+
+  if((u==="admin" && p==="1234") || (u==="cashier" && p==="1234")){
+
+    currentUser=u;
+    role=u==="admin"?"admin":"cashier";
+
+    document.getElementById("loginScreen").style.display="none";
+    document.getElementById("app").style.display="block";
+    document.getElementById("userName").textContent=u;
+
+    document.getElementById("discountAdminBox").style.display=
+      role==="admin" ? "block" : "none";
+
+    document.getElementById("discountAmount").disabled=
+      role!=="admin";
+
+    newBill();
+
+  }else{
+    alert("Invalid username or password");
+  }
+}
+
+function logout(){
+  location.reload();
+}
+
+/* =========================
+   MENU
+========================= */
+
+function toggleMenu(){
+
+  document.getElementById("sidebar").classList.toggle("hide");
+  document.getElementById("main").classList.toggle("full");
+
+}
+
+/* =========================
+   PAGES
+========================= */
+
+function showPage(page,btn){
+
+  document.querySelectorAll(
+    "#billingPage,#tablesPage,#itemsPage,#reportsPage,#settingsPage"
+  ).forEach(x=>x.classList.add("hidden"));
+
+  document.getElementById(page+"Page").classList.remove("hidden");
+
+  document.querySelectorAll(".menu button")
+    .forEach(x=>x.classList.remove("active"));
+
+  if(btn)btn.classList.add("active");
+
+  const titles={
+    billing:"Restaurant Billing",
+    tables:"Table Management",
+    items:"Items Management",
+    reports:"Sales Reports",
+    settings:"Settings"
+  };
+
+  document.getElementById("pageTitle").textContent=titles[page];
+
+  if(page==="tables")renderAllTables();
+  if(page==="items")renderItemTable();
+  if(page==="reports")renderReports();
+}
+
+/* =========================
+   BILL / KOT
+========================= */
+
+function newBill(){
+
+  billNumber++;
+  kotNumber++;
+
+  localStorage.setItem("eb_bill_no",billNumber);
+  localStorage.setItem("eb_kot_no",kotNumber);
+
+  currentBill=[];
+  discount=0;
+
+  selectedTable=null;
+
+  document.getElementById("cashAmount").value="";
+  document.getElementById("discountAmount").value="";
+
+  document.getElementById("billNo").textContent=
+    "B"+String(billNumber).padStart(5,"0");
+
+  document.getElementById("kotNo").textContent=
+    "KOT-"+String(kotNumber).padStart(5,"0");
+
+  document.getElementById("orderName").textContent=
+    mode==="takeaway" ? "TAKEAWAY" : "Select Table";
+
+  renderTables();
+  updateBill();
+}
+
+/* =========================
+   MODE
+========================= */
+
+function setMode(m){
+
+  mode=m;
+
+  document.getElementById("tableModeBtn")
+    .classList.toggle("active",m==="table");
+
+  document.getElementById("takeModeBtn")
+    .classList.toggle("active",m==="takeaway");
+
+  document.getElementById("tableSelector").style.display=
+    m==="table"?"grid":"none";
+
+  if(m==="takeaway"){
+    selectedTable=null;
+    document.getElementById("orderName").textContent="TAKEAWAY";
+  }else{
+    document.getElementById("orderName").textContent="Select Table";
+  }
+
+  updateBill();
+}
+
+/* =========================
+   TABLES
+========================= */
+
+function renderTables(){
+
+  const el=document.getElementById("tableSelector");
+  el.innerHTML="";
+
+  for(let i=1;i<=20;i++){
+
+    const t=tables[i];
+
+    const div=document.createElement("button");
+    div.className="table";
+
+    if(t && t.items && t.items.length){
+      div.classList.add(t.printed?"printed":"open");
+
+      div.innerHTML=`
+        <span>TABLE ${i}</span>
+        <small>Rs. ${money(calcItems(t.items))}</small>
+        <span class="badge">${t.items.length}</span>
+      `;
+    }else{
+      div.innerHTML=`<span>TABLE ${i}</span><small>Available</small>`;
+    }
+
+    div.onclick=()=>openTable(i);
+
+    el.appendChild(div);
+  }
+}
+
+function renderAllTables(){
+
+  const el=document.getElementById("allTables");
+  el.innerHTML="";
+
+  for(let i=1;i<=20;i++){
+
+    const t=tables[i];
+
+    const div=document.createElement("button");
+    div.className="table";
+
+    if(t && t.items && t.items.length){
+      div.classList.add(t.printed?"printed":"open");
+      div.innerHTML=`
+        <span>TABLE ${i}</span>
+        <small>Rs. ${money(calcItems(t.items))}</small>
+        <span class="badge">${t.items.length}</span>
+      `;
+    }else{
+      div.innerHTML=`<span>TABLE ${i}</span><small>Available</small>`;
+    }
+
+    div.onclick=()=>{
+      showPage("billing",
+        document.querySelector(".menu button"));
+      openTable(i);
+    };
+
+    el.appendChild(div);
+  }
+}
+
+function openTable(num){
+
+  mode="table";
+
+  document.getElementById("tableModeBtn").classList.add("active");
+  document.getElementById("takeModeBtn").classList.remove("active");
+  document.getElementById("tableSelector").style.display="grid";
+
+  selectedTable=num;
+
+  const t=tables[num];
+
+  if(t && t.items){
+    currentBill=JSON.parse(JSON.stringify(t.items));
+    discount=t.discount||0;
+
+    document.getElementById("discountAmount").value=discount;
+    document.getElementById("cashAmount").value=t.cash||"";
+  }else{
+    currentBill=[];
+    discount=0;
+
+    document.getElementById("discountAmount").value="";
+    document.getElementById("cashAmount").value="";
+  }
+
+  document.getElementById("orderName").textContent="TABLE "+num;
+
+  updateBill();
+  renderTables();
+}
+
+/* =========================
+   PRODUCTS
+========================= */
+
+function renderProducts(){
+
+  const q=document.getElementById("search").value.toLowerCase();
+
+  const el=document.getElementById("products");
+  el.innerHTML="";
+
+  items
+    .filter(x=>
+      x.name.toLowerCase().includes(q) ||
+      String(x.barcode).includes(q)
+    )
+    .forEach(item=>{
+
+      const b=document.createElement("button");
+      b.className="product";
+
+      b.innerHTML=`
+        <strong>${escapeHtml(item.name)}</strong>
+        <small>${item.barcode||""}</small>
+        <span>Rs. ${money(item.price)}</span>
+      `;
+
+      b.onclick=()=>addToBill(item.id);
+
+      el.appendChild(b);
+    });
+}
+
+function addToBill(id){
+
+  const item=items.find(x=>x.id===id);
+  if(!item)return;
+
+  const found=currentBill.find(x=>x.id===id);
+
+  if(found){
+    found.qty++;
+  }else{
+    currentBill.push({
+      id:item.id,
+      name:item.name,
+      price:Number(item.price),
+      qty:1
+    });
+  }
+
+  saveCurrentTable();
+  updateBill();
+}
+
+function changeQty(index,amount){
+
+  if(!currentBill[index])return;
+
+  currentBill[index].qty+=amount;
+
+  if(currentBill[index].qty<=0){
+    currentBill.splice(index,1);
+  }
+
+  saveCurrentTable();
+  updateBill();
+}
+
+function removeItem(index){
+
+  currentBill.splice(index,1);
+
+  saveCurrentTable();
+  updateBill();
+}
+
+/* =========================
+   BILL
+========================= */
+
+function calcItems(arr){
+
+  return arr.reduce((sum,x)=>
+    sum+(Number(x.price)*Number(x.qty)),0);
+}
+
+function getDiscount(){
+
+  if(role!=="admin")return 0;
+
+  return Number(document.getElementById("discountAmount").value||0);
+}
+
+function updateBill(){
+
+  discount=getDiscount();
+
+  const subtotal=calcItems(currentBill);
+  const total=Math.max(0,subtotal-discount);
+
+  document.getElementById("subtotal").textContent=
+    "Rs. "+money(subtotal);
+
+  document.getElementById("discountDisplay").textContent=
+    "Rs. "+money(discount);
+
+  document.getElementById("total").textContent=
+    "Rs. "+money(total);
+
+  renderBillItems();
+  calculateChange();
+}
+
+function renderBillItems(){
+
+  const el=document.getElementById("billItems");
+
+  if(!currentBill.length){
+    el.innerHTML=
+      `<div style="text-align:center;color:#94a3b8;padding:40px">
+        No items added
+      </div>`;
+    return;
+  }
+
+  el.innerHTML=currentBill.map((x,i)=>`
+
+    <div class="billRow">
+
+      <div>
+        <b>${escapeHtml(x.name)}</b><br>
+        <small>Rs. ${money(x.price)}</small>
+      </div>
+
+      <div class="qtyBtns">
+        <button onclick="changeQty(${i},-1)">−</button>
+        <b>${x.qty}</b>
+        <button onclick="changeQty(${i},1)">+</button>
+      </div>
+
+      <b style="text-align:right">
+        Rs. ${money(x.price*x.qty)}
+      </b>
+
+      <button class="remove"
+              onclick="removeItem(${i})">×</button>
+
+    </div>
+
+  `).join("");
+}
+
+function calculateChange(){
+
+  const subtotal=calcItems(currentBill);
+  const total=Math.max(0,subtotal-getDiscount());
+
+  const cash=Number(document.getElementById("cashAmount").value||0);
+
+  const change=Math.max(0,cash-total);
+
+  document.getElementById("change").textContent=
+    "Rs. "+money(change);
+}
+
+/* =========================
+   SAVE CURRENT TABLE
+========================= */
+
+function saveCurrentTable(){
+
+  if(mode!=="table" || !selectedTable)return;
+
+  if(currentBill.length){
+
+    tables[selectedTable]={
+      items:JSON.parse(JSON.stringify(currentBill)),
+      discount:getDiscount(),
+      cash:Number(document.getElementById("cashAmount").value||0),
+      printed:false,
+      kot:kotNumber,
+      bill:billNumber
+    };
+
+  }else{
+    delete tables[selectedTable];
+  }
+
+  localStorage.setItem("eb_tables",JSON.stringify(tables));
+
+  renderTables();
+}
+
+/* =========================
+   SAVE BILL
+========================= */
+
+function saveBill(){
+
+  if(!currentBill.length){
+    alert("Please add items first.");
+    return;
+  }
+
+  const subtotal=calcItems(currentBill);
+  const disc=getDiscount();
+  const total=Math.max(0,subtotal-disc);
+
+  const cash=Number(document.getElementById("cashAmount").value||0);
+
+  if(cash<total){
+    if(!confirm("Cash amount is less than total. Save anyway?"))
+      return;
+  }
+
+  const sale={
+    id:Date.now(),
+    bill:"B"+String(billNumber).padStart(5,"0"),
+    kot:"KOT-"+String(kotNumber).padStart(5,"0"),
+    type:mode,
+    table:selectedTable,
+    items:JSON.parse(JSON.stringify(currentBill)),
+    subtotal,
+    discount:disc,
+    total,
+    cash,
+    change:Math.max(0,cash-total),
+    user:currentUser,
+    date:new Date().toLocaleString()
+  };
+
+  sales.push(sale);
+
+  localStorage.setItem("eb_sales",JSON.stringify(sales));
+
+  saveCurrentTable();
+
+  alert("Bill saved successfully.");
+}
+
+/* =========================
+   PRINT
+========================= */
+
+function printBill(){
+
+  if(!currentBill.length){
+    alert("No items to print.");
+    return;
+  }
+
+  const subtotal=calcItems(currentBill);
+  const disc=getDiscount();
+  const total=Math.max(0,subtotal-disc);
+
+  const cash=Number(document.getElementById("cashAmount").value||0);
+  const change=Math.max(0,cash-total);
+
+  /* Mark table RED after print */
+  if(mode==="table" && selectedTable){
+
+    if(!tables[selectedTable]){
+      tables[selectedTable]={
+        items:JSON.parse(JSON.stringify(currentBill))
+      };
+    }
+
+    tables[selectedTable].printed=true;
+    tables[selectedTable].discount=disc;
+    tables[selectedTable].cash=cash;
+
+    localStorage.setItem("eb_tables",JSON.stringify(tables));
+    renderTables();
+  }
+
+  const html=`
+
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <title>EASY BILL LK</title>
+    <style>
+      body{
+        font-family:Arial;
+        width:80mm;
+        margin:auto;
+        font-size:12px;
+      }
+      h2{text-align:center;margin:5px}
+      .center{text-align:center}
+      hr{border:0;border-top:1px dashed #000}
+      table{width:100%;border-collapse:collapse}
+      td{padding:3px 0}
+      .right{text-align:right}
+      .total{
+        font-size:16px;
+        font-weight:bold;
+      }
+    </style>
+  </head>
+  <body>
+
+    <h2>EASY BILL LK</h2>
+    <div class="center">Restaurant POS</div>
+
+    <hr>
+
+    <div>Bill: B${String(billNumber).padStart(5,"0")}</div>
+    <div>KOT: KOT-${String(kotNumber).padStart(5,"0")}</div>
+    <div>${mode==="table"?"Table "+selectedTable:"TAKEAWAY"}</div>
+    <div>${new Date().toLocaleString()}</div>
+
+    <hr>
+
+    <table>
+      ${currentBill.map(x=>`
+        <tr>
+          <td>${escapeHtml(x.name)}</td>
+          <td>${x.qty}</td>
+          <td class="right">Rs. ${money(x.price*x.qty)}</td>
+        </tr>
+      `).join("")}
+    </table>
+
+    <hr>
+
+    <table>
+      <tr>
+        <td>Subtotal</td>
+        <td class="right">Rs. ${money(subtotal)}</td>
+      </tr>
+
+      <tr>
+        <td>Discount</td>
+        <td class="right">Rs. ${money(disc)}</td>
+      </tr>
+
+      <tr class="total">
+        <td>TOTAL</td>
+        <td class="right">Rs. ${money(total)}</td>
+      </tr>
+
+      <tr>
+        <td>Cash</td>
+        <td class="right">Rs. ${money(cash)}</td>
+      </tr>
+
+      <tr>
+        <td>Change</td>
+        <td class="right">Rs. ${money(change)}</td>
+      </tr>
+    </table>
+
+    <hr>
+
+    <div class="center">Thank You!</div>
+
+    <script>
+      window.onload=function(){
+        window.print();
+        setTimeout(function(){window.close()},500);
+      }
+    <\/script>
+
+  </body>
+  </html>
+  `;
+
+  const win=window.open("","_blank","width=420,height=700");
+
+  if(!win){
+    alert("Please allow popup for printing.");
+    return;
+  }
+
+  win.document.write(html);
+  win.document.close();
+
+  renderTables();
+}
+
+/* =========================
+   NUMERIC KEYPAD
+========================= */
+
+function key(v){
+
+  const input=document.getElementById(activeInput);
+
+  input.focus();
+
+  input.value+=v;
+
+  calculateChange();
+}
+
+document.getElementById("cashAmount")
+  .addEventListener("focus",()=>{
+    activeInput="cashAmount";
+  });
+
+document.getElementById("discountAmount")
+  .addEventListener("focus",()=>{
+    activeInput="discountAmount";
+  });
+
+function clearCash(){
+  document.getElementById(activeInput).value="";
+  updateBill();
+}
+
+/* =========================
+   ITEMS
+========================= */
+
+function addItem(){
+
+  const name=document.getElementById("itemName").value.trim();
+  const price=Number(document.getElementById("itemPrice").value);
+  const barcode=document.getElementById("itemBarcode").value.trim();
+
+  if(!name || !price){
+    alert("Enter item name and price.");
+    return;
+  }
+
+  items.push({
+    id:Date.now(),
+    name,
+    price,
+    barcode
+  });
+
+  saveItems();
+
+  document.getElementById("itemName").value="";
+  document.getElementById("itemPrice").value="";
+  document.getElementById("itemBarcode").value="";
+
+  renderItemTable();
+  renderProducts();
+}
+
+function deleteItem(id){
+
+  if(role!=="admin"){
+    alert("Admin only.");
+    return;
+  }
+
+  items=items.filter(x=>x.id!==id);
+
+  saveItems();
+  renderItemTable();
+  renderProducts();
+}
+
+function renderItemTable(){
+
+  const el=document.getElementById("itemTableBody");
+
+  el.innerHTML=items.map(x=>`
+
+    <tr>
+      <td>${escapeHtml(x.name)}</td>
+      <td>${x.barcode||"-"}</td>
+      <td>Rs. ${money(x.price)}</td>
+      <td>
+        ${role==="admin"
+          ? `<button class="danger"
+              onclick="deleteItem(${x.id})">Delete</button>`
+          : "Admin Only"}
+      </td>
+    </tr>
+
+  `).join("");
+}
+
+function saveItems(){
+  localStorage.setItem("eb_items",JSON.stringify(items));
+}
+
+function saveDiscount(){
+
+  if(role!=="admin"){
+    alert("Admin only.");
+    return;
+  }
+
+  const p=Number(document.getElementById("discountPercent").value||0);
+
+  if(p<0 || p>100){
+    alert("Enter 0 - 100%");
+    return;
+  }
+
+  localStorage.setItem("eb_default_discount",p);
+
+  alert("Default discount saved.");
+}
+
+/* =========================
+   REPORTS
+========================= */
+
+function renderReports(){
+
+  const el=document.getElementById("reportContent");
+
+  const totalSales=sales.reduce((a,x)=>a+x.total,0);
+  const count=sales.length;
+
+  el.innerHTML=`
+
+    <div style="
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:15px
+    ">
+
+      <div class="section">
+        <small>Total Bills</small>
+        <h2>${count}</h2>
+      </div>
+
+      <div class="section">
+        <small>Total Sales</small>
+        <h2>Rs. ${money(totalSales)}</h2>
+      </div>
+
+      <div class="section">
+        <small>Average Bill</small>
+        <h2>
+          Rs. ${money(count?totalSales/count:0)}
+        </h2>
+      </div>
+
+    </div>
+
+    <table class="itemTable">
+
+      <thead>
+        <tr>
+          <th>Bill</th>
+          <th>KOT</th>
+          <th>Type</th>
+          <th>Total</th>
+          <th>Cashier</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        ${sales.slice().reverse().map(x=>`
+
+          <tr>
+            <td>${x.bill}</td>
+            <td>${x.kot}</td>
+            <td>
+              ${x.type==="table"
+                ?"Table "+x.table
+                :"Takeaway"}
+            </td>
+            <td>Rs. ${money(x.total)}</td>
+            <td>${x.user}</td>
+            <td>${x.date}</td>
+          </tr>
+
+        `).join("")}
+
+      </tbody>
+
+    </table>
+  `;
+}
+
+/* =========================
+   HELPERS
+========================= */
+
+function money(n){
+  return Number(n||0).toLocaleString("en-LK",{
+    minimumFractionDigits:2,
+    maximumFractionDigits:2
+  });
+}
+
+function escapeHtml(str){
+
+  return String(str)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+/* =========================
+   START
+========================= */
+
+document.getElementById("billTime").textContent=
+  new Date().toLocaleDateString();
+
+renderProducts();
+renderTables();
+
+</script>
+
+</body>
+</html>
