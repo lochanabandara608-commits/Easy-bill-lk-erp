@@ -2807,3 +2807,3450 @@ textarea:focus{
 <div id="printArea"></div>
 
 <!-- Part 2 JavaScript will be placed below this line. -->
+<script>
+
+/* =========================================================
+   EASY BILL LK - PART 2
+   FIXED:
+   MENU / SUBMENU
+   TABLE BILL
+   CREDIT
+   CUSTOMERS
+   PURCHASING
+   ACCOUNTS
+   INVENTORY
+   REPORTS
+   ITEMS
+   PRINT
+========================================================= */
+
+/* ---------- SAFE STORAGE ---------- */
+
+function ebGet(key, fallback){
+    try{
+        const x = localStorage.getItem(key);
+        return x ? JSON.parse(x) : fallback;
+    }catch(e){
+        return fallback;
+    }
+}
+
+function ebSave(key,value){
+    localStorage.setItem(key,JSON.stringify(value));
+}
+
+
+/* ---------- MENU FIX ---------- */
+
+document.addEventListener("DOMContentLoaded",function(){
+
+    document.querySelectorAll(".menu-item").forEach(item=>{
+
+        item.addEventListener("click",function(e){
+
+            if(this.getAttribute("onclick") &&
+               this.getAttribute("onclick").includes("toggleSub")){
+                e.stopPropagation();
+            }
+
+        });
+
+    });
+
+});
+
+
+function toggleSub(el,id){
+
+    const sub=document.getElementById(id);
+
+    if(!sub)return;
+
+    const isOpen=sub.classList.contains("show");
+
+    document.querySelectorAll(".submenu").forEach(x=>{
+        x.classList.remove("show");
+    });
+
+    document.querySelectorAll(".menu-item").forEach(x=>{
+        x.classList.remove("open");
+    });
+
+    if(!isOpen){
+        sub.classList.add("show");
+        el.classList.add("open");
+    }
+}
+
+
+/* ---------- OPEN PAGE FIX ---------- */
+
+function showPage(id,title){
+
+    document.querySelectorAll(".page").forEach(p=>{
+        p.classList.remove("active");
+    });
+
+    const page=document.getElementById(id);
+
+    if(page){
+        page.classList.add("active");
+    }
+
+    const titleBox=document.getElementById("pageTitle");
+
+    if(titleBox){
+        titleBox.textContent=title || id;
+    }
+
+    if(window.innerWidth<=900){
+        document.getElementById("sidebar")
+        ?.classList.remove("mobile-open");
+    }
+
+    refreshPageData(id);
+}
+
+
+/* ---------- GENERIC OPEN ---------- */
+
+function go(id,title){
+    showPage(id,title);
+}
+
+
+/* =========================================================
+   CUSTOMERS
+========================================================= */
+
+let customers=ebGet("eb_customers",[]);
+
+function saveCustomers(){
+    ebSave("eb_customers",customers);
+}
+
+
+function addCustomer(){
+
+    const name=prompt("Customer Name:");
+
+    if(!name)return;
+
+    const phone=prompt("Phone Number:");
+
+    if(!phone)return;
+
+    const customer={
+        id:Date.now(),
+        name:name,
+        phone:phone,
+        credit:0
+    };
+
+    customers.push(customer);
+
+    saveCustomers();
+    renderCustomers();
+
+    alert("Customer added successfully.");
+}
+
+
+function renderCustomers(){
+
+    const page=document.getElementById("customers");
+
+    if(!page)return;
+
+    page.innerHTML=`
+
+    <div class="card">
+
+        <div style="
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        gap:10px;
+        flex-wrap:wrap">
+
+            <div>
+                <h2>Customers</h2>
+                <p>Customer database and outstanding balances.</p>
+            </div>
+
+            <button class="btn btn-blue"
+            onclick="addCustomer()">
+            ＋ Add Customer
+            </button>
+
+        </div>
+
+        <table class="table-list">
+
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>Outstanding</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                ${
+                    customers.length
+                    ?
+                    customers.map(c=>`
+
+                    <tr>
+
+                        <td>${escapeHTML(c.name)}</td>
+
+                        <td>${escapeHTML(c.phone)}</td>
+
+                        <td>
+                            Rs. ${(c.credit||0).toFixed(2)}
+                        </td>
+
+                        <td>
+
+                            <button class="btn btn-green"
+                            onclick="collectCredit(${c.id})">
+                            Collect
+                            </button>
+
+                        </td>
+
+                    </tr>
+
+                    `).join("")
+                    :
+                    `
+                    <tr>
+                        <td colspan="4"
+                        style="text-align:center;padding:30px">
+                        No customers added
+                        </td>
+                    </tr>
+                    `
+                }
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    `;
+}
+
+
+function collectCredit(id){
+
+    const c=customers.find(x=>x.id===id);
+
+    if(!c)return;
+
+    const amount=parseFloat(
+        prompt(
+            "Outstanding: Rs. "+
+            (c.credit||0).toFixed(2)+
+            "\n\nPayment amount:"
+        )
+    );
+
+    if(!amount || amount<=0)return;
+
+    c.credit=Math.max(
+        0,
+        (c.credit||0)-amount
+    );
+
+    saveCustomers();
+
+    renderCustomers();
+
+    alert("Payment recorded.");
+}
+
+
+/* =========================================================
+   CREDIT PAGE
+========================================================= */
+
+function renderCredit(){
+
+    const page=document.getElementById("credit");
+
+    if(!page)return;
+
+    const total=customers.reduce(
+        (s,c)=>s+(c.credit||0),
+        0
+    );
+
+    page.innerHTML=`
+
+    <div class="card">
+
+        <h2>Credit Management</h2>
+
+        <div class="stat"
+        style="margin:15px 0">
+
+            <small>Total Outstanding</small>
+
+            <h2>
+            Rs. ${total.toFixed(2)}
+            </h2>
+
+        </div>
+
+        <table class="table-list">
+
+            <thead>
+                <tr>
+                    <th>Customer</th>
+                    <th>Phone</th>
+                    <th>Outstanding</th>
+                    <th>Payment</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+            ${
+                customers
+                .filter(c=>(c.credit||0)>0)
+                .map(c=>`
+
+                <tr>
+
+                    <td>${escapeHTML(c.name)}</td>
+
+                    <td>${escapeHTML(c.phone)}</td>
+
+                    <td>
+                    Rs. ${(c.credit||0).toFixed(2)}
+                    </td>
+
+                    <td>
+
+                    <button
+                    class="btn btn-green"
+                    onclick="collectCredit(${c.id})">
+                    Collect
+                    </button>
+
+                    </td>
+
+                </tr>
+
+                `).join("")
+                ||
+                `
+                <tr>
+                <td colspan="4"
+                style="text-align:center;padding:30px">
+                No outstanding credit
+                </td>
+                </tr>
+                `
+            }
+
+            </tbody>
+
+        </table>
+
+    </div>
+    `;
+}
+
+
+/* =========================================================
+   ITEMS
+========================================================= */
+
+function addItemAdvanced(){
+
+    if(userRole!=="admin"){
+        alert("Only Admin can add items.");
+        return;
+    }
+
+    const name=prompt("Item name:");
+
+    if(!name)return;
+
+    const price=parseFloat(
+        prompt("Selling price:")
+    );
+
+    if(isNaN(price) || price<=0){
+        alert("Invalid price.");
+        return;
+    }
+
+    const cost=parseFloat(
+        prompt("Cost price:")
+    ) || 0;
+
+    const stock=parseInt(
+        prompt("Opening stock:","100")
+    ) || 0;
+
+    const category=prompt(
+        "Category:",
+        "Food"
+    ) || "Food";
+
+    const barcode=prompt(
+        "Barcode / SKU:",
+        String(Date.now())
+    );
+
+    products.push({
+
+        id:Date.now(),
+
+        name:name,
+
+        category:category,
+
+        price:price,
+
+        cost:cost,
+
+        stock:stock,
+
+        barcode:barcode
+
+    });
+
+    localStorage.setItem(
+        "eb_products",
+        JSON.stringify(products)
+    );
+
+    renderItems();
+    renderProducts();
+    updateDashboard();
+
+    alert("Item added.");
+}
+
+
+/* =========================================================
+   INVENTORY
+========================================================= */
+
+function renderInventory(){
+
+    const page=document.getElementById("inventory");
+
+    if(!page)return;
+
+    const value=products.reduce(
+        (s,p)=>s+(p.stock*p.price),
+        0
+    );
+
+    const low=products.filter(
+        p=>p.stock<=10
+    );
+
+    page.innerHTML=`
+
+    <div class="stats">
+
+        <div class="stat">
+            <small>Total Items</small>
+            <h2>${products.length}</h2>
+        </div>
+
+        <div class="stat">
+            <small>Stock Value</small>
+            <h2>Rs. ${value.toFixed(2)}</h2>
+        </div>
+
+        <div class="stat">
+            <small>Low Stock</small>
+            <h2>${low.length}</h2>
+        </div>
+
+        <div class="stat">
+            <small>Total Units</small>
+            <h2>
+            ${products.reduce((s,p)=>s+p.stock,0)}
+            </h2>
+        </div>
+
+    </div>
+
+    <div class="card">
+
+        <h2>Inventory</h2>
+
+        <table class="table-list">
+
+            <thead>
+
+                <tr>
+                    <th>Item</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Status</th>
+                    <th>Adjust</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+            ${products.map(p=>`
+
+                <tr>
+
+                    <td>${escapeHTML(p.name)}</td>
+
+                    <td>${escapeHTML(p.category)}</td>
+
+                    <td>Rs. ${p.price.toFixed(2)}</td>
+
+                    <td>${p.stock}</td>
+
+                    <td>
+                    ${
+                        p.stock<=10
+                        ?
+                        `<b style="color:red">
+                        LOW STOCK
+                        </b>`
+                        :
+                        `<b style="color:green">
+                        Available
+                        </b>`
+                    }
+                    </td>
+
+                    <td>
+
+                    <button
+                    class="btn btn-blue"
+                    onclick="adjustStock(${p.id})">
+                    Adjust
+                    </button>
+
+                    </td>
+
+                </tr>
+
+            `).join("")}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    `;
+}
+
+
+function adjustStock(id){
+
+    const p=products.find(x=>x.id===id);
+
+    if(!p)return;
+
+    const amount=parseInt(
+        prompt(
+            p.name+
+            "\nCurrent Stock: "+
+            p.stock+
+            "\n\nEnter adjustment:"
+        )
+    );
+
+    if(isNaN(amount))return;
+
+    p.stock=Math.max(
+        0,
+        p.stock+amount
+    );
+
+    localStorage.setItem(
+        "eb_products",
+        JSON.stringify(products)
+    );
+
+    renderInventory();
+    renderProducts();
+}
+
+
+/* =========================================================
+   PURCHASING
+========================================================= */
+
+let purchases=ebGet("eb_purchases",[]);
+
+function renderPurchases(){
+
+    const page=document.getElementById("purchases");
+
+    if(!page)return;
+
+    page.innerHTML=`
+
+    <div class="card">
+
+        <div style="
+        display:flex;
+        justify-content:space-between;
+        align-items:center">
+
+            <h2>Purchasing</h2>
+
+            <button
+            class="btn btn-blue"
+            onclick="addPurchase()">
+            ＋ New Purchase
+            </button>
+
+        </div>
+
+        <table class="table-list">
+
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Supplier</th>
+                    <th>Item</th>
+                    <th>Qty</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+            ${
+                purchases.length
+                ?
+                purchases.slice().reverse()
+                .map(p=>`
+
+                <tr>
+
+                    <td>${p.date}</td>
+                    <td>${escapeHTML(p.supplier)}</td>
+                    <td>${escapeHTML(p.item)}</td>
+                    <td>${p.qty}</td>
+                    <td>Rs. ${p.total.toFixed(2)}</td>
+
+                </tr>
+
+                `).join("")
+                :
+                `
+                <tr>
+                <td colspan="5"
+                style="text-align:center;padding:30px">
+                No purchases
+                </td>
+                </tr>
+                `
+            }
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    `;
+}
+
+
+function addPurchase(){
+
+    const itemName=prompt("Item name:");
+
+    if(!itemName)return;
+
+    const qty=parseInt(
+        prompt("Quantity:")
+    );
+
+    if(!qty || qty<=0)return;
+
+    const cost=parseFloat(
+        prompt("Cost per item:")
+    );
+
+    if(!cost || cost<=0)return;
+
+    const supplier=prompt(
+        "Supplier:",
+        "General Supplier"
+    ) || "General Supplier";
+
+    const purchase={
+
+        id:Date.now(),
+
+        date:new Date().toLocaleString(),
+
+        supplier:supplier,
+
+        item:itemName,
+
+        qty:qty,
+
+        cost:cost,
+
+        total:qty*cost
+
+    };
+
+    purchases.push(purchase);
+
+    ebSave("eb_purchases",purchases);
+
+    let p=products.find(
+        x=>x.name.toLowerCase()===itemName.toLowerCase()
+    );
+
+    if(p){
+
+        p.stock+=qty;
+
+    }else{
+
+        products.push({
+
+            id:Date.now()+1,
+
+            name:itemName,
+
+            category:"Other",
+
+            price:cost,
+
+            cost:cost,
+
+            stock:qty,
+
+            barcode:String(Date.now())
+
+        });
+
+    }
+
+    localStorage.setItem(
+        "eb_products",
+        JSON.stringify(products)
+    );
+
+    renderPurchases();
+    renderProducts();
+    updateDashboard();
+
+    alert("Purchase saved.");
+}
+
+
+function renderDailyPurchase(){
+
+    const page=document.getElementById("dailyPurchase");
+
+    if(!page)return;
+
+    const today=new Date().toDateString();
+
+    const list=purchases.filter(
+        p=>new Date(p.date).toDateString()===today
+    );
+
+    const total=list.reduce(
+        (s,p)=>s+p.total,
+        0
+    );
+
+    page.innerHTML=`
+
+    <div class="card">
+
+        <h2>Daily Purchasing</h2>
+
+        <h3>
+        Today: Rs. ${total.toFixed(2)}
+        </h3>
+
+        <table class="table-list">
+
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Supplier</th>
+                <th>Item</th>
+                <th>Qty</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+        ${
+            list.map(p=>`
+
+            <tr>
+                <td>${p.date}</td>
+                <td>${escapeHTML(p.supplier)}</td>
+                <td>${escapeHTML(p.item)}</td>
+                <td>${p.qty}</td>
+                <td>Rs. ${p.total.toFixed(2)}</td>
+            </tr>
+
+            `).join("")
+            ||
+            `
+            <tr>
+            <td colspan="5"
+            style="text-align:center;padding:30px">
+            No purchases today
+            </td>
+            </tr>
+            `
+        }
+
+        </tbody>
+
+        </table>
+
+    </div>
+
+    `;
+}
+
+
+/* =========================================================
+   SUPPLIERS
+========================================================= */
+
+let suppliers=ebGet("eb_suppliers",[]);
+
+function renderSuppliers(){
+
+    const page=document.getElementById("suppliers");
+
+    if(!page)return;
+
+    page.innerHTML=`
+
+    <div class="card">
+
+        <div style="
+        display:flex;
+        justify-content:space-between">
+
+            <h2>Suppliers</h2>
+
+            <button class="btn btn-blue"
+            onclick="addSupplier()">
+            ＋ Add Supplier
+            </button>
+
+        </div>
+
+        <table class="table-list">
+
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Address</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+        ${
+            suppliers.map(s=>`
+
+            <tr>
+                <td>${escapeHTML(s.name)}</td>
+                <td>${escapeHTML(s.phone)}</td>
+                <td>${escapeHTML(s.address)}</td>
+            </tr>
+
+            `).join("")
+            ||
+            `
+            <tr>
+            <td colspan="3"
+            style="text-align:center;padding:30px">
+            No suppliers
+            </td>
+            </tr>
+            `
+        }
+
+        </tbody>
+
+        </table>
+
+    </div>
+
+    `;
+}
+
+
+function addSupplier(){
+
+    const name=prompt("Supplier name:");
+
+    if(!name)return;
+
+    const phone=prompt("Phone:");
+
+    const address=prompt("Address:");
+
+    suppliers.push({
+
+        id:Date.now(),
+
+        name:name,
+
+        phone:phone||"",
+
+        address:address||""
+
+    });
+
+    ebSave("eb_suppliers",suppliers);
+
+    renderSuppliers();
+}
+
+
+/* =========================================================
+   ACCOUNTS
+========================================================= */
+
+let expenses=ebGet("eb_expenses",[]);
+let incomes=ebGet("eb_incomes",[]);
+
+function addExpense(){
+
+    const title=prompt("Expense:");
+
+    if(!title)return;
+
+    const amount=parseFloat(
+        prompt("Amount:")
+    );
+
+    if(!amount)return;
+
+    expenses.push({
+
+        id:Date.now(),
+
+        title:title,
+
+        amount:amount,
+
+        date:new Date().toISOString()
+
+    });
+
+    ebSave("eb_expenses",expenses);
+
+    renderExpenses();
+
+    alert("Expense saved.");
+}
+
+
+function renderExpenses(){
+
+    const page=document.getElementById("expenses");
+
+    if(!page)return;
+
+    const total=expenses.reduce(
+        (s,x)=>s+x.amount,
+        0
+    );
+
+    page.innerHTML=`
+
+    <div class="card">
+
+        <div style="
+        display:flex;
+        justify-content:space-between">
+
+            <h2>Expenses</h2>
+
+            <button
+            class="btn btn-red"
+            onclick="addExpense()">
+            ＋ Add Expense
+            </button>
+
+        </div>
+
+        <h3>
+        Total Expenses: Rs. ${total.toFixed(2)}
+        </h3>
+
+        <table class="table-list">
+
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+        ${expenses.slice().reverse()
+        .map(x=>`
+
+        <tr>
+            <td>${new Date(x.date).toLocaleString()}</td>
+            <td>${escapeHTML(x.title)}</td>
+            <td>Rs. ${x.amount.toFixed(2)}</td>
+        </tr>
+
+        `).join("")}
+
+        </tbody>
+
+        </table>
+
+    </div>
+
+    `;
+}
+
+
+function addIncome(){
+
+    const title=prompt("Income description:");
+
+    if(!title)return;
+
+    const amount=parseFloat(
+        prompt("Amount:")
+    );
+
+    if(!amount)return;
+
+    incomes.push({
+
+        id:Date.now(),
+
+        title:title,
+
+        amount:amount,
+
+        date:new Date().toISOString()
+
+    });
+
+    ebSave("eb_incomes",incomes);
+
+    renderIncome();
+
+    alert("Income saved.");
+}
+
+
+function renderIncome(){
+
+    const page=document.getElementById("income");
+
+    if(!page)return;
+
+    const total=incomes.reduce(
+        (s,x)=>s+x.amount,
+        0
+    );
+
+    page.innerHTML=`
+
+    <div class="card">
+
+        <div style="
+        display:flex;
+        justify-content:space-between">
+
+            <h2>Income</h2>
+
+            <button
+            class="btn btn-green"
+            onclick="addIncome()">
+            ＋ Add Income
+            </button>
+
+        </div>
+
+        <h3>
+        Total Income: Rs. ${total.toFixed(2)}
+        </h3>
+
+        <table class="table-list">
+
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+        ${incomes.slice().reverse()
+        .map(x=>`
+
+        <tr>
+            <td>${new Date(x.date).toLocaleString()}</td>
+            <td>${escapeHTML(x.title)}</td>
+            <td>Rs. ${x.amount.toFixed(2)}</td>
+        </tr>
+
+        `).join("")}
+
+        </tbody>
+
+        </table>
+
+    </div>
+
+    `;
+}
+
+
+/* =========================================================
+   CASH BOOK
+========================================================= */
+
+function renderCashbook(){
+
+    const page=document.getElementById("cashbook");
+
+    if(!page)return;
+
+    const salesTotal=sales.reduce(
+        (s,x)=>s+x.total,
+        0
+    );
+
+    const expenseTotal=expenses.reduce(
+        (s,x)=>s+x.amount,
+        0
+    );
+
+    const incomeTotal=incomes.reduce(
+        (s,x)=>s+x.amount,
+        0
+    );
+
+    const balance=
+        salesTotal+
+        incomeTotal-
+        expenseTotal;
+
+    page.innerHTML=`
+
+    <div class="stats">
+
+        <div class="stat">
+            <small>Sales</small>
+            <h2>Rs. ${salesTotal.toFixed(2)}</h2>
+        </div>
+
+        <div class="stat">
+            <small>Income</small>
+            <h2>Rs. ${incomeTotal.toFixed(2)}</h2>
+        </div>
+
+        <div class="stat">
+            <small>Expenses</small>
+            <h2>Rs. ${expenseTotal.toFixed(2)}</h2>
+        </div>
+
+        <div class="stat">
+            <small>Balance</small>
+            <h2>Rs. ${balance.toFixed(2)}</h2>
+        </div>
+
+    </div>
+
+    <div class="card">
+
+        <h2>Cash Book</h2>
+
+        <table class="table-list">
+
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Type</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+        ${sales.slice().reverse().map(s=>`
+
+            <tr>
+                <td>${new Date(s.date).toLocaleString()}</td>
+                <td>${s.bill}</td>
+                <td>SALE</td>
+                <td>Rs. ${s.total.toFixed(2)}</td>
+            </tr>
+
+        `).join("")}
+
+        ${expenses.slice().reverse().map(e=>`
+
+            <tr>
+                <td>${new Date(e.date).toLocaleString()}</td>
+                <td>${escapeHTML(e.title)}</td>
+                <td>EXPENSE</td>
+                <td>Rs. ${e.amount.toFixed(2)}</td>
+            </tr>
+
+        `).join("")}
+
+        </tbody>
+
+        </table>
+
+    </div>
+
+    `;
+}
+
+
+/* =========================================================
+   PROFIT
+========================================================= */
+
+function calculateProfit(){
+
+    let revenue=sales.reduce(
+        (s,sale)=>s+sale.total,
+        0
+    );
+
+    let cost=0;
+
+    sales.forEach(sale=>{
+
+        sale.items.forEach(item=>{
+
+            const p=products.find(
+                x=>x.id===item.id
+            );
+
+            const cp=p ? (p.cost||0) : 0;
+
+            cost+=cp*item.qty;
+
+        });
+
+    });
+
+    const gross=revenue-cost;
+
+    const exp=expenses.reduce(
+        (s,e)=>s+e.amount,
+        0
+    );
+
+    return {
+
+        revenue:revenue,
+
+        cost:cost,
+
+        gross:gross,
+
+        expenses:exp,
+
+        net:gross-exp
+
+    };
+}
+
+
+function renderProfit(){
+
+    const page=document.getElementById("profit");
+
+    if(!page)return;
+
+    const p=calculateProfit();
+
+    page.innerHTML=`
+
+    <div class="stats">
+
+        <div class="stat">
+            <small>Revenue</small>
+            <h2>Rs. ${p.revenue.toFixed(2)}</h2>
+        </div>
+
+        <div class="stat">
+            <small>Cost</small>
+            <h2>Rs. ${p.cost.toFixed(2)}</h2>
+        </div>
+
+        <div class="stat">
+            <small>Gross Profit</small>
+            <h2>Rs. ${p.gross.toFixed(2)}</h2>
+        </div>
+
+        <div class="stat">
+            <small>Net Profit</small>
+            <h2>Rs. ${p.net.toFixed(2)}</h2>
+        </div>
+
+    </div>
+
+    `;
+}
+
+
+/* =========================================================
+   REPORTS
+========================================================= */
+
+function renderStockReport(){
+
+    const page=document.getElementById("stockReport");
+
+    if(!page)return;
+
+    page.innerHTML=`
+
+    <div class="card">
+
+        <h2>Stock Report</h2>
+
+        <table class="table-list">
+
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Category</th>
+                <th>Stock</th>
+                <th>Value</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+        ${products.map(p=>`
+
+            <tr>
+
+                <td>${escapeHTML(p.name)}</td>
+
+                <td>${escapeHTML(p.category)}</td>
+
+                <td>${p.stock}</td>
+
+                <td>
+                Rs. ${(p.stock*p.price).toFixed(2)}
+                </td>
+
+                <td>
+                ${
+                    p.stock<=10
+                    ?
+                    `<b style="color:red">LOW</b>`
+                    :
+                    `<b style="color:green">OK</b>`
+                }
+                </td>
+
+            </tr>
+
+        `).join("")}
+
+        </tbody>
+
+        </table>
+
+    </div>
+
+    `;
+}
+
+
+function renderProfitReport(){
+
+    const page=document.getElementById("profitReport");
+
+    if(!page)return;
+
+    const p=calculateProfit();
+
+    page.innerHTML=`
+
+    <div class="card">
+
+        <h2>Profit Report</h2>
+
+        <table class="table-list">
+
+        <tbody>
+
+            <tr>
+                <th>Total Revenue</th>
+                <td>Rs. ${p.revenue.toFixed(2)}</td>
+            </tr>
+
+            <tr>
+                <th>Cost of Goods</th>
+                <td>Rs. ${p.cost.toFixed(2)}</td>
+            </tr>
+
+            <tr>
+                <th>Gross Profit</th>
+                <td>Rs. ${p.gross.toFixed(2)}</td>
+            </tr>
+
+            <tr>
+                <th>Expenses</th>
+                <td>Rs. ${p.expenses.toFixed(2)}</td>
+            </tr>
+
+            <tr>
+                <th>Net Profit</th>
+                <td>
+                <b>Rs. ${p.net.toFixed(2)}</b>
+                </td>
+            </tr>
+
+        </tbody>
+
+        </table>
+
+    </div>
+
+    `;
+}
+
+
+/* =========================================================
+   DAILY SALES FIX
+========================================================= */
+
+function renderDailySalesReport(){
+
+    const page=document.getElementById("dailyReport");
+
+    if(!page)return;
+
+    const today=new Date().toDateString();
+
+    const list=sales.filter(
+        s=>new Date(s.date).toDateString()===today
+    );
+
+    const total=list.reduce(
+        (s,x)=>s+x.total,
+        0
+    );
+
+    const itemMap={};
+
+    list.forEach(s=>{
+
+        s.items.forEach(i=>{
+
+            if(!itemMap[i.name]){
+
+                itemMap[i.name]={
+                    qty:0,
+                    total:0
+                };
+
+            }
+
+            itemMap[i.name].qty+=i.qty;
+
+            itemMap[i.name].total+=
+                i.qty*i.price;
+
+        });
+
+    });
+
+    page.innerHTML=`
+
+    <div class="stats">
+
+        <div class="stat">
+            <small>Today's Bills</small>
+            <h2>${list.length}</h2>
+        </div>
+
+        <div class="stat">
+            <small>Today's Sales</small>
+            <h2>Rs. ${total.toFixed(2)}</h2>
+        </div>
+
+    </div>
+
+    <div class="card">
+
+        <h2>Daily Item Sales</h2>
+
+        <table class="table-list">
+
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Qty</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+        ${Object.keys(itemMap).map(name=>`
+
+            <tr>
+
+                <td>${escapeHTML(name)}</td>
+
+                <td>${itemMap[name].qty}</td>
+
+                <td>
+                Rs. ${itemMap[name].total.toFixed(2)}
+                </td>
+
+            </tr>
+
+        `).join("")
+        ||
+        `
+        <tr>
+        <td colspan="3"
+        style="text-align:center;padding:30px">
+        No sales today
+        </td>
+        </tr>
+        `}
+
+        </tbody>
+
+        </table>
+
+    </div>
+
+    `;
+}
+
+
+/* =========================================================
+   TABLE BILL FIX
+========================================================= */
+
+function selectTableForBilling(id){
+
+    const table=tables.find(
+        t=>t.id===id
+    );
+
+    if(!table)return;
+
+    selectedTable=id;
+
+    orderType="Table";
+
+    cart=JSON.parse(
+        JSON.stringify(table.items||[])
+    );
+
+    document.getElementById(
+        "takeawayBtn"
+    )?.classList.remove("active");
+
+    document.getElementById(
+        "tableBtn"
+    )?.classList.add("active");
+
+    const txt=
+        document.getElementById(
+            "selectedTableText"
+        );
+
+    if(txt){
+        txt.textContent=
+            table.name+" selected";
+    }
+
+    openPage("billing");
+
+    renderCart();
+}
+
+
+function renderTableSelector(){
+
+    const free=tables.filter(
+        t=>!t.occupied
+    );
+
+    let text="Select table:\n\n";
+
+    tables.forEach(t=>{
+
+        text+=
+            t.id+
+            " - "+
+            t.name+
+            (t.occupied
+                ?" [OCCUPIED]"
+                :" [FREE]"
+            )+
+            "\n";
+
+    });
+
+    const n=parseInt(
+        prompt(text)
+    );
+
+    if(isNaN(n))return;
+
+    const table=tables.find(
+        t=>t.id===n
+    );
+
+    if(!table){
+
+        alert("Table not found.");
+
+        return;
+    }
+
+    selectTableForBilling(n);
+}
+
+
+/* Override table selector */
+function openTableSelector(){
+
+    renderTableSelector();
+
+}
+
+
+/* =========================================================
+   SAVE CURRENT TABLE
+========================================================= */
+
+function saveCurrentTable(){
+
+    if(orderType!=="Table" ||
+       selectedTable===null){
+        return;
+    }
+
+    const table=tables.find(
+        t=>t.id===selectedTable
+    );
+
+    if(!table)return;
+
+    table.items=
+        JSON.parse(JSON.stringify(cart));
+
+    table.total=
+        cart.reduce(
+            (s,i)=>s+(i.price*i.qty),
+            0
+        );
+
+    table.occupied=
+        cart.length>0;
+
+    ebSave(
+        "eb_tables",
+        tables
+    );
+
+    renderTables();
+}
+
+
+/* =========================================================
+   CREDIT BILL
+========================================================= */
+
+function selectCreditCustomer(){
+
+    if(!customers.length){
+
+        alert(
+            "Please add a customer first."
+        );
+
+        return false;
+    }
+
+    let list=customers.map(
+        c=>
+        c.id+
+        " - "+
+        c.name+
+        " - "+
+        c.phone
+    ).join("\n");
+
+    const id=parseInt(
+        prompt(
+            "Select Customer:\n\n"+
+            list
+        )
+    );
+
+    if(isNaN(id))return false;
+
+    const c=customers.find(
+        x=>x.id===id
+    );
+
+    if(!c){
+
+        alert("Customer not found.");
+
+        return false;
+    }
+
+    selectedCreditCustomer=c.id;
+
+    return true;
+}
+
+
+let selectedCreditCustomer=null;
+
+
+/* Override payment */
+function setPayment(method,button){
+
+    paymentMethod=method;
+
+    document.querySelectorAll(
+        ".pay-btn"
+    ).forEach(b=>{
+        b.classList.remove("active");
+    });
+
+    if(button){
+        button.classList.add("active");
+    }
+
+    if(method==="Credit"){
+
+        const ok=selectCreditCustomer();
+
+        if(!ok){
+
+            paymentMethod="Cash";
+
+            document.querySelectorAll(
+                ".pay-btn"
+            ).forEach((b,i)=>{
+                b.classList.toggle(
+                    "active",
+                    i===0
+                );
+            });
+
+            return;
+        }
+
+    }
+
+    if(method!=="Cash"){
+
+        const cash=document.getElementById(
+            "cashAmount"
+        );
+
+        if(cash)cash.value="";
+
+        const change=document.getElementById(
+            "change"
+        );
+
+        if(change)
+            change.textContent="Rs. 0.00";
+
+    }
+
+}
+
+
+/* =========================================================
+   SETTLE OVERRIDE
+========================================================= */
+
+function settleBill(){
+
+    if(!cart.length){
+
+        alert("Please add items first.");
+
+        return;
+    }
+
+    const total=getGrandTotal();
+
+    if(paymentMethod==="Cash"){
+
+        const cash=parseFloat(
+            document.getElementById(
+                "cashAmount"
+            )?.value
+        )||0;
+
+        if(cash<total){
+
+            alert(
+                "Insufficient cash.\n\n"+
+                "Required: Rs. "+
+                total.toFixed(2)
+            );
+
+            return;
+        }
+
+    }
+
+
+    if(paymentMethod==="Credit" &&
+       !selectedCreditCustomer){
+
+        if(!selectCreditCustomer()){
+            return;
+        }
+
+    }
+
+
+    const bill=generateBillNo();
+
+    const sale={
+
+        bill:bill,
+
+        date:new Date().toISOString(),
+
+        type:orderType,
+
+        table:selectedTable,
+
+        customer:
+            selectedCreditCustomer,
+
+        items:
+            JSON.parse(JSON.stringify(cart)),
+
+        total:total,
+
+        payment:paymentMethod,
+
+        cashier:currentUser
+
+    };
+
+
+    sales.push(sale);
+
+    ebSave(
+        "eb_sales",
+        sales
+    );
+
+
+    /* STOCK */
+
+    cart.forEach(item=>{
+
+        const p=products.find(
+            x=>x.id===item.id
+        );
+
+        if(p){
+
+            p.stock=Math.max(
+                0,
+                p.stock-item.qty
+            );
+
+        }
+
+    });
+
+    localStorage.setItem(
+        "eb_products",
+        JSON.stringify(products)
+    );
+
+
+    /* CREDIT */
+
+    if(paymentMethod==="Credit"){
+
+        const customer=
+            customers.find(
+                c=>c.id===selectedCreditCustomer
+            );
+
+        if(customer){
+
+            customer.credit=
+                (customer.credit||0)+total;
+
+            saveCustomers();
+
+        }
+
+    }
+
+
+    /* CLEAR TABLE */
+
+    if(orderType==="Table" &&
+       selectedTable!==null){
+
+        const table=tables.find(
+            t=>t.id===selectedTable
+        );
+
+        if(table){
+
+            table.items=[];
+            table.total=0;
+            table.occupied=false;
+
+        }
+
+        ebSave(
+            "eb_tables",
+            tables
+        );
+
+    }
+
+
+    alert(
+        "Bill Settled Successfully!\n\n"+
+        bill+
+        "\nRs. "+
+        total.toFixed(2)
+    );
+
+
+    printBill();
+
+
+    cart=[];
+
+    selectedTable=null;
+
+    selectedCreditCustomer=null;
+
+    orderType="Takeaway";
+
+    paymentMethod="Cash";
+
+
+    billCounter++;
+
+    saveCounter();
+
+
+    const billBox=
+        document.getElementById("billNo");
+
+    if(billBox){
+
+        billBox.textContent=
+            generateBillNo();
+
+        billBox.style.color="red";
+
+    }
+
+
+    const discount=
+        document.getElementById("discount");
+
+    if(discount)
+        discount.value=0;
+
+
+    const cash=
+        document.getElementById("cashAmount");
+
+    if(cash)
+        cash.value="";
+
+
+    const tableText=
+        document.getElementById(
+            "selectedTableText"
+        );
+
+    if(tableText)
+        tableText.textContent=
+            "Takeaway Order";
+
+
+    document.getElementById(
+        "takeawayBtn"
+    )?.classList.add("active");
+
+    document.getElementById(
+        "tableBtn"
+    )?.classList.remove("active");
+
+
+    document.querySelectorAll(
+        ".pay-btn"
+    ).forEach((b,i)=>{
+        b.classList.toggle(
+            "active",
+            i===0
+        );
+    });
+
+
+    renderCart();
+
+    renderProducts();
+
+    renderTables();
+
+    updateDashboard();
+
+}
+
+
+/* =========================================================
+   SALES HISTORY
+========================================================= */
+
+function renderSalesHistory(){
+
+    const page=document.getElementById("sales");
+
+    if(!page)return;
+
+    page.innerHTML=`
+
+    <div class="card">
+
+        <h2>Sales History</h2>
+
+        <table class="table-list">
+
+        <thead>
+
+            <tr>
+                <th>Bill</th>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Payment</th>
+                <th>Total</th>
+                <th>Print</th>
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+        ${
+            sales.slice().reverse()
+            .map((s,i)=>`
+
+            <tr>
+
+                <td>${s.bill}</td>
+
+                <td>
+                ${new Date(s.date)
+                .toLocaleString()}
+                </td>
+
+                <td>
+                ${s.type}
+                ${s.table
+                    ?" / Table "+s.table
+                    :""}
+                </td>
+
+                <td>${s.payment}</td>
+
+                <td>
+                Rs. ${s.total.toFixed(2)}
+                </td>
+
+                <td>
+
+                <button
+                class="btn btn-blue"
+                onclick="printSavedBill(${sales.length-1-i})">
+                🖨 Print
+                </button>
+
+                </td>
+
+            </tr>
+
+            `).join("")
+            ||
+            `
+            <tr>
+            <td colspan="6"
+            style="text-align:center;padding:30px">
+            No sales
+            </td>
+            </tr>
+            `
+        }
+
+        </tbody>
+
+        </table>
+
+    </div>
+
+    `;
+}
+
+
+function printSavedBill(index){
+
+    const sale=sales[index];
+
+    if(!sale)return;
+
+    const oldCart=cart;
+    const oldType=orderType;
+    const oldTable=selectedTable;
+    const oldPayment=paymentMethod;
+
+    cart=JSON.parse(
+        JSON.stringify(sale.items)
+    );
+
+    orderType=sale.type;
+
+    selectedTable=sale.table;
+
+    paymentMethod=sale.payment;
+
+    printBill();
+
+    cart=oldCart;
+    orderType=oldType;
+    selectedTable=oldTable;
+    paymentMethod=oldPayment;
+
+}
+
+
+/* =========================================================
+   TABLE PAGE
+========================================================= */
+
+function renderTables(){
+
+    const grid=
+        document.getElementById(
+            "tablesGrid"
+        );
+
+    if(!grid)return;
+
+    grid.innerHTML=
+        tables.map(t=>`
+
+        <div class="table-box
+        ${t.occupied?"occupied":""}"
+        onclick="openTable(${t.id})">
+
+            <div class="table-name">
+            🪑 ${t.name}
+            </div>
+
+            <div class="table-status">
+
+            ${
+                t.occupied
+                ?
+                "🔴 Occupied"
+                :
+                "🟢 Available"
+            }
+
+            </div>
+
+            <div class="table-total">
+
+            ${
+                t.occupied
+                ?
+                "Rs. "+t.total.toFixed(2)
+                :
+                "Empty"
+            }
+
+            </div>
+
+        </div>
+
+        `).join("");
+
+    const dash=
+        document.getElementById(
+            "dashTables"
+        );
+
+    if(dash){
+
+        dash.textContent=
+            tables.filter(
+                t=>t.occupied
+            ).length;
+
+    }
+
+}
+
+
+/* =========================================================
+   TABLE DETAIL
+========================================================= */
+
+function openTable(id){
+
+    const table=tables.find(
+        t=>t.id===id
+    );
+
+    if(!table)return;
+
+    selectedTable=id;
+
+    const card=
+        document.getElementById(
+            "tableDetailCard"
+        );
+
+    if(!card)return;
+
+    card.style.display="block";
+
+    document.getElementById(
+        "detailTitle"
+    ).textContent=
+        table.name+" - Current Items";
+
+
+    const body=
+        document.getElementById(
+            "tableDetailItems"
+        );
+
+    body.innerHTML=
+        table.items.length
+        ?
+        table.items.map(i=>`
+
+        <tr>
+
+            <td>${escapeHTML(i.name)}</td>
+
+            <td>${i.qty}</td>
+
+            <td>
+            Rs. ${i.price.toFixed(2)}
+            </td>
+
+            <td>
+            Rs. ${(i.price*i.qty).toFixed(2)}
+            </td>
+
+        </tr>
+
+        `).join("")
+        :
+        `
+        <tr>
+        <td colspan="4"
+        style="text-align:center;padding:25px">
+        No items
+        </td>
+        </tr>
+        `;
+
+
+    document.getElementById(
+        "tableDetailTotal"
+    ).textContent=
+        "Rs. "+
+        table.total.toFixed(2);
+
+
+    card.scrollIntoView({
+        behavior:"smooth"
+    });
+
+}
+
+
+/* =========================================================
+   SUPPLIER / ACCOUNT / REPORT PAGE ROUTER
+========================================================= */
+
+function refreshPageData(id){
+
+    switch(id){
+
+        case "items":
+            renderItems();
+            break;
+
+        case "inventory":
+            renderInventory();
+            break;
+
+        case "customers":
+            renderCustomers();
+            break;
+
+        case "credit":
+            renderCredit();
+            break;
+
+        case "purchases":
+            renderPurchases();
+            break;
+
+        case "dailyPurchase":
+            renderDailyPurchase();
+            break;
+
+        case "suppliers":
+            renderSuppliers();
+            break;
+
+        case "expenses":
+            renderExpenses();
+            break;
+
+        case "income":
+            renderIncome();
+            break;
+
+        case "cashbook":
+            renderCashbook();
+            break;
+
+        case "profit":
+            renderProfit();
+            break;
+
+        case "stockReport":
+            renderStockReport();
+            break;
+
+        case "profitReport":
+            renderProfitReport();
+            break;
+
+        case "dailyReport":
+            renderDailySalesReport();
+            break;
+
+        case "sales":
+            renderSalesHistory();
+            break;
+
+    }
+
+}
+
+
+/* =========================================================
+   SETTINGS
+========================================================= */
+
+function renderSettings(){
+
+    const page=document.getElementById("settings");
+
+    if(!page)return;
+
+    page.innerHTML=`
+
+    <div class="card">
+
+        <h2>General Settings</h2>
+
+        <div style="
+        display:grid;
+        grid-template-columns:
+        repeat(auto-fit,minmax(250px,1fr));
+        gap:12px">
+
+            <div>
+                <label>Business Name</label>
+                <input id="setBusiness"
+                value="EASY BILL LK">
+            </div>
+
+            <div>
+                <label>Phone</label>
+                <input id="setPhone"
+                placeholder="Business phone">
+            </div>
+
+            <div>
+                <label>Address</label>
+                <input id="setAddress"
+                placeholder="Business address">
+            </div>
+
+            <div>
+                <label>Currency</label>
+                <input value="LKR" disabled>
+            </div>
+
+            <div>
+                <label>Receipt Width</label>
+                <select>
+                    <option>80mm</option>
+                    <option>58mm</option>
+                </select>
+            </div>
+
+            <div>
+                <label>Tax</label>
+                <input type="number"
+                placeholder="0">
+            </div>
+
+        </div>
+
+        <button
+        class="btn btn-blue"
+        style="margin-top:15px"
+        onclick="saveSettings()">
+        Save Settings
+        </button>
+
+    </div>
+
+    `;
+}
+
+
+function saveSettings(){
+
+    ebSave(
+        "eb_settings",
+        {
+            business:
+                document.getElementById(
+                    "setBusiness"
+                ).value,
+
+            phone:
+                document.getElementById(
+                    "setPhone"
+                ).value,
+
+            address:
+                document.getElementById(
+                    "setAddress"
+                ).value
+        }
+    );
+
+    alert("Settings saved.");
+}
+
+
+/* =========================================================
+   CONFIGURATION - 20 FIELDS
+========================================================= */
+
+function renderConfigs(){
+
+    const page=document.getElementById("configs");
+
+    if(!page)return;
+
+    const fields=[
+
+        "Business Name",
+        "Business Phone",
+        "Business Address",
+        "Email",
+        "Tax Number",
+        "Invoice Prefix",
+        "Starting Invoice Number",
+        "Default Customer",
+        "Default Payment",
+        "Default Order Type",
+        "Low Stock Limit",
+        "Receipt Header",
+        "Receipt Footer",
+        "Printer Name",
+        "Printer Width",
+        "Currency",
+        "Decimal Places",
+        "Discount Permission",
+        "Credit Permission",
+        "Auto Print"
+
+    ];
+
+    page.innerHTML=`
+
+    <div class="card">
+
+        <h2>Configurations</h2>
+
+        <div style="
+        display:grid;
+        grid-template-columns:
+        repeat(auto-fit,minmax(240px,1fr));
+        gap:12px">
+
+        ${
+            fields.map((f,i)=>`
+
+            <div>
+
+                <label>
+                ${f}
+                </label>
+
+                <input
+                id="config_${i}"
+                placeholder="${f}">
+
+            </div>
+
+            `).join("")
+        }
+
+        </div>
+
+        <button
+        class="btn btn-blue"
+        style="margin-top:15px"
+        onclick="saveConfigs()">
+        Save Configurations
+        </button>
+
+    </div>
+
+    `;
+}
+
+
+function saveConfigs(){
+
+    const data={};
+
+    for(let i=0;i<20;i++){
+
+        data[i]=
+            document.getElementById(
+                "config_"+i
+            )?.value || "";
+
+    }
+
+    ebSave(
+        "eb_configs",
+        data
+    );
+
+    alert("Configurations saved.");
+}
+
+
+/* =========================================================
+   HTML ESCAPE
+========================================================= */
+
+function escapeHTML(value){
+
+    return String(value??"")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+
+}
+
+
+/* =========================================================
+   FIX EXISTING ADD ITEM BUTTON
+========================================================= */
+
+const oldAddItem=window.addItem;
+
+window.addItem=function(){
+
+    addItemAdvanced();
+
+};
+
+
+/* =========================================================
+   PATCH OPEN PAGE
+========================================================= */
+
+const originalOpenPage=window.openPage;
+
+window.openPage=function(id,el=null){
+
+    document.querySelectorAll(".page")
+    .forEach(p=>{
+        p.classList.remove("active");
+    });
+
+    const page=document.getElementById(id);
+
+    if(page){
+        page.classList.add("active");
+    }
+
+    const names={
+
+        dashboard:"Dashboard",
+
+        billing:"Billing / POS",
+
+        tables:"Restaurant Tables",
+
+        sales:"Sales History",
+
+        returns:"Returns / Refunds",
+
+        items:"Items",
+
+        categories:"Categories",
+
+        inventory:"Inventory",
+
+        expiry:"Expiry Management",
+
+        purchases:"Purchasing",
+
+        dailyPurchase:"Daily Purchasing",
+
+        suppliers:"Suppliers",
+
+        customers:"Customers",
+
+        credit:"Credit Management",
+
+        statements:"Customer Statements",
+
+        cashbook:"Cash Book",
+
+        expenses:"Expenses",
+
+        income:"Income",
+
+        profit:"Profit & Loss",
+
+        employees:"Employees",
+
+        attendance:"Attendance",
+
+        salary:"Salary",
+
+        commission:"Commission",
+
+        dailyReport:"Daily Sales Report",
+
+        stockReport:"Stock Report",
+
+        profitReport:"Profit Report",
+
+        settings:"General Settings",
+
+        users:"Users / Accounts",
+
+        configs:"Configurations"
+
+    };
+
+    document.getElementById(
+        "pageTitle"
+    ).textContent=
+        names[id] || id;
+
+
+    refreshPageData(id);
+
+
+    if(id==="billing"){
+
+        renderProducts();
+        renderCart();
+
+    }
+
+    if(id==="tables"){
+
+        renderTables();
+
+    }
+
+
+    if(el){
+
+        document.querySelectorAll(
+            ".menu-item"
+        ).forEach(x=>{
+            x.classList.remove("active");
+        });
+
+        el.classList.add("active");
+
+    }
+
+
+    if(window.innerWidth<=900){
+
+        document.getElementById(
+            "sidebar"
+        )?.classList.remove(
+            "mobile-open"
+        );
+
+    }
+
+};
+
+
+/* =========================================================
+   PATCH CATEGORY PAGE
+========================================================= */
+
+function renderCategoryPage(){
+
+    const page=
+        document.getElementById(
+            "categories"
+        );
+
+    if(!page)return;
+
+    page.innerHTML=`
+
+    <div class="card">
+
+        <h2>Categories</h2>
+
+        <button
+        class="btn btn-blue"
+        onclick="addCategory()">
+        ＋ Add Category
+        </button>
+
+        <div style="
+        display:grid;
+        grid-template-columns:
+        repeat(auto-fit,minmax(160px,1fr));
+        gap:10px;
+        margin-top:15px">
+
+        ${
+            categories.map(c=>`
+
+            <div class="stat">
+
+                <b>${escapeHTML(c)}</b>
+
+                <div style="
+                margin-top:8px;
+                color:#6b7280">
+
+                ${
+                    products.filter(
+                        p=>p.category===c
+                    ).length
+                }
+                items
+
+                </div>
+
+            </div>
+
+            `).join("")
+        }
+
+        </div>
+
+    </div>
+
+    `;
+}
+
+
+function addCategory(){
+
+    const name=prompt(
+        "Category name:"
+    );
+
+    if(!name)return;
+
+    if(!categories.includes(name)){
+
+        categories.push(name);
+
+        ebSave(
+            "eb_categories",
+            categories
+        );
+
+    }
+
+    renderCategoryPage();
+    renderProducts();
+
+}
+
+
+/* =========================================================
+   EMPLOYEES
+========================================================= */
+
+let employees=ebGet(
+    "eb_employees",
+    []
+);
+
+function renderEmployees(){
+
+    const page=
+        document.getElementById(
+            "employees"
+        );
+
+    if(!page)return;
+
+    page.innerHTML=`
+
+    <div class="card">
+
+        <div style="
+        display:flex;
+        justify-content:space-between">
+
+            <h2>Employees</h2>
+
+            <button
+            class="btn btn-blue"
+            onclick="addEmployee()">
+            ＋ Add Employee
+            </button>
+
+        </div>
+
+        <table class="table-list">
+
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Role</th>
+                <th>Salary</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+        ${
+            employees.map(e=>`
+
+            <tr>
+
+                <td>${escapeHTML(e.name)}</td>
+
+                <td>${escapeHTML(e.phone)}</td>
+
+                <td>${escapeHTML(e.role)}</td>
+
+                <td>
+                Rs. ${e.salary.toFixed(2)}
+                </td>
+
+            </tr>
+
+            `).join("")
+            ||
+            `
+            <tr>
+            <td colspan="4"
+            style="text-align:center;padding:30px">
+            No employees
+            </td>
+            </tr>
+            `
+        }
+
+        </tbody>
+
+        </table>
+
+    </div>
+
+    `;
+}
+
+
+function addEmployee(){
+
+    const name=prompt(
+        "Employee name:"
+    );
+
+    if(!name)return;
+
+    const phone=prompt(
+        "Phone:"
+    )||"";
+
+    const role=prompt(
+        "Role:",
+        "Cashier"
+    )||"Cashier";
+
+    const salary=parseFloat(
+        prompt(
+            "Salary:",
+            "0"
+        )
+    )||0;
+
+    employees.push({
+
+        id:Date.now(),
+
+        name:name,
+
+        phone:phone,
+
+        role:role,
+
+        salary:salary
+
+    });
+
+    ebSave(
+        "eb_employees",
+        employees
+    );
+
+    renderEmployees();
+
+}
+
+
+/* =========================================================
+   ATTENDANCE
+========================================================= */
+
+let attendance=ebGet(
+    "eb_attendance",
+    []
+);
+
+function renderAttendance(){
+
+    const page=
+        document.getElementById(
+            "attendance"
+        );
+
+    if(!page)return;
+
+    page.innerHTML=`
+
+    <div class="card">
+
+        <h2>Attendance</h2>
+
+        <button
+        class="btn btn-green"
+        onclick="markAttendance()">
+        ✓ Mark Attendance
+        </button>
+
+        <table class="table-list"
+        style="margin-top:15px">
+
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Employee</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+        ${attendance.slice().reverse()
+        .map(a=>`
+
+        <tr>
+            <td>${a.date}</td>
+            <td>${escapeHTML(a.employee)}</td>
+            <td>${a.status}</td>
+        </tr>
+
+        `).join("")}
+
+        </tbody>
+
+        </table>
+
+    </div>
+
+    `;
+}
+
+
+function markAttendance(){
+
+    if(!employees.length){
+
+        alert(
+            "Please add employees first."
+        );
+
+        return;
+    }
+
+    const name=prompt(
+        "Employee name:"
+    );
+
+    if(!name)return;
+
+    attendance.push({
+
+        date:new Date().toLocaleString(),
+
+        employee:name,
+
+        status:"Present"
+
+    });
+
+    ebSave(
+        "eb_attendance",
+        attendance
+    );
+
+    renderAttendance();
+
+}
+
+
+/* =========================================================
+   SALARY
+========================================================= */
+
+function renderSalary(){
+
+    const page=
+        document.getElementById(
+            "salary"
+        );
+
+    if(!page)return;
+
+    page.innerHTML=`
+
+    <div class="card">
+
+        <h2>Salary</h2>
+
+        <table class="table-list">
+
+        <thead>
+            <tr>
+                <th>Employee</th>
+                <th>Role</th>
+                <th>Salary</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+        ${employees.map(e=>`
+
+            <tr>
+                <td>${escapeHTML(e.name)}</td>
+                <td>${escapeHTML(e.role)}</td>
+                <td>Rs. ${e.salary.toFixed(2)}</td>
+            </tr>
+
+        `).join("")}
+
+        </tbody>
+
+        </table>
+
+    </div>
+
+    `;
+}
+
+
+/* =========================================================
+   COMMISSION
+========================================================= */
+
+function renderCommission(){
+
+    const page=
+        document.getElementById(
+            "commission"
+        );
+
+    if(!page)return;
+
+    page.innerHTML=`
+
+    <div class="card">
+
+        <h2>Commission</h2>
+
+        <p>
+        Sales commission by cashier.
+        </p>
+
+        <table class="table-list">
+
+        <thead>
+            <tr>
+                <th>Cashier</th>
+                <th>Sales</th>
+                <th>Commission 1%</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+        ${employees.map(e=>{
+
+            const total=sales
+                .filter(
+                    s=>s.cashier===e.name
+                )
+                .reduce(
+                    (a,s)=>a+s.total,
+                    0
+                );
+
+            return `
+
+            <tr>
+
+                <td>
+                ${escapeHTML(e.name)}
+                </td>
+
+                <td>
+                Rs. ${total.toFixed(2)}
+                </td>
+
+                <td>
+                Rs. ${(total*0.01).toFixed(2)}
+                </td>
+
+            </tr>
+
+            `;
+
+        }).join("")}
+
+        </tbody>
+
+        </table>
+
+    </div>
+
+    `;
+}
+
+
+/* =========================================================
+   USERS
+========================================================= */
+
+function renderUsers(){
+
+    const page=
+        document.getElementById(
+            "users"
+        );
+
+    if(!page)return;
+
+    const users=ebGet(
+        "eb_users",
+        []
+    );
+
+    page.innerHTML=`
+
+    <div class="card">
+
+        <h2>Users / Accounts</h2>
+
+        <p>
+        Accounts saved in this browser.
+        </p>
+
+        <table class="table-list">
+
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Role</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+        ${
+            users.map(u=>`
+
+            <tr>
+                <td>${escapeHTML(u.username)}</td>
+                <td>${escapeHTML(u.role)}</td>
+            </tr>
+
+            `).join("")
+            ||
+            `
+            <tr>
+            <td colspan="2"
+            style="text-align:center;padding:30px">
+            No additional users
+            </td>
+            </tr>
+            `
+        }
+
+        </tbody>
+
+        </table>
+
+    </div>
+
+    `;
+}
+
+
+/* =========================================================
+   USER ROUTER PATCH
+========================================================= */
+
+const oldRefresh=refreshPageData;
+
+refreshPageData=function(id){
+
+    oldRefresh(id);
+
+    switch(id){
+
+        case "categories":
+            renderCategoryPage();
+            break;
+
+        case "employees":
+            renderEmployees();
+            break;
+
+        case "attendance":
+            renderAttendance();
+            break;
+
+        case "salary":
+            renderSalary();
+            break;
+
+        case "commission":
+            renderCommission();
+            break;
+
+        case "users":
+            renderUsers();
+            break;
+
+        case "settings":
+            renderSettings();
+            break;
+
+        case "configs":
+            renderConfigs();
+            break;
+
+    }
+
+};
+
+
+/* =========================================================
+   INITIAL LOAD
+========================================================= */
+
+setTimeout(function(){
+
+    try{
+
+        const savedProducts=
+            localStorage.getItem(
+                "eb_products"
+            );
+
+        if(savedProducts){
+
+            const parsed=
+                JSON.parse(savedProducts);
+
+            if(Array.isArray(parsed) &&
+               parsed.length){
+
+                products=parsed;
+
+            }
+
+        }
+
+        const savedCategories=
+            localStorage.getItem(
+                "eb_categories"
+            );
+
+        if(savedCategories){
+
+            const parsed=
+                JSON.parse(savedCategories);
+
+            if(Array.isArray(parsed)){
+
+                categories=parsed;
+
+                if(!categories.includes("All")){
+                    categories.unshift("All");
+                }
+
+            }
+
+        }
+
+        if(typeof updateDashboard==="function"){
+            updateDashboard();
+        }
+
+        if(typeof renderProducts==="function"){
+            renderProducts();
+        }
+
+    }catch(e){
+
+        console.log(
+            "Easy Bill LK initialization error",
+            e
+        );
+
+    }
+
+},300);
+
+
+/* =========================================================
+   KEYBOARD SHORTCUTS
+========================================================= */
+
+document.addEventListener(
+    "keydown",
+    function(e){
+
+        if(e.key==="F2"){
+
+            e.preventDefault();
+
+            openPage("billing");
+
+        }
+
+        if(e.key==="F4"){
+
+            e.preventDefault();
+
+            newBill();
+
+        }
+
+        if(e.key==="Escape"){
+
+            document.querySelectorAll(
+                ".submenu"
+            ).forEach(x=>{
+                x.classList.remove("show");
+            });
+
+            document.querySelectorAll(
+                ".menu-item"
+            ).forEach(x=>{
+                x.classList.remove("open");
+            });
+
+        }
+
+    }
+);
+
+</script>
