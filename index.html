@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EASY BILL LK - ERP POS (PRO UPGRADE)</title>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f1f5f9;color:#172033}
+button,input,select{font:inherit}
+button{cursor:pointer;border:0;transition:0.2s}
+button:hover{opacity:0.9}
+.hidden{display:none!important}
+
+/* TOAST NOTIFICATION */
+#toast{
+ position:fixed;top:20px;right:20px;z-index:9999;padding:12px 20px;
+ border-radius:8px;color:white;font-weight:bold;box-shadow:0 4px 12px rgba(0,0,0,0.15);
+ opacity:0;transition:opacity 0.3s ease;pointer-events:none;
+}
+#toast.show{opacity:1}
+#toast.success{background:#16a34a}
+#toast.error{background:#dc2626}
+
+/* AUTH */
+.auth{
+ min-height:100vh;display:flex;align-items:center;justify-content:center;
+ background:linear-gradient(135deg,#1d4ed8,#2563eb,#0f172a);padding:20px
+}
+.auth-box{
+ width:100%;max-width:430px;background:white;border-radius:18px;
+ padding:30px;box-shadow:0 20px 60px rgba(0,0,0,0.3)
+}
+.logo{text-align:center;font-size:28px;font-weight:800;color:#2563eb}
+.logo small{display:block;font-size:12px;color:#64748b;margin-top:5px;font-weight:normal}
+.auth-tabs{display:flex;margin:25px 0 20px;background:#e2e8f0;border-radius:10px;padding:4px}
+.auth-tabs button{flex:1;padding:10px;border-radius:8px;background:transparent;font-weight:bold;color:#475569}
+.auth-tabs button.active{background:#2563eb;color:white}
+.field{margin-bottom:14px}
+.field label{display:block;font-weight:600;font-size:13px;margin-bottom:6px}
+.field input,.field select{
+ width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:8px;outline:none
+}
+.field input:focus,.field select:focus{border-color:#2563eb}
+.primary{width:100%;padding:12px;border-radius:8px;background:#2563eb;color:white;font-weight:bold;font-size:15px}
+
+/* APP LAYOUT */
+.app{display:none;min-height:100vh}
+.sidebar{
+ position:fixed;left:0;top:0;bottom:0;width:250px;background:#0f172a;
+ color:white;overflow-y:auto;z-index:1000;transition:.25s
+}
+.brand{padding:20px;font-size:20px;font-weight:bold;border-bottom:1px solid rgba(255,255,255,0.1)}
+.brand span{color:#60a5fa}
+.menu{padding:12px}
+.menu button{
+ width:100%;background:transparent;color:#cbd5e1;text-align:left;
+ padding:11px 14px;border-radius:8px;margin:2px 0;font-size:14px
+}
+.menu button:hover,.menu button.active{background:#1e40af;color:white}
+.submenu{display:none;padding-left:12px}
+.submenu.open{display:block}
+.submenu button{font-size:13px;padding:8px 12px}
+.menu-title{font-size:11px;color:#64748b;font-weight:bold;padding:15px 12px 4px;text-transform:uppercase}
+.main{margin-left:250px;min-height:100vh}
+.top{
+ height:65px;background:white;border-bottom:1px solid #e2e8f0;
+ display:flex;align-items:center;padding:0 20px;gap:15px;position:sticky;top:0;z-index:500
+}
+.hamb{font-size:22px;background:#eff6ff;color:#2563eb;border-radius:8px;padding:6px 12px}
+.top-title{font-size:18px;font-weight:bold;flex:1}
+.user-circle{width:38px;height:38px;border-radius:50%;background:#2563eb;color:white;display:flex;align-items:center;justify-content:center;font-weight:bold}
+.logout{background:#dc2626;color:white;padding:8px 14px;border-radius:8px;font-weight:bold;font-size:13px}
+.content{padding:20px}
+.page{display:none}
+.page.active{display:block}
+
+/* CARDS & PANELS */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;margin-bottom:20px}
+.card{background:white;border-radius:12px;padding:18px;box-shadow:0 2px 6px rgba(0,0,0,0.04)}
+.card .num{font-size:22px;font-weight:bold;margin-top:6px;color:#1e293b}
+.card .label{color:#64748b;font-size:13px}
+.panel{background:white;border-radius:12px;padding:20px;margin-bottom:20px;box-shadow:0 2px 6px rgba(0,0,0,0.04)}
+.panel h3{margin-top:0;font-size:16px;color:#1e293b}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:15px}
+.btn{padding:9px 14px;border-radius:8px;background:#2563eb;color:white;font-weight:600;font-size:13px}
+.btn.green{background:#16a34a}
+.btn.red{background:#dc2626}
+.btn.gray{background:#64748b}
+.btn.orange{background:#ea580c}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+
+/* TABLES */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:600px}
+th,td{padding:10px;border-bottom:1px solid #e2e8f0;text-align:left;font-size:13px}
+th{background:#f8fafc;color:#475569}
+
+/* POS LAYOUT */
+.pos{display:grid;grid-template-columns:1.5fr 1fr;gap:15px}
+.products{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.product{background:white;border:1px solid #e2e8f0;border-radius:10px;padding:12px;cursor:pointer}
+.product:hover{border-color:#2563eb;box-shadow:0 3px 10px rgba(37,99,235,0.1)}
+.product b{display:block;font-size:14px;margin-bottom:4px}
+.product small{color:#64748b;font-size:11px}
+.price{font-weight:bold;color:#2563eb;margin-top:6px;font-size:13px}
+.cart{background:white;border-radius:12px;padding:15px;display:flex;flex-direction:column;justify-content:space-between}
+.cart-row{border-bottom:1px solid #f1f5f9;padding:8px 0;display:flex;justify-content:space-between;align-items:center}
+.qty{display:flex;gap:6px;align-items:center}
+.qty button{background:#e2e8f0;border-radius:4px;padding:2px 8px;font-weight:bold}
+.total-box{border-top:2px solid #e2e8f0;padding-top:10px;margin-top:10px}
+.total-row{display:flex;justify-content:space-between;font-size:14px;margin-bottom:5px}
+.total-row.grand{font-size:18px;font-weight:bold;color:#1e293b}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+ .sidebar{transform:translateX(-100%)}
+ .sidebar.open{transform:translateX(0)}
+ .main{margin-left:0}
+ .pos,.grid2{grid-template-columns:1fr}
+}
+</style>
+</head>
+
+<body>
+
+<div id="toast"></div>
+
+<!-- AUTH -->
+<div id="auth" class="auth">
+ <div class="auth-box">
+  <div class="logo">
+   EASY BILL LK
+   <small>ERP & POS SYSTEM</small>
+  </div>
+
+  <div class="auth-tabs">
+   <button id="loginTab" class="active" onclick="showAuth('login')">Login</button>
+   <button id="signupTab" onclick="showAuth('signup')">Create Account</button>
+  </div>
+
+  <form id="loginForm">
+   <div class="field">
+    <label>Username</label>
+    <input id="loginUser" required autocomplete="username">
+   </div>
+   <div class="field">
+    <label>Password</label>
+    <input id="loginPass" type="password" required autocomplete="current-password">
+   </div>
+   <button class="primary" type="submit">LOGIN</button>
+  </form>
+
+  <form id="signupForm" class="hidden">
+   <div class="field">
+    <label>Business Name</label>
+    <input id="businessName" required>
+   </div>
+   <div class="field">
+    <label>Username</label>
+    <input id="signupUser" required autocomplete="username">
+   </div>
+   <div class="field">
+    <label>Password</label>
+    <input id="signupPass" type="password" minlength="4" required>
+   </div>
+   <div class="field">
+    <label>Confirm Password</label>
+    <input id="signupPass2" type="password" minlength="4" required>
+   </div>
+   <button class="primary" type="submit">CREATE ACCOUNT</button>
+  </form>
+ </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="app">
+ <aside id="sidebar" class="sidebar">
+  <div class="brand"><span>EASY</span> BILL LK</div>
+  <div class="menu">
+   <div class="menu-title">Main</div>
+   <button onclick="openPage('dashboard',this)" class="active">🏠 Dashboard</button>
+   <button onclick="openPage('pos',this)">🧾 POS / Billing</button>
+
+   <div class="menu-title">Sales & Orders</div>
+   <button onclick="toggleSub('salesSub')">▸ Sales Options</button>
+   <div id="salesSub" class="submenu">
+    <button onclick="openPage('sales')">Sales History</button>
+   </div>
+
+   <div class="menu-title">Inventory</div>
+   <button onclick="toggleSub('inventorySub')">▸ Inventory</button>
+   <div id="inventorySub" class="submenu">
+    <button onclick="openPage('inventory')">Items List</button>
+    <button onclick="openPage('stock')">Stock Summary</button>
+   </div>
+
+   <div class="menu-title">Admin</div>
+   <button onclick="openPage('settings',this)">⚙ Settings</button>
+  </div>
+ </aside>
+
+ <main class="main">
+  <header class="top">
+   <button class="hamb" onclick="toggleSidebar()">☰</button>
+   <div id="pageTitle" class="top-title">Dashboard</div>
+   <div id="userNameTop" style="font-weight:600"></div>
+   <div id="userCircle" class="user-circle">U</div>
+   <button class="logout" onclick="logout()">Logout</button>
+  </header>
+
+  <div class="content">
+   <!-- DASHBOARD -->
+   <section id="dashboard" class="page active">
+    <div class="cards">
+     <div class="card"><div class="label">Today's Sales</div><div id="dashSales" class="num">Rs. 0.00</div></div>
+     <div class="card"><div class="label">Bills Printed</div><div id="dashBills" class="num">0</div></div>
+     <div class="card"><div class="label">Total Products</div><div id="dashProducts" class="num">0</div></div>
+    </div>
+    <div class="grid2">
+     <div class="panel">
+      <h3>Quick Actions</h3>
+      <div class="toolbar">
+       <button class="btn" onclick="openPage('pos')">+ New Bill</button>
+       <button class="btn green" onclick="addProduct()">+ Add Product</button>
+      </div>
+     </div>
+     <div class="panel">
+      <h3>System Information</h3>
+      <p>Logged in as: <b id="dashUser"></b></p>
+      <p>Business Name: <b id="dashBusiness"></b></p>
+     </div>
+    </div>
+   </section>
+
+   <!-- POS -->
+   <section id="pos" class="page">
+    <div class="pos">
+     <div>
+      <div class="toolbar">
+       <input id="productSearch" placeholder="Search product..." oninput="renderProducts()" style="padding:10px;border:1px solid #cbd5e1;border-radius:8px;flex:1">
+      </div>
+      <div id="products" class="products"></div>
+     </div>
+
+     <div class="cart">
+      <div>
+       <h3>Current Cart</h3>
+       <div id="cartItems"></div>
+      </div>
+      <div class="total-box">
+       <div class="field">
+        <label>Discount (%)</label>
+        <input type="number" id="cartDiscount" value="0" min="0" max="100" oninput="renderCart()">
+       </div>
+       <div class="field">
+        <label>Payment Method</label>
+        <select id="paymentMethod">
+         <option>Cash</option>
+         <option>Card</option>
+         <option>Online Transfer</option>
+        </select>
+       </div>
+       <div class="total-row grand"><span>Total:</span><span id="cartTotal">Rs. 0.00</span></div>
+       <button class="btn green" style="width:100%;padding:12px;margin-top:10px" onclick="completeSale()">COMPLETE & PRINT</button>
+       <button class="btn gray" style="width:100%;margin-top:5px" onclick="clearCart()">Clear Cart</button>
+      </div>
+     </div>
+    </div>
+   </section>
+
+   <!-- INVENTORY -->
+   <section id="inventory" class="page">
+    <div class="panel">
+     <h3>Inventory Management</h3>
+     <div class="toolbar">
+      <button class="btn green" onclick="addProduct()">+ Add Item</button>
+     </div>
+     <div class="table-wrap">
+      <table>
+       <thead><tr><th>SKU</th><th>Name</th><th>Cost Price</th><th>Selling Price</th><th>Stock</th><th>Action</th></tr></thead>
+       <tbody id="inventoryBody"></tbody>
+      </table>
+     </div>
+    </div>
+   </section>
+
+   <!-- STOCK -->
+   <section id="stock" class="page">
+    <div class="panel">
+     <h3>Stock Summary</h3>
+     <div class="table-wrap">
+      <table>
+       <thead><tr><th>Product Name</th><th>In Stock</th><th>Cost</th><th>Total Stock Value</th></tr></thead>
+       <tbody id="stockBody"></tbody>
+      </table>
+     </div>
+    </div>
+   </section>
+
+   <!-- SALES HISTORY -->
+   <section id="sales" class="page">
+    <div class="panel">
+     <h3>Sales History</h3>
+     <div class="table-wrap">
+      <table>
+       <thead><tr><th>Invoice</th><th>Date & Time</th><th>Payment</th><th>Total</th></tr></thead>
+       <tbody id="historyBody"></tbody>
+      </table>
+     </div>
+    </div>
+   </section>
+
+   <!-- SETTINGS -->
+   <section id="settings" class="page">
+    <div class="panel">
+     <h3>Business Settings</h3>
+     <div class="grid2">
+      <div class="field"><label>Business Name</label><input id="setBusiness"></div>
+      <div class="field"><label>Phone Number</label><input id="setPhone"></div>
+      <div class="field"><label>Invoice Prefix</label><input id="setPrefix"></div>
+     </div>
+     <button class="btn green" onclick="saveSettings()">Save Settings</button>
+    </div>
+   </section>
+
+  </div>
+ </main>
+</div>
+
+<script>
+const KEY = "easybill_lk_v2";
+
+let state = {
+ users: [],
+ currentUser: null,
+ products: [],
+ sales: [],
+ cart: [],
+ settings: { business: "EASY BILL LK", phone: "", prefix: "EB" }
+};
+
+function load() {
+ try {
+  const data = localStorage.getItem(KEY);
+  if (data) state = Object.assign(state, JSON.parse(data));
+ } catch (e) { console.error(e); }
+}
+
+function save() {
+ localStorage.setItem(KEY, JSON.stringify(state));
+}
+
+function toast(text, type="success") {
+ const t = document.getElementById("toast");
+ t.textContent = text;
+ t.className = "show " + type;
+ setTimeout(() => t.className = "", 3000);
+}
+
+function showAuth(type) {
+ const isLogin = type === 'login';
+ document.getElementById("loginForm").classList.toggle("hidden", !isLogin);
+ document.getElementById("signupForm").classList.toggle("hidden", isLogin);
+ document.getElementById("loginTab").classList.toggle("active", isLogin);
+ document.getElementById("signupTab").classList.toggle("active", !isLogin);
+}
+
+document.getElementById("loginForm").addEventListener("submit", function(e) {
+ e.preventDefault();
+ const u = document.getElementById("loginUser").value.trim();
+ const p = document.getElementById("loginPass").value;
+
+ const user = state.users.find(x => x.username.toLowerCase() === u.toLowerCase() && x.password === p);
+
+ if (!user) {
+  toast("Invalid Username or Password!", "error");
+  return;
+ }
+
+ state.currentUser = user.id;
+ save();
+ startApp();
+ toast("Successfully Logged In!");
+});
+
+document.getElementById("signupForm").addEventListener("submit", function(e) {
+ e.preventDefault();
+ const b = document.getElementById("businessName").value.trim();
+ const u = document.getElementById("signupUser").value.trim();
+ const p1 = document.getElementById("signupPass").value;
+ const p2 = document.getElementById("signupPass2").value;
+
+ if (p1 !== p2) {
+  toast("Passwords do not match!", "error");
+  return;
+ }
+
+ if (state.users.some(x => x.username.toLowerCase() === u.toLowerCase())) {
+  toast("Username already exists!", "error");
+  return;
+ }
+
+ const newUser = { id: Date.now().toString(), username: u, password: p1, business: b };
+ state.users.push(newUser);
+ state.currentUser = newUser.id;
+ state.settings.business = b;
+ save();
+
+ startApp();
+ toast("Account created successfully!");
+});
+
+function startApp() {
+ document.getElementById("auth").style.display = "none";
+ document.getElementById("app").style.display = "block";
+
+ const user = state.users.find(x => x.id === state.currentUser);
+ if (!user) { logout(); return; }
+
+ document.getElementById("userNameTop").textContent = user.username;
+ document.getElementById("userCircle").textContent = user.username.charAt(0).toUpperCase();
+ document.getElementById("dashUser").textContent = user.username;
+ document.getElementById("dashBusiness").textContent = user.business;
+
+ refreshAll();
+}
+
+function logout() {
+ state.currentUser = null;
+ save();
+ document.getElementById("app").style.display = "none";
+ document.getElementById("auth").style.display = "flex";
+}
+
+function toggleSidebar() {
+ document.getElementById("sidebar").classList.toggle("open");
+}
+
+function toggleSub(id) {
+ document.getElementById(id).classList.toggle("open");
+}
+
+function openPage(id, btn) {
+ document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+ document.getElementById(id).classList.add("active");
+
+ if (btn) {
+  document.querySelectorAll(".menu button").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+ }
+ renderPage(id);
+}
+
+function renderPage(id) {
+ if (id === 'dashboard') renderDashboard();
+ if (id === 'pos') { renderProducts(); renderCart(); }
+ if (id === 'inventory') renderInventory();
+ if (id === 'stock') renderStock();
+ if (id === 'sales') renderSalesHistory();
+ if (id === 'settings') loadSettings();
+}
+
+function refreshAll() {
+ renderDashboard();
+ renderProducts();
+ renderInventory();
+}
+
+function renderDashboard() {
+ const today = new Date().toISOString().slice(0, 10);
+ const todaySales = state.sales.filter(s => s.date === today);
+ const total = todaySales.reduce((a, b) => a + b.total, 0);
+
+ document.getElementById("dashSales").textContent = "Rs. " + total.toFixed(2);
+ document.getElementById("dashBills").textContent = todaySales.length;
+ document.getElementById("dashProducts").textContent = state.products.length;
+}
+
+/* PRODUCT & INVENTORY */
+function addProduct() {
+ const name = prompt("Product Name:"); if (!name) return;
+ const price = Number(prompt("Selling Price:", "100") || 0);
+ const cost = Number(prompt("Cost Price:", "70") || 0);
+ const stock = Number(prompt("Stock Quantity:", "10") || 0);
+
+ state.products.push({
+  id: Date.now().toString(),
+  sku: "SKU" + Math.floor(1000 + Math.random() * 9000),
+  name, price, cost, stock
+ });
+ save();
+ refreshAll();
+ toast("Product Added!");
+}
+
+function renderProducts() {
+ const box = document.getElementById("products");
+ const q = (document.getElementById("productSearch")?.value || "").toLowerCase();
+
+ const items = state.products.filter(p => p.name.toLowerCase().includes(q));
+ box.innerHTML = items.map(p => `
+  <div class="product" onclick="addToCart('${p.id}')">
+   <b>${p.name}</b>
+   <small>Stock: ${p.stock}</small>
+   <div class="price">Rs. ${p.price.toFixed(2)}</div>
+  </div>
+ `).join("") || "<p>No products found</p>";
+}
+
+function renderInventory() {
+ const b = document.getElementById("inventoryBody");
+ b.innerHTML = state.products.map(p => `
+  <tr>
+   <td>${p.sku}</td>
+   <td>${p.name}</td>
+   <td>Rs. ${p.cost.toFixed(2)}</td>
+   <td>Rs. ${p.price.toFixed(2)}</td>
+   <td>${p.stock}</td>
+   <td><button class="btn red" onclick="deleteProduct('${p.id}')">Delete</button></td>
+  </tr>
+ `).join("");
+}
+
+function deleteProduct(id) {
+ state.products = state.products.filter(p => p.id !== id);
+ save();
+ refreshAll();
+}
+
+function renderStock() {
+ const b = document.getElementById("stockBody");
+ b.innerHTML = state.products.map(p => `
+  <tr>
+   <td>${p.name}</td>
+   <td>${p.stock}</td>
+   <td>Rs. ${p.cost.toFixed(2)}</td>
+   <td>Rs. ${(p.stock * p.cost).toFixed(2)}</td>
+  </tr>
+ `).join("");
+}
+
+/* POS & CART */
+function addToCart(id) {
+ const p = state.products.find(x => x.id === id);
+ if (!p || p.stock <= 0) { toast("Out of stock!", "error"); return; }
+
+ const item = state.cart.find(x => x.id === id);
+ if (item) {
+  if (item.qty < p.stock) item.qty++;
+  else toast("Max stock reached!", "error");
+ } else {
+  state.cart.push({ id: p.id, name: p.name, price: p.price, qty: 1 });
+ }
+ renderCart();
+}
+
+function changeQty(id, delta) {
+ const item = state.cart.find(x => x.id === id);
+ if (!item) return;
+
+ item.qty += delta;
+ if (item.qty <= 0) state.cart = state.cart.filter(x => x.id !== id);
+ renderCart();
+}
+
+function clearCart() {
+ state.cart = [];
+ renderCart();
+}
+
+function renderCart() {
+ const box = document.getElementById("cartItems");
+ box.innerHTML = state.cart.map(x => `
+  <div class="cart-row">
+   <div><b>${x.name}</b><br><small>Rs. ${x.price.toFixed(2)}</small></div>
+   <div class="qty">
+    <button onclick="changeQty('${x.id}', -1)">-</button>
+    <span>${x.qty}</span>
+    <button onclick="changeQty('${x.id}', 1)">+</button>
+   </div>
+  </div>
+ `).join("") || "<p>Cart empty</p>";
+
+ const subtotal = state.cart.reduce((a, b) => a + (b.price * b.qty), 0);
+ const disc = Number(document.getElementById("cartDiscount")?.value || 0);
+ const grandTotal = subtotal - (subtotal * (disc / 100));
+
+ document.getElementById("cartTotal").textContent = "Rs. " + grandTotal.toFixed(2);
+}
+
+function completeSale() {
+ if (!state.cart.length) { toast("Cart is empty!", "error"); return; }
+
+ const subtotal = state.cart.reduce((a, b) => a + (b.price * b.qty), 0);
+ const disc = Number(document.getElementById("cartDiscount").value || 0);
+ const total = subtotal - (subtotal * (disc / 100));
+
+ // Update stock
+ state.cart.forEach(item => {
+  const p = state.products.find(x => x.id === item.id);
+  if (p) p.stock -= item.qty;
+ });
+
+ const sale = {
+  invoice: (state.settings.prefix || "EB") + "-" + Date.now().toString().slice(-5),
+  date: new Date().toISOString().slice(0, 10),
+  time: new Date().toLocaleTimeString(),
+  items: [...state.cart],
+  total,
+  payment: document.getElementById("paymentMethod").value
+ };
+
+ state.sales.push(sale);
+ save();
+ printBill(sale);
+
+ clearCart();
+ refreshAll();
+ toast("Sale Processed!");
+}
+
+function printBill(sale) {
+ const w = window.open("", "_blank", "width=400,height=600");
+ w.document.write(`
+  <html>
+  <head><style>body{font-family:monospace;padding:10px;text-align:center}</style></head>
+  <body>
+   <h2>${state.settings.business}</h2>
+   <p>Invoice: ${sale.invoice}</p>
+   <hr>
+   ${sale.items.map(i => `<div style="display:flex;justify-content:space-between"><span>${i.name} x${i.qty}</span><span>Rs.${(i.price*i.qty).toFixed(2)}</span></div>`).join("")}
+   <hr>
+   <h3>TOTAL: Rs. ${sale.total.toFixed(2)}</h3>
+   <p>Payment: ${sale.payment}</p>
+   <script>window.print();<\/script>
+  </body>
+  </html>
+ `);
+ w.document.close();
+}
+
+function renderSalesHistory() {
+ const b = document.getElementById("historyBody");
+ b.innerHTML = state.sales.slice().reverse().map(s => `
+  <tr>
+   <td>${s.invoice}</td>
+   <td>${s.date} ${s.time}</td>
+   <td>${s.payment}</td>
+   <td>Rs. ${s.total.toFixed(2)}</td>
+  </tr>
+ `).join("");
+}
+
+function loadSettings() {
+ document.getElementById("setBusiness").value = state.settings.business || "";
+ document.getElementById("setPhone").value = state.settings.phone || "";
+ document.getElementById("setPrefix").value = state.settings.prefix || "EB";
+}
+
+function saveSettings() {
+ state.settings.business = document.getElementById("setBusiness").value;
+ state.settings.phone = document.getElementById("setPhone").value;
+ state.settings.prefix = document.getElementById("setPrefix").value;
+ save();
+ toast("Settings Saved!");
+}
+
+// Initialization
+load();
+if (state.currentUser) startApp();
+</script>
+</body>
+</html>
