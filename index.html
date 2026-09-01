@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EASY BILL LK - Advanced ERP & POS</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#f1f5f9;color:#1e293b;min-height:100vh;display:flex}
+
+/* SIDEBAR STYLES */
+.sidebar{width:260px;background:#0f172a;color:#fff;display:flex;flex-direction:column;transition:all 0.3s ease;z-index:100;position:fixed;top:0;bottom:0;left:0}
+.sidebar.collapsed{width:70px}
+.brand{padding:15px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #1e293b;background:#0b1120}
+.brand-logo{width:42px;height:42px;min-width:42px;border-radius:50%;background:#fff;padding:2px;display:flex;align-items:center;justify-content:center}
+.brand-logo svg{width:100%;height:100%}
+.brand-text{font-size:18px;font-weight:bold;color:#fff;white-space:nowrap;overflow:hidden}
+.brand-text span{color:#3b82f6}
+.sidebar.collapsed .brand-text,.sidebar.collapsed .menu-title,.sidebar.collapsed .arrow,.sidebar.collapsed .submenu{display:none!important}
+
+.menu-container{flex:1;overflow-y:auto;padding:10px 0}
+.menu-title{font-size:11px;text-transform:uppercase;color:#64748b;font-weight:bold;padding:12px 20px 4px}
+.menu-btn{width:100%;background:transparent;border:0;color:#cbd5e1;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-size:14px;transition:0.2s;text-align:left}
+.menu-btn:hover,.menu-btn.active{background:#1e293b;color:#3b82f6}
+.menu-btn-content{display:flex;align-items:center;gap:12px;white-space:nowrap}
+.menu-btn-content span{font-size:18px}
+
+.submenu{display:none;background:#090d16;padding:5px 0}
+.submenu.open{display:block}
+.submenu-btn{width:100%;background:transparent;border:0;color:#94a3b8;padding:10px 20px 10px 50px;text-align:left;font-size:13px;cursor:pointer;display:block;transition:0.2s}
+.submenu-btn:hover,.submenu-btn.active{color:#fff;background:#1e293b}
+
+/* MAIN LAYOUT */
+.main{flex:1;margin-left:260px;transition:all 0.3s ease;display:flex;flex-direction:column;min-height:100vh}
+.main.expanded{margin-left:70px}
+
+.top-nav{height:65px;background:#fff;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:90}
+.toggle-btn{background:#f1f5f9;border:0;width:38px;height:38px;border-radius:8px;cursor:pointer;font-size:18px;color:#334155}
+.user-profile{display:flex;align-items:center;gap:10px}
+.avatar{width:36px;height:36px;background:#3b82f6;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold}
+
+.content{padding:20px;flex:1}
+.page{display:none}
+.page.active{display:block}
+
+/* POS PAGE STYLES */
+.pos-container{display:grid;grid-template-columns:1fr 390px;gap:20px;align-items:start}
+.order-type-tabs{display:flex;gap:10px;margin-bottom:15px}
+.tab-btn{flex:1;padding:12px;border:2px solid #e2e8f0;background:#fff;border-radius:10px;font-weight:bold;cursor:pointer;text-align:center;transition:0.2s}
+.tab-btn.active{border-color:#3b82f6;background:#eff6ff;color:#1d4ed8}
+
+.tables-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px;margin-bottom:15px;background:#fff;padding:12px;border-radius:12px;border:1px solid #e2e8f0;max-height:160px;overflow-y:auto}
+.table-card{padding:8px;border-radius:8px;background:#f8fafc;border:1px solid #cbd5e1;text-align:center;cursor:pointer;font-weight:bold;font-size:12px}
+.table-card.selected{border-color:#3b82f6;background:#dbeafe;color:#1e40af}
+.table-card.occupied{background:#fee2e2;border-color:#f87171;color:#991b1b}
+
+.products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+.product-card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:10px;cursor:pointer;transition:0.2s}
+.product-card:hover{border-color:#3b82f6;transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.05)}
+.p-name{font-weight:600;font-size:13px;margin-bottom:5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.p-price{color:#2563eb;font-weight:bold;font-size:13px}
+.p-stock{font-size:11px;color:#64748b;margin-top:2px}
+
+/* CART PANEL */
+.cart-panel{background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,0.02)}
+.cart-header{display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;border-bottom:1px solid #e2e8f0;margin-bottom:10px}
+.cart-items{max-height:220px;overflow-y:auto;margin-bottom:10px}
+.cart-item{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px dashed #f1f5f9}
+.qty-ctrl{display:flex;align-items:center;gap:6px}
+.qty-ctrl button{width:22px;height:22px;border-radius:4px;border:1px solid #cbd5e1;background:#fff;cursor:pointer}
+
+.cash-calc-box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px;margin:10px 0}
+.calc-field{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.calc-field label{font-size:12px;font-weight:bold;color:#475569}
+.calc-field input{width:110px;padding:6px;border:1px solid #cbd5e1;border-radius:6px;font-weight:bold;text-align:right}
+
+.payment-methods{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0}
+.pay-btn{padding:8px;border:1px solid #cbd5e1;border-radius:6px;background:#fff;font-size:11px;font-weight:bold;cursor:pointer;text-align:center}
+.pay-btn.active{background:#2563eb;color:#fff;border-color:#2563eb}
+
+.cart-summary{border-top:2px solid #e2e8f0;padding-top:10px}
+.summary-row{display:flex;justify-content:space-between;margin-bottom:4px;font-size:13px}
+.summary-row.total{font-size:16px;font-weight:bold;color:#0f172a;margin-top:6px}
+
+.btn-primary{width:100%;background:#16a34a;color:#fff;border:0;padding:10px;border-radius:8px;font-weight:bold;font-size:14px;cursor:pointer;margin-top:8px}
+.btn-secondary{width:100%;background:#0284c7;color:#fff;border:0;padding:8px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;margin-top:5px}
+.btn-danger{width:100%;background:#dc2626;color:#fff;border:0;padding:8px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;margin-top:5px}
+
+.panel{background:#fff;border-radius:12px;padding:20px;border:1px solid #e2e8f0;margin-bottom:20px}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+th,td{padding:10px;border-bottom:1px solid #e2e8f0;text-align:left;font-size:13px}
+th{background:#f8fafc;color:#64748b}
+
+/* CONFIGURATIONS GRID */
+.config-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:15px}
+.config-card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px}
+.config-title{font-weight:bold;font-size:13px;margin-bottom:6px;color:#1e293b}
+.config-card input,.config-card select{width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px;margin-top:4px}
+
+/* MODALS */
+.modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;justify-content:center;align-items:center}
+.modal-overlay.active{display:flex}
+.modal-box{background:#fff;width:360px;padding:20px;border-radius:10px;box-shadow:0 10px 25px rgba(0,0,0,0.2)}
+.modal-box input, .modal-box select{width:100%;padding:8px;margin:6px 0 12px;border:1px solid #cbd5e1;border-radius:6px}
+
+.kot-ticket{background:#fff;width:300px;padding:18px;border-radius:8px;font-family:monospace}
+.kot-header{text-align:center;border-bottom:2px dashed #000;padding-bottom:8px;margin-bottom:8px}
+
+@media(max-width:1024px){
+ .pos-container{grid-template-columns:1fr}
+ .sidebar{transform:translateX(-100%)}
+ .sidebar.mobile-open{transform:translateX(0);width:260px}
+ .main{margin-left:0!important}
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR NAVIGATION -->
+<aside class="sidebar" id="sidebar">
+ <div class="brand">
+  <div class="brand-logo">
+   <svg viewBox="0 0 200 200">
+    <circle cx="100" cy="100" r="95" fill="#38bdf8"/>
+    <path d="M 30,135 A 95,95 0 0,0 170,135 Z" fill="#22c55e"/>
+    <circle cx="100" cy="100" r="65" fill="#ffffff"/>
+    <path d="M 75 70 L 125 70 A 5 5 0 0 1 130 75 L 130 125 A 5 5 0 0 1 125 130 L 75 130 A 5 5 0 0 1 70 125 L 70 75 A 5 5 0 0 1 75 70 Z" fill="none" stroke="#0284c7" stroke-width="6"/>
+    <line x1="85" y1="85" x2="115" y2="85" stroke="#0284c7" stroke-width="5" stroke-linecap="round"/>
+    <line x1="85" y1="98" x2="115" y2="98" stroke="#0284c7" stroke-width="5" stroke-linecap="round"/>
+    <path d="M 80 112 L 92 122 L 120 92" fill="none" stroke="#22c55e" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+   </svg>
+  </div>
+  <div class="brand-text">EASY BILL <span>LK</span></div>
+ </div>
+
+ <div class="menu-container">
+  <div class="menu-title">Main</div>
+  <button class="menu-btn active" onclick="openPage('dashboard', this)">
+   <div class="menu-btn-content"><span>🏠</span> Dashboard</div>
+  </button>
+
+  <button class="menu-btn" onclick="openPage('pos', this)">
+   <div class="menu-btn-content"><span>🧾</span> POS Billing</div>
+  </button>
+
+  <div class="menu-title">Inventory & Stock</div>
+  <button class="menu-btn" onclick="toggleSub('invSub')">
+   <div class="menu-btn-content"><span>📦</span> Inventory</div>
+   <span class="arrow">▸</span>
+  </button>
+  <div id="invSub" class="submenu">
+   <button class="submenu-btn" onclick="openPage('inventory', this)">Full Inventory</button>
+   <button class="submenu-btn" onclick="openPage('stock-summary', this)">Stock Summary</button>
+   <button class="submenu-btn" onclick="openPage('low-stock', this)">Low Stock Alerts</button>
+   <button class="submenu-btn" onclick="openPage('stock-movement', this)">Stock Movement</button>
+   <button class="submenu-btn" onclick="openPage('inventory-value', this)">Inventory Value</button>
+  </div>
+
+  <div class="menu-title">Accounts & Users</div>
+  <button class="menu-btn" onclick="toggleSub('accSub')">
+   <div class="menu-btn-content"><span>💰</span> Accounts</div>
+   <span class="arrow">▸</span>
+  </button>
+  <div id="accSub" class="submenu">
+   <button class="submenu-btn" onclick="openPage('cashbook', this)">Cash Book</button>
+   <button class="submenu-btn" onclick="openPage('expenses', this)">Expenses</button>
+   <button class="submenu-btn" onclick="openPage('income', this)">Income</button>
+   <button class="submenu-btn" onclick="openPage('profit', this)">Profit / Loss</button>
+  </div>
+
+  <button class="menu-btn" onclick="openPage('roles', this)">
+   <div class="menu-btn-content"><span>👥</span> Cashier Roles</div>
+  </button>
+
+  <div class="menu-title">System</div>
+  <button class="menu-btn" onclick="openPage('configurations', this)">
+   <div class="menu-btn-content"><span>⚙️</span> 30 Configurations</div>
+  </button>
+ </div>
+</aside>
+
+<!-- MAIN APP AREA -->
+<main class="main" id="main">
+ <header class="top-nav">
+  <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+  <div style="font-weight:bold;font-size:16px" id="pageTitle">Dashboard</div>
+  <div class="user-profile">
+   <span style="font-size:13px;font-weight:600">Active Role: Cashier-1</span>
+   <div class="avatar">C</div>
+  </div>
+ </header>
+
+ <div class="content">
+  <!-- DASHBOARD -->
+  <section id="dashboard" class="page active">
+   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;margin-bottom:20px">
+    <div class="panel" style="margin:0"><small>Today Sales</small><h2>Rs. 42,500.00</h2></div>
+    <div class="panel" style="margin:0"><small>Daily Profit</small><h2 style="color:#16a34a">Rs. 12,800.00</h2></div>
+    <div class="panel" style="margin:0"><small>Active Tables</small><h2 style="color:#2563eb">3 / 20 Tables</h2></div>
+   </div>
+   <div class="panel">
+    <h3>Quick Shortcuts</h3><br>
+    <button class="btn-secondary" style="width:auto;padding:10px 20px" onclick="openPage('pos')">+ Launch Billing Console</button>
+    <button class="btn-secondary" style="width:auto;padding:10px 20px;background:#16a34a;margin-left:10px" onclick="openAddItemModal()">+ Add New Item</button>
+   </div>
+  </section>
+
+  <!-- POS BILLING PAGE -->
+  <section id="pos" class="page">
+   <div class="pos-container">
+    <div>
+     <div class="order-type-tabs">
+      <div class="tab-btn active" id="tabTakeaway" onclick="setOrderType('Takeaway')">🛍️ Takeaway</div>
+      <div class="tab-btn" id="tabDineIn" onclick="setOrderType('Dine-In')">🍽️ Table / Dine-In (20)</div>
+     </div>
+
+     <!-- 20 TABLES GRID -->
+     <div id="tablesContainer" style="display:none">
+      <div style="font-weight:bold;margin-bottom:6px;font-size:12px">Select Table (1 - 20):</div>
+      <div class="tables-grid" id="tablesGrid"></div>
+     </div>
+
+     <div style="display:flex;gap:10px;margin-bottom:12px">
+      <input type="text" placeholder="🔍 Search item by name..." style="flex:1;padding:10px;border:1px solid #cbd5e1;border-radius:8px;outline:none" onkeyup="filterProducts(this.value)">
+      <button class="btn-secondary" style="width:auto;margin:0;padding:0 15px;background:#16a34a" onclick="openAddItemModal()">+ New Item</button>
+     </div>
+     
+     <div class="products-grid" id="productsGrid"></div>
+    </div>
+
+    <!-- CART SIDE PANEL -->
+    <div class="cart-panel">
+     <div class="cart-header">
+      <h3 id="cartOrderTitle">Takeaway Order</h3>
+      <button onclick="cancelBill()" style="border:0;background:none;color:#dc2626;cursor:pointer;font-size:11px;font-weight:bold">Cancel Bill</button>
+     </div>
+
+     <div class="cart-items" id="cartItems"></div>
+
+     <div class="cart-summary">
+      <div class="summary-row"><span>Subtotal:</span><span id="subTotal">Rs. 0.00</span></div>
+      <div class="summary-row total"><span>Total Payable:</span><span id="grandTotal" style="color:#2563eb">Rs. 0.00</span></div>
+     </div>
+
+     <!-- CASH AMOUNT & CHANGE CALCULATOR -->
+     <div class="cash-calc-box">
+      <div class="calc-field">
+       <label>Cash Given (Rs.):</label>
+       <input type="number" id="cashGivenInput" placeholder="0.00" oninput="calculateChange()">
+      </div>
+      <div class="calc-field" style="margin:0">
+       <label>Change Due:</label>
+       <span id="changeDueText" style="font-weight:bold;color:#16a34a;font-size:14px">Rs. 0.00</span>
+      </div>
+     </div>
+
+     <div style="font-weight:bold;margin-top:8px;font-size:11px">Payment Method:</div>
+     <div class="payment-methods">
+      <div class="pay-btn active" onclick="setPayment('Cash', this)">💵 Cash</div>
+      <div class="pay-btn" onclick="setPayment('Card', this)">💳 Card</div>
+      <div class="pay-btn" onclick="setPayment('Credit', this)">📝 Credit</div>
+      <div class="pay-btn" onclick="setPayment('QR Payment', this)">📲 QR</div>
+      <div class="pay-btn" onclick="setPayment('Bank Transfer', this)">🏦 Bank</div>
+     </div>
+
+     <button class="btn-primary" onclick="printBill()">PAY & PRINT BILL</button>
+     <button class="btn-secondary" onclick="newBill()">+ NEW BILL</button>
+     <button class="btn-danger" onclick="cancelBill()">❌ CANCEL</button>
+    </div>
+   </div>
+  </section>
+
+  <!-- INVENTORY PAGE -->
+  <section id="inventory" class="page">
+   <div class="panel">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+     <h3>Full Inventory Items</h3>
+     <button class="btn-secondary" style="width:auto;padding:8px 15px;background:#16a34a" onclick="openAddItemModal()">+ Add New Product</button>
+    </div>
+    <table>
+     <thead><tr><th>ID</th><th>Item Name</th><th>Price</th><th>Stock Status</th></tr></thead>
+     <tbody id="inventoryTableBody"></tbody>
+    </table>
+   </div>
+  </section>
+
+  <!-- CASHIER ROLES PAGE -->
+  <section id="roles" class="page">
+   <div class="panel">
+    <h3>Cashier Roles & Permissions</h3>
+    <table>
+     <thead><tr><th>Role Name</th><th>POS Access</th><th>Reports</th><th>Inventory Edit</th><th>Status</th></tr></thead>
+     <tbody>
+      <tr><td>System Administrator</td><td>Full</td><td>Yes</td><td>Yes</td><td><span style="color:#16a34a">Active</span></td></tr>
+      <tr><td>Senior Cashier</td><td>Full</td><td>View Only</td><td>No</td><td><span style="color:#16a34a">Active</span></td></tr>
+      <tr><td>Junior Cashier</td><td>POS Billing Only</td><td>No</td><td>No</td><td><span style="color:#16a34a">Active</span></td></tr>
+      <tr><td>Kitchen Staff</td><td>KOT View Only</td><td>No</td><td>No</td><td><span style="color:#16a34a">Active</span></td></tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+
+  <!-- 30 CONFIGURATIONS PAGE -->
+  <section id="configurations" class="page">
+   <div class="panel">
+    <h3>30 ERP System Configurations</h3>
+    <br>
+    <div class="config-grid" id="configsGrid"></div>
+   </div>
+  </section>
+
+  <section id="stock-summary" class="page"><div class="panel"><h3>Stock Summary</h3></div></section>
+  <section id="low-stock" class="page"><div class="panel"><h3>Low Stock</h3></div></section>
+  <section id="stock-movement" class="page"><div class="panel"><h3>Stock Movement</h3></div></section>
+  <section id="inventory-value" class="page"><div class="panel"><h3>Inventory Value</h3></div></section>
+  <section id="cashbook" class="page"><div class="panel"><h3>Cash Book</h3></div></section>
+  <section id="expenses" class="page"><div class="panel"><h3>Expenses</h3></div></section>
+  <section id="income" class="page"><div class="panel"><h3>Income</h3></div></section>
+  <section id="profit" class="page"><div class="panel"><h3>Profit / Loss</h3></div></section>
+ </div>
+</main>
+
+<!-- ADD NEW ITEM MODAL -->
+<div class="modal-overlay" id="addItemModal">
+ <div class="modal-box">
+  <h3 style="margin-bottom:10px">Add New Product</h3>
+  <label style="font-size:12px;font-weight:bold">Item Name:</label>
+  <input type="text" id="newItemName" placeholder="e.g. Cheese Burger">
+  <label style="font-size:12px;font-weight:bold">Price (Rs.):</label>
+  <input type="number" id="newItemPrice" placeholder="500">
+  <label style="font-size:12px;font-weight:bold">Initial Stock Qty:</label>
+  <input type="number" id="newItemStock" placeholder="50">
+  <button class="btn-primary" onclick="addNewProduct()">Save Item</button>
+  <button class="btn-danger" onclick="closeAddItemModal()">Cancel</button>
+ </div>
+</div>
+
+<!-- KOT MODAL -->
+<div class="modal-overlay" id="kotModal">
+ <div class="kot-ticket">
+  <div class="kot-header">
+   <b style="font-size:16px">KITCHEN ORDER TICKET</b>
+   <div style="font-size:11px" id="kotTypeInfo">Takeaway</div>
+   <div style="font-size:11px" id="kotTimeInfo">Time: --:--</div>
+  </div>
+  <table style="width:100%;margin:10px 0">
+   <thead><tr><th>Qty</th><th>Item</th></tr></thead>
+   <tbody id="kotItemsBody"></tbody>
+  </table>
+  <div style="text-align:center;border-top:2px dashed #000;padding-top:8px;font-size:12px">
+   <div id="kotStatusText" style="font-weight:bold;color:#dc2626">ORDER CONFIRMED</div>
+  </div>
+  <div style="display:flex;gap:8px;margin-top:12px">
+   <button class="btn-secondary" style="flex:1" onclick="closeKOTModal()">Close</button>
+  </div>
+ </div>
+</div>
+
+<script>
+let products = [
+ { id: 1, name: "Chicken Kottu (Full)", price: 1200, stock: 45 },
+ { id: 2, name: "Egg Fried Rice", price: 950, stock: 30 },
+ { id: 3, name: "Cheese Pasta", price: 1100, stock: 15 },
+ { id: 4, name: "Iced Coffee", price: 250, stock: 80 }
+];
+
+let cart = [];
+let currentOrderType = 'Takeaway';
+let selectedTable = 'Table 1';
+let selectedPayment = 'Cash';
+
+// AUTO HIDE MENU ON SELECTION
+function autoHideMenu() {
+ const sb = document.getElementById('sidebar');
+ if (window.innerWidth <= 1024) {
+  sb.classList.remove('mobile-open');
+ }
+}
+
+function toggleSidebar() {
+ const sb = document.getElementById('sidebar');
+ const main = document.getElementById('main');
+ if (window.innerWidth <= 1024) {
+  sb.classList.toggle('mobile-open');
+ } else {
+  sb.classList.toggle('collapsed');
+  main.classList.toggle('expanded');
+ }
+}
+
+function toggleSub(id) {
+ document.getElementById(id).classList.toggle('open');
+}
+
+function openPage(pageId, element) {
+ document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+ document.getElementById(pageId).classList.add('active');
+ document.getElementById('pageTitle').textContent = element ? element.textContent.trim() : pageId.toUpperCase();
+
+ if(element && element.classList.contains('menu-btn')) {
+  document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
+  element.classList.add('active');
+ }
+ autoHideMenu(); // Auto Close Sidebar
+}
+
+// RENDER 20 TABLES
+function renderTables() {
+ const grid = document.getElementById('tablesGrid');
+ let html = '';
+ for (let i = 1; i <= 20; i++) {
+  const isOccupied = i === 3 || i === 8;
+  const isSelected = i === 1;
+  html += `<div class="table-card ${isSelected ? 'selected' : ''} ${isOccupied ? 'occupied' : ''}" onclick="selectTable('Table ${i}', this)">Table ${i}</div>`;
+ }
+ grid.innerHTML = html;
+}
+
+function renderProducts(items) {
+ const grid = document.getElementById('productsGrid');
+ grid.innerHTML = items.map(p => `
+  <div class="product-card" onclick="addToCart(${p.id})">
+   <div class="p-name">${p.name}</div>
+   <div class="p-price">Rs. ${p.price.toFixed(2)}</div>
+   <div class="p-stock">Stock: ${p.stock}</div>
+  </div>
+ `).join('');
+
+ // Render Inventory Table
+ const invBody = document.getElementById('inventoryTableBody');
+ if(invBody) {
+  invBody.innerHTML = items.map(p => `
+   <tr><td>P-${p.id}</td><td>${p.name}</td><td>Rs. ${p.price.toFixed(2)}</td><td>${p.stock} Units</td></tr>
+  `).join('');
+ }
+}
+
+// ADD NEW ITEM
+function openAddItemModal() { document.getElementById('addItemModal').classList.add('active'); }
+function closeAddItemModal() { document.getElementById('addItemModal').classList.remove('active'); }
+
+function addNewProduct() {
+ const name = document.getElementById('newItemName').value;
+ const price = parseFloat(document.getElementById('newItemPrice').value);
+ const stock = parseInt(document.getElementById('newItemStock').value);
+
+ if(!name || !price) { alert('Fill in product name and price'); return; }
+
+ const newProd = { id: products.length + 1, name: name, price: price, stock: stock || 0 };
+ products.push(newProd);
+ renderProducts(products);
+ closeAddItemModal();
+ alert('Product added successfully!');
+}
+
+function filterProducts(query) {
+ renderProducts(products.filter(p => p.name.toLowerCase().includes(query.toLowerCase())));
+}
+
+function addToCart(productId) {
+ const p = products.find(x => x.id === productId);
+ const item = cart.find(x => x.id === productId);
+ if (item) item.qty++;
+ else cart.push({ id: p.id, name: p.name, price: p.price, qty: 1 });
+ updateCartUI();
+}
+
+function updateQty(id, delta) {
+ const item = cart.find(x => x.id === id);
+ if (item) {
+  item.qty += delta;
+  if (item.qty <= 0) cart = cart.filter(x => x.id !== id);
+ }
+ updateCartUI();
+}
+
+function updateCartUI() {
+ const container = document.getElementById('cartItems');
+ container.innerHTML = cart.map(i => `
+  <div class="cart-item">
+   <div>
+    <div style="font-weight:600;font-size:12px">${i.name}</div>
+    <div style="font-size:11px;color:#64748b">Rs. ${i.price} x ${i.qty}</div>
+   </div>
+   <div class="qty-ctrl">
+    <button onclick="updateQty(${i.id}, -1)">-</button>
+    <span style="font-size:11px;font-weight:bold">${i.qty}</span>
+    <button onclick="updateQty(${i.id}, 1)">+</button>
+   </div>
+  </div>
+ `).join('') || '<div style="text-align:center;color:#94a3b8;padding:15px 0;font-size:12px">Cart is Empty</div>';
+
+ const total = cart.reduce((a, b) => a + (b.price * b.qty), 0);
+ document.getElementById('subTotal').textContent = `Rs. ${total.toFixed(2)}`;
+ document.getElementById('grandTotal').textContent = `Rs. ${total.toFixed(2)}`;
+ calculateChange();
+}
+
+// CASH CALCULATOR
+function calculateChange() {
+ const total = cart.reduce((a, b) => a + (b.price * b.qty), 0);
+ const given = parseFloat(document.getElementById('cashGivenInput').value) || 0;
+ const change = given - total;
+ document.getElementById('changeDueText').textContent = `Rs. ${change > 0 ? change.toFixed(2) : '0.00'}`;
+}
+
+function setOrderType(type) {
+ currentOrderType = type;
+ document.getElementById('tabTakeaway').classList.toggle('active', type === 'Takeaway');
+ document.getElementById('tabDineIn').classList.toggle('active', type === 'Dine-In');
+ document.getElementById('tablesContainer').style.display = type === 'Dine-In' ? 'block' : 'none';
+ document.getElementById('cartOrderTitle').textContent = type === 'Dine-In' ? `Dine-In (${selectedTable})` : 'Takeaway Order';
+}
+
+function selectTable(tableNo, element) {
+ selectedTable = tableNo;
+ document.querySelectorAll('.table-card').forEach(c => c.classList.remove('selected'));
+ element.classList.add('selected');
+ document.getElementById('cartOrderTitle').textContent = `Dine-In (${tableNo})`;
+}
+
+function setPayment(method, element) {
+ selectedPayment = method;
+ document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('active'));
+ element.classList.add('active');
+}
+
+function showKOT(statusText) {
+ if (!cart.length) return;
+ const timeStr = new Date().toLocaleTimeString();
+ document.getElementById('kotTimeInfo').textContent = `Time: ${timeStr}`;
+ document.getElementById('kotTypeInfo').textContent = currentOrderType === 'Dine-In' ? `ORDER: Dine-In (${selectedTable})` : 'ORDER: Takeaway';
+ document.getElementById('kotStatusText').textContent = statusText;
+
+ document.getElementById('kotItemsBody').innerHTML = cart.map(item => `
+  <tr><td><b>${item.qty}x</b></td><td>${item.name}</td></tr>
+ `).join('');
+ document.getElementById('kotModal').classList.add('active');
+}
+
+function closeKOTModal() {
+ document.getElementById('kotModal').classList.remove('active');
+ cart = [];
+ document.getElementById('cashGivenInput').value = '';
+ updateCartUI();
+}
+
+function printBill() {
+ if (!cart.length) { alert('Cart empty!'); return; }
+ showKOT('ORDER COMPLETED & PAID');
+}
+
+function newBill() { if (cart.length) showKOT('NEW BILL SWITCH KOT'); }
+function cancelBill() { if (cart.length && confirm('Cancel order?')) showKOT('ORDER CANCELLED'); }
+
+// GENERATE 30 CONFIGURATIONS
+function render30Configs() {
+ const configs = [
+  "Thermal Paper Width (80mm/58mm)", "Auto Cash Drawer Kick", "Enable KOT Auto-Print", "Business Name on Receipt",
+  "Header Tax Identification No", "Footer Custom Message", "Enable Service Charge (10%)", "Default Payment Method",
+  "Enable Low Stock Popup Alert", "Barcode Scanner Mode", "Sound Effect on Cart Add", "Multi-Currency Mode (LKR/$)",
+  "Enable Dine-In Table View", "Total Table Count (Default: 20)", "Rounding Off Total Amount", "Enable Credit Sales Mode",
+  "KOT Kitchen Printer IP", "Main Receipt Printer IP", "Daily Auto-Backup Time", "Enable Dark Theme Interface",
+  "Allow Cashier Item Discounts", "Max Discount Cap (%)", "Require Supervisor Pin for Cancel", "Enable QR Code on Bill", "Show Stock Qty on POS Card", "Auto-Lock Screen Idle Time", "Enable Profit Ledger View", "SMS Receipt Gateway API", "Cashier Session Start Shift", "Enable Cloud Sync Status"
+ ];
+
+ const grid = document.getElementById('configsGrid');
+ grid.innerHTML = configs.map((c, i) => `
+  <div class="config-card">
+   <div class="config-title">Config #${i+1}: ${c}</div>
+   <input type="text" value="Default Option Value">
+  </div>
+ `).join('');
+}
+
+renderTables();
+renderProducts(products);
+render30Configs();
+</script>
+</body>
+</html>
