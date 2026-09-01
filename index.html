@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WOK OF BREAD SHOP - ERP & POS System</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#f1f5f9;color:#1e293b;min-height:100vh}
+
+/* AUTHENTICATION SCREENS (LOGIN & SIGNUP) */
+.auth-container{display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px;background:#0f172a}
+.auth-card{background:#fff;padding:25px 30px;border-radius:12px;width:100%;max-width:480px;box-shadow:0 10px 25px rgba(0,0,0,0.3)}
+.auth-card h2{text-align:center;color:#0f172a;margin-bottom:5px}
+.auth-card p{text-align:center;color:#64748b;font-size:13px;margin-bottom:20px}
+.form-group{margin-bottom:12px}
+.form-group label{font-size:12px;font-weight:bold;color:#334155;display:block;margin-bottom:4px}
+.form-group input, .form-group select{width:100%;padding:9px;border:1px solid #cbd5e1;border-radius:6px;outline:none;font-size:13px}
+.auth-btn{width:100%;padding:10px;background:#2563eb;color:#fff;border:0;border-radius:6px;font-weight:bold;cursor:pointer;margin-top:10px;font-size:14px}
+.auth-btn:hover{background:#1d4ed8}
+.auth-toggle{text-align:center;margin-top:15px;font-size:13px;color:#64748b}
+.auth-toggle a{color:#2563eb;text-decoration:none;font-weight:bold;cursor:pointer}
+
+/* MAIN APP LAYOUT */
+#appLayout{display:none;min-height:100vh}
+.sidebar{width:260px;background:#0f172a;color:#fff;display:flex;flex-direction:column;position:fixed;top:0;bottom:0;left:0;z-index:100}
+.brand{padding:15px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #1e293b;background:#0b1120}
+.brand-text{font-size:16px;font-weight:bold;color:#fff}
+.brand-text span{color:#38bdf8}
+
+.menu-container{flex:1;overflow-y:auto;padding:10px 0}
+.menu-btn{width:100%;background:transparent;border:0;color:#cbd5e1;padding:12px 20px;display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;text-align:left}
+.menu-btn:hover,.menu-btn.active{background:#1e293b;color:#38bdf8}
+
+.main{margin-left:260px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+.top-nav{height:60px;background:#fff;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:90}
+.logout-btn{background:#ef4444;color:#fff;border:0;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:bold;cursor:pointer}
+
+.content{padding:20px;flex:1}
+.page{display:none}
+.page.active{display:block}
+
+/* POS INTERFACE */
+.pos-container{display:grid;grid-template-columns:1fr 380px;gap:20px}
+.products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+.product-card{background:#fff;border:1px solid #cbd5e1;border-radius:8px;padding:10px;cursor:pointer;text-align:center}
+.product-card:hover{border-color:#2563eb;background:#f8fafc}
+.p-name{font-size:12px;font-weight:bold;margin-bottom:4px;height:30px;overflow:hidden}
+.p-price{color:#2563eb;font-weight:bold;font-size:13px}
+
+.cart-panel{background:#fff;border-radius:10px;border:1px solid #cbd5e1;padding:15px}
+.cart-items{max-height:160px;overflow-y:auto;margin-bottom:10px}
+.cart-item{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px dashed #e2e8f0;font-size:12px}
+
+.keypad-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin:10px 0}
+.key-btn{padding:8px;background:#f1f5f9;border:1px solid #cbd5e1;border-radius:4px;font-weight:bold;font-size:13px;cursor:pointer;text-align:center}
+
+.btn-success{width:100%;background:#16a34a;color:#fff;border:0;padding:10px;border-radius:6px;font-weight:bold;cursor:pointer;margin-top:6px}
+
+/* MODAL & RECEIPT PREVIEW (EXACTLY MATCHING THE IMAGE) */
+.modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:1000;justify-content:center;align-items:center}
+.modal-overlay.active{display:flex}
+
+.receipt-box{background:#fff;width:300px;padding:15px;border-radius:4px;font-family:'Courier New', Courier, monospace;box-shadow:0 10px 25px rgba(0,0,0,0.5);color:#000}
+.receipt-logo{text-align:center;font-size:24px;margin-bottom:2px}
+.receipt-header{text-align:center;font-size:11px;line-height:1.2;margin-bottom:8px}
+.receipt-meta{display:flex;justify-content:space-between;font-size:10px;margin-bottom:8px}
+.receipt-table{width:100%;border-collapse:collapse;font-size:10px;margin-bottom:8px}
+.receipt-table th,.receipt-table td{padding:2px 0;text-align:left}
+.receipt-divider{border-top:1px dashed #000;margin:4px 0}
+.receipt-total{display:flex;justify-content:space-between;font-size:14px;font-weight:bold;margin:4px 0}
+.receipt-footer{text-align:center;font-size:10px;margin-top:10px;line-height:1.3}
+
+@media(max-width:900px){
+ .sidebar{display:none}
+ .main{margin-left:0}
+ .pos-container{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- SIGNUP SCREEN (DETAILS 7 REQUIREMENT) -->
+<div class="auth-container" id="signupScreen">
+ <div class="auth-card">
+  <h2>Admin Registration</h2>
+  <p>Create your Administrator Account (Fill 7 Details)</p>
+  
+  <form onsubmit="handleSignup(event)">
+   <div class="form-group">
+    <label>1. Full Name</label>
+    <input type="text" id="regFullName" placeholder="e.g. Kamal Perera" required>
+   </div>
+   <div class="form-group">
+    <label>2. Business/Shop Name</label>
+    <input type="text" id="regShopName" value="WOK OF BREAD SHOP" required>
+   </div>
+   <div class="form-group">
+    <label>3. Email Address</label>
+    <input type="email" id="regEmail" placeholder="admin@wokofbread.com" required>
+   </div>
+   <div class="form-group">
+    <label>4. Mobile Phone Number</label>
+    <input type="text" id="regPhone" placeholder="+94 76 897 8421" required>
+   </div>
+   <div class="form-group">
+    <label>5. Business Address</label>
+    <input type="text" id="regAddress" value="#203/4, Daulagala Road, Pilimathalawa" required>
+   </div>
+   <div class="form-group">
+    <label>6. Username</label>
+    <input type="text" id="regUsername" placeholder="admin" required>
+   </div>
+   <div class="form-group">
+    <label>7. Password</label>
+    <input type="password" id="regPassword" placeholder="••••••••" required>
+   </div>
+
+   <button type="submit" class="auth-btn">Create Admin Account</button>
+  </form>
+  <div class="auth-toggle">Already have an account? <a onclick="showLogin()">Login</a></div>
+ </div>
+</div>
+
+<!-- LOGIN SCREEN -->
+<div class="auth-container" id="loginScreen" style="display:none">
+ <div class="auth-card">
+  <h2>System Login</h2>
+  <p>Enter your credentials to access POS</p>
+  
+  <form onsubmit="handleLogin(event)">
+   <div class="form-group">
+    <label>Username</label>
+    <input type="text" id="loginUser" placeholder="Enter username" required>
+   </div>
+   <div class="form-group">
+    <label>Password</label>
+    <input type="password" id="loginPass" placeholder="••••••••" required>
+   </div>
+   <button type="submit" class="auth-btn">Login to System</button>
+  </form>
+  <div class="auth-toggle">Need an Admin Account? <a onclick="showSignup()">Sign Up</a></div>
+ </div>
+</div>
+
+<!-- MAIN APPLICATION LAYOUT -->
+<div id="appLayout">
+ <aside class="sidebar">
+  <div class="brand">
+   <div class="brand-text">WOK OF BREAD <span>POS</span></div>
+  </div>
+  <div class="menu-container">
+   <button class="menu-btn active" onclick="openPage('pos')">🧾 POS Billing</button>
+   <button class="menu-btn" onclick="openPage('dashboard')">🏠 Dashboard</button>
+   <button class="menu-btn" onclick="openPage('reports')">📊 Sales Reports</button>
+  </div>
+ </aside>
+
+ <main class="main">
+  <header class="top-nav">
+   <div><b>User:</b> <span id="navUser">Admin</span> (<span id="navRole">Administrator</span>)</div>
+   <button class="logout-btn" onclick="handleLogout()">Logout 🔓</button>
+  </header>
+
+  <div class="content">
+   <!-- POS BILLING PAGE -->
+   <section id="pos" class="page active">
+    <div class="pos-container">
+     <div>
+      <input type="text" placeholder="Search item..." style="width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:6px;margin-bottom:12px" onkeyup="filterProducts(this.value)">
+      <div class="products-grid" id="productsGrid"></div>
+     </div>
+
+     <!-- CART & KEYPAD -->
+     <div class="cart-panel">
+      <h4 style="margin-bottom:8px">Current Order</h4>
+      <div class="cart-items" id="cartItems"></div>
+
+      <div style="border-top:2px solid #e2e8f0;padding-top:6px;margin-bottom:8px">
+       <div style="display:flex;justify-content:space-between;font-weight:bold">
+        <span>Net Total:</span><span id="grandTotal" style="color:#2563eb">Rs. 0.00</span>
+       </div>
+      </div>
+
+      <div>
+       <div style="display:flex;justify-content:space-between;align-items:center">
+        <label style="font-size:12px;font-weight:bold">Cash Received:</label>
+        <input type="text" id="cashInput" style="width:90px;text-align:right;font-weight:bold;padding:4px" readonly value="0">
+       </div>
+       <div class="keypad-grid">
+        <div class="key-btn" onclick="pressKey('1')">1</div><div class="key-btn" onclick="pressKey('2')">2</div><div class="key-btn" onclick="pressKey('3')">3</div>
+        <div class="key-btn" onclick="pressKey('4')">4</div><div class="key-btn" onclick="pressKey('5')">5</div><div class="key-btn" onclick="pressKey('6')">6</div>
+        <div class="key-btn" onclick="pressKey('7')">7</div><div class="key-btn" onclick="pressKey('8')">8</div><div class="key-btn" onclick="pressKey('9')">9</div>
+        <div class="key-btn" onclick="pressKey('0')">0</div><div class="key-btn" onclick="pressKey('00')">00</div><div class="key-btn" style="color:#dc2626" onclick="pressKey('CLR')">C</div>
+       </div>
+      </div>
+
+      <button class="btn-success" onclick="printBill()">PRINT BILL RECEIPT</button>
+     </div>
+    </div>
+   </section>
+
+   <section id="dashboard" class="page"><h3>Dashboard</h3><p>Welcome to Admin Dashboard</p></section>
+   <section id="reports" class="page"><h3>Reports</h3><p>Sales reports view</p></section>
+  </div>
+ </main>
+</div>
+
+<!-- RECEIPT PREVIEW MODAL (IMAGE LAYOUT MATCH) -->
+<div class="modal-overlay" id="previewModal">
+ <div class="receipt-box">
+  <div class="receipt-logo">🍳🔥</div>
+  <div class="receipt-header">
+   <strong style="font-size:12px">WOK OF BREAD SHOP</strong><br>
+   #203/4, Daulagala Road<br>
+   Pilimathalawa, Sri Lanka<br>
+   +94 76 897 8421
+  </div>
+
+  <div class="receipt-meta">
+   <div>Date: <span id="billDate">28/08/2026</span><br>Time: <span id="billTime">12:05</span></div>
+   <div style="text-align:right">Table No:<br>Bill No: <span id="billNo">321325</span></div>
+  </div>
+
+  <div class="receipt-divider"></div>
+
+  <table class="receipt-table">
+   <tbody id="receiptItemsBody">
+    <!-- Dynamic Items -->
+   </tbody>
+  </table>
+
+  <div class="receipt-divider"></div>
+
+  <div class="receipt-total">
+   <span>Net Total:</span>
+   <span id="receiptNetTotal">180.00</span>
+  </div>
+
+  <div style="display:flex;justify-content:space-between;font-size:11px;margin-top:2px">
+   <span>Cash</span>
+   <span id="receiptCash">180.00</span>
+  </div>
+
+  <div class="receipt-divider"></div>
+
+  <div class="receipt-footer">
+   THANK YOU | SEE YOU AGAIN!!<br><br>
+   facebook.com/wokofbreadshop<br>
+   Whatsapp : +94 76 897 8421
+  </div>
+
+  <button style="width:100%;margin-top:12px;padding:6px;background:#0f172a;color:#fff;border:0;border-radius:4px;cursor:pointer" onclick="closePreview()">Close Receipt</button>
+ </div>
+</div>
+
+<script>
+// DEMO PRODUCTS
+let products = [
+ { id: 1, name: "1 SLICE BREAD(SMALL) 320G", price: 180 },
+ { id: 2, name: "CHICKEN KOTTU (FULL)", price: 1200 },
+ { id: 3, name: "EGG FRIED RICE", price: 950 },
+ { id: 4, name: "CHEESE PASTA", price: 1100 }
+];
+
+let cart = [];
+let registeredUser = null;
+
+// AUTHENTICATION FUNCTIONS
+function showLogin() {
+ document.getElementById('signupScreen').style.display = 'none';
+ document.getElementById('loginScreen').style.display = 'flex';
+}
+
+function showSignup() {
+ document.getElementById('loginScreen').style.display = 'none';
+ document.getElementById('signupScreen').style.display = 'flex';
+}
+
+function handleSignup(e) {
+ e.preventDefault();
+ registeredUser = {
+  fullName: document.getElementById('regFullName').value,
+  shopName: document.getElementById('regShopName').value,
+  email: document.getElementById('regEmail').value,
+  phone: document.getElementById('regPhone').value,
+  address: document.getElementById('regAddress').value,
+  username: document.getElementById('regUsername').value,
+  password: document.getElementById('regPassword').value
+ };
+ alert('Admin Account Created Successfully! Please Login.');
+ showLogin();
+}
+
+function handleLogin(e) {
+ e.preventDefault();
+ const u = document.getElementById('loginUser').value;
+ const p = document.getElementById('loginPass').value;
+
+ if(registeredUser && u === registeredUser.username && p === registeredUser.password) {
+  loginSuccess(registeredUser.fullName, "Administrator");
+ } else if(u === "admin" && p === "admin") {
+  loginSuccess("System Admin", "Administrator");
+ } else {
+  alert('Invalid Credentials! Try default: admin / admin');
+ }
+}
+
+function loginSuccess(name, role) {
+ document.getElementById('loginScreen').style.display = 'none';
+ document.getElementById('appLayout').style.display = 'flex';
+ document.getElementById('navUser').textContent = name;
+ document.getElementById('navRole').textContent = role;
+}
+
+function handleLogout() {
+ if(confirm('Are you sure you want to logout?')) {
+  document.getElementById('appLayout').style.display = 'none';
+  showLogin();
+ }
+}
+
+function openPage(id) {
+ document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+ document.getElementById(id).classList.add('active');
+}
+
+// POS LOGIC
+function renderProducts(list) {
+ document.getElementById('productsGrid').innerHTML = list.map(p => `
+  <div class="product-card" onclick="addToCart(${p.id})">
+   <div class="p-name">${p.name}</div>
+   <div class="p-price">Rs. ${p.price.toFixed(2)}</div>
+  </div>
+ `).join('');
+}
+
+function filterProducts(q) {
+ renderProducts(products.filter(p => p.name.toLowerCase().includes(q.toLowerCase())));
+}
+
+function addToCart(pId) {
+ const p = products.find(x => x.id === pId);
+ const item = cart.find(x => x.id === pId);
+ if(item) item.qty++;
+ else cart.push({ id: p.id, name: p.name, price: p.price, qty: 1 });
+ updateCart();
+}
+
+function updateCart() {
+ document.getElementById('cartItems').innerHTML = cart.map(i => `
+  <div class="cart-item">
+   <div>${i.qty}x ${i.name}</div>
+   <div><b>Rs. ${(i.price * i.qty).toFixed(2)}</b></div>
+  </div>
+ `).join('') || '<div style="text-align:center;color:#94a3b8;padding:10px">Cart Empty</div>';
+
+ const total = cart.reduce((a, b) => a + (b.price * b.qty), 0);
+ document.getElementById('grandTotal').textContent = `Rs. ${total.toFixed(2)}`;
+}
+
+function pressKey(v) {
+ const input = document.getElementById('cashInput');
+ if(v === 'CLR') input.value = '0';
+ else input.value = input.value === '0' ? v : input.value + v;
+}
+
+// PRINT RECEIPT MATCHING THE SUBMITTED IMAGE
+function printBill() {
+ if(!cart.length) { alert('Add items to cart first!'); return; }
+
+ const total = cart.reduce((a, b) => a + (b.price * b.qty), 0);
+ const now = new Date();
+ 
+ document.getElementById('billDate').textContent = now.toLocaleDateString();
+ document.getElementById('billTime').textContent = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+ document.getElementById('billNo').textContent = Math.floor(100000 + Math.random() * 900000);
+
+ document.getElementById('receiptItemsBody').innerHTML = cart.map(i => `
+  <tr>
+   <td>1 ${i.name}</td>
+   <td style="text-align:right">@ ${i.price.toFixed(2)} ${ (i.price * i.qty).toFixed(2) }</td>
+  </tr>
+ `).join('');
+
+ document.getElementById('receiptNetTotal').textContent = total.toFixed(2);
+ const cashPaid = parseFloat(document.getElementById('cashInput').value) || total;
+ document.getElementById('receiptCash').textContent = cashPaid.toFixed(2);
+
+ document.getElementById('previewModal').classList.add('active');
+}
+
+function closePreview() {
+ document.getElementById('previewModal').classList.remove('active');
+ cart = [];
+ document.getElementById('cashInput').value = '0';
+ updateCart();
+}
+
+renderProducts(products);
+</script>
+</body>
+</html>
