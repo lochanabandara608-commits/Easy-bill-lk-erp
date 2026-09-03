@@ -1,0 +1,4192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EASY BILL LK - Advanced ERP POS</title>
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<style>
+:root{
+    --primary:#2563eb;
+    --primary-dark:#1d4ed8;
+    --dark:#0f172a;
+    --dark2:#1e293b;
+    --bg:#f1f5f9;
+    --white:#fff;
+    --text:#0f172a;
+    --muted:#64748b;
+    --border:#e2e8f0;
+    --success:#16a34a;
+    --danger:#dc2626;
+    --warning:#f59e0b;
+    --sidebar:255px;
+}
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family:Segoe UI,Arial,sans-serif;
+}
+
+body{
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+}
+
+/* ================= AUTH ================= */
+
+#authScreen{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#0f172a,#1d4ed8);
+    padding:20px;
+}
+
+.auth-box{
+    width:420px;
+    max-width:100%;
+    background:#fff;
+    border-radius:18px;
+    padding:30px;
+    box-shadow:0 25px 60px rgba(0,0,0,.25);
+}
+
+.logo{
+    text-align:center;
+    margin-bottom:25px;
+}
+
+.logo i{
+    font-size:42px;
+    color:var(--primary);
+}
+
+.logo h1{
+    margin-top:8px;
+    font-size:26px;
+}
+
+.logo p{
+    color:var(--muted);
+    font-size:13px;
+}
+
+.auth-tabs{
+    display:flex;
+    margin-bottom:20px;
+    border-bottom:1px solid var(--border);
+}
+
+.auth-tabs button{
+    flex:1;
+    border:0;
+    background:none;
+    padding:12px;
+    cursor:pointer;
+    font-weight:700;
+    color:var(--muted);
+}
+
+.auth-tabs button.active{
+    color:var(--primary);
+    border-bottom:3px solid var(--primary);
+}
+
+.form-group{
+    margin-bottom:14px;
+}
+
+.form-group label{
+    display:block;
+    margin-bottom:6px;
+    font-size:13px;
+    font-weight:700;
+}
+
+.form-group input,
+.form-group select{
+    width:100%;
+    padding:12px;
+    border:1px solid #cbd5e1;
+    border-radius:8px;
+    outline:none;
+}
+
+.form-group input:focus,
+.form-group select:focus{
+    border-color:var(--primary);
+}
+
+.btn{
+    border:0;
+    padding:11px 15px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:700;
+}
+
+.btn-primary{
+    background:var(--primary);
+    color:#fff;
+}
+
+.btn-primary:hover{
+    background:var(--primary-dark);
+}
+
+.btn-success{
+    background:var(--success);
+    color:#fff;
+}
+
+.btn-danger{
+    background:var(--danger);
+    color:#fff;
+}
+
+.btn-warning{
+    background:var(--warning);
+    color:#fff;
+}
+
+.full{
+    width:100%;
+}
+
+.demo-note{
+    text-align:center;
+    color:#64748b;
+    font-size:12px;
+    margin-top:15px;
+}
+
+/* ================= APP ================= */
+
+#app{
+    display:none;
+    min-height:100vh;
+}
+
+.layout{
+    display:flex;
+    min-height:100vh;
+}
+
+/* ================= SIDEBAR ================= */
+
+.sidebar{
+    width:var(--sidebar);
+    background:var(--dark);
+    color:#fff;
+    position:fixed;
+    left:0;
+    top:0;
+    bottom:0;
+    z-index:1000;
+    overflow-y:auto;
+    transition:.25s;
+}
+
+.sidebar.collapsed{
+    width:68px;
+}
+
+.sidebar-header{
+    height:65px;
+    padding:0 15px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:#020617;
+}
+
+.brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-weight:800;
+    color:#38bdf8;
+    white-space:nowrap;
+}
+
+.brand i{
+    font-size:24px;
+}
+
+.sidebar.collapsed .brand span,
+.sidebar.collapsed .menu-text,
+.sidebar.collapsed .arrow{
+    display:none;
+}
+
+.toggle{
+    background:none;
+    border:0;
+    color:#fff;
+    cursor:pointer;
+    font-size:20px;
+}
+
+.menu{
+    list-style:none;
+    padding:8px 0;
+}
+
+.menu-item{
+    border-bottom:1px solid rgba(255,255,255,.06);
+}
+
+.menu-link{
+    min-height:48px;
+    padding:12px 15px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    color:#cbd5e1;
+    cursor:pointer;
+}
+
+.menu-link:hover,
+.menu-link.active{
+    background:#1e293b;
+    color:#fff;
+}
+
+.menu-content{
+    display:flex;
+    align-items:center;
+    gap:13px;
+}
+
+.menu-content i{
+    width:20px;
+    text-align:center;
+}
+
+.submenu{
+    display:none;
+    list-style:none;
+    background:#020617;
+}
+
+.submenu.open{
+    display:block;
+}
+
+.submenu a{
+    display:block;
+    padding:10px 15px 10px 48px;
+    color:#94a3b8;
+    text-decoration:none;
+    cursor:pointer;
+    font-size:13px;
+}
+
+.submenu a:hover{
+    color:#38bdf8;
+    background:#1e293b;
+}
+
+/* ================= MAIN ================= */
+
+.main{
+    margin-left:var(--sidebar);
+    width:calc(100% - var(--sidebar));
+    min-height:100vh;
+    transition:.25s;
+}
+
+.sidebar.collapsed ~ .main{
+    margin-left:68px;
+    width:calc(100% - 68px);
+}
+
+.topbar{
+    height:65px;
+    background:#fff;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 20px;
+    position:sticky;
+    top:0;
+    z-index:900;
+}
+
+.topbar-left h2{
+    font-size:19px;
+}
+
+.topbar-right{
+    display:flex;
+    align-items:center;
+    gap:15px;
+}
+
+.user-badge{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:13px;
+    font-weight:700;
+}
+
+.logout-btn{
+    border:0;
+    background:#fee2e2;
+    color:#b91c1c;
+    padding:8px 11px;
+    border-radius:7px;
+    cursor:pointer;
+}
+
+/* ================= PAGE ================= */
+
+.page{
+    display:none;
+    padding:20px;
+}
+
+.page.active{
+    display:block;
+}
+
+.page-title{
+    margin-bottom:18px;
+}
+
+.page-title h2{
+    font-size:22px;
+}
+
+.page-title p{
+    color:var(--muted);
+    font-size:13px;
+    margin-top:3px;
+}
+
+/* ================= CARDS ================= */
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:15px;
+    margin-bottom:20px;
+}
+
+.stat{
+    background:#fff;
+    border-radius:12px;
+    padding:18px;
+    border:1px solid var(--border);
+}
+
+.stat-icon{
+    width:42px;
+    height:42px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    border-radius:10px;
+    background:#eff6ff;
+    color:var(--primary);
+    margin-bottom:10px;
+}
+
+.stat h3{
+    font-size:21px;
+}
+
+.stat p{
+    color:var(--muted);
+    font-size:12px;
+    margin-top:4px;
+}
+
+/* ================= POS ================= */
+
+.pos-layout{
+    display:grid;
+    grid-template-columns:1.25fr 1fr;
+    gap:15px;
+    min-height:calc(100vh - 105px);
+}
+
+.panel{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:15px;
+}
+
+.pos-products{
+    display:flex;
+    flex-direction:column;
+    min-height:0;
+}
+
+.pos-tools{
+    display:grid;
+    grid-template-columns:1fr 180px;
+    gap:10px;
+    margin-bottom:12px;
+}
+
+.search{
+    width:100%;
+    padding:11px;
+    border:1px solid var(--border);
+    border-radius:8px;
+}
+
+.category{
+    padding:11px;
+    border:1px solid var(--border);
+    border-radius:8px;
+}
+
+.products{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(130px,1fr));
+    gap:10px;
+    overflow:auto;
+}
+
+.product{
+    border:1px solid var(--border);
+    background:#f8fafc;
+    padding:13px;
+    border-radius:10px;
+    cursor:pointer;
+    transition:.15s;
+}
+
+.product:hover{
+    border-color:var(--primary);
+    transform:translateY(-2px);
+}
+
+.product-name{
+    font-weight:700;
+    font-size:14px;
+}
+
+.product-price{
+    color:var(--primary);
+    font-weight:800;
+    margin-top:7px;
+}
+
+.stock{
+    color:var(--muted);
+    font-size:11px;
+    margin-top:4px;
+}
+
+/* CART */
+
+.cart-panel{
+    display:flex;
+    flex-direction:column;
+}
+
+.order-type{
+    display:flex;
+    gap:8px;
+    margin-bottom:12px;
+}
+
+.order-type button{
+    flex:1;
+    padding:9px;
+    border:1px solid var(--border);
+    background:#f8fafc;
+    border-radius:7px;
+    cursor:pointer;
+    font-weight:700;
+}
+
+.order-type button.active{
+    color:var(--primary);
+    border-color:var(--primary);
+    background:#eff6ff;
+}
+
+.cart-table-wrap{
+    overflow:auto;
+    flex:1;
+    min-height:180px;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th,td{
+    padding:9px 7px;
+    border-bottom:1px solid var(--border);
+    text-align:left;
+    font-size:13px;
+}
+
+th{
+    background:#f8fafc;
+}
+
+.qty-control{
+    display:flex;
+    align-items:center;
+    gap:5px;
+}
+
+.qty-control button{
+    width:25px;
+    height:25px;
+    border:0;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+.qty-control span{
+    min-width:20px;
+    text-align:center;
+}
+
+.summary{
+    border-top:1px solid var(--border);
+    padding-top:12px;
+    margin-top:10px;
+}
+
+.summary-row{
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:7px;
+}
+
+.summary-row.total{
+    font-size:19px;
+    font-weight:800;
+    margin-top:10px;
+}
+
+.payment-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    margin-top:10px;
+}
+
+.payment-grid input,
+.payment-grid select{
+    width:100%;
+    padding:9px;
+    border:1px solid var(--border);
+    border-radius:7px;
+}
+
+.keypad{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:5px;
+    margin-top:10px;
+}
+
+.keypad button{
+    padding:10px;
+    border:1px solid var(--border);
+    background:#fff;
+    border-radius:6px;
+    cursor:pointer;
+    font-weight:800;
+}
+
+.action-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    margin-top:10px;
+}
+
+/* ================= TABLE TOOLBAR ================= */
+
+.toolbar{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:12px;
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:12px;
+}
+
+.toolbar input,
+.toolbar select{
+    padding:9px;
+    border:1px solid var(--border);
+    border-radius:7px;
+}
+
+/* ================= MODAL ================= */
+
+.modal{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(15,23,42,.6);
+    z-index:3000;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+}
+
+.modal.show{
+    display:flex;
+}
+
+.modal-box{
+    background:#fff;
+    width:600px;
+    max-width:100%;
+    max-height:90vh;
+    overflow:auto;
+    border-radius:14px;
+    padding:20px;
+}
+
+.modal-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:15px;
+}
+
+.close{
+    border:0;
+    background:#f1f5f9;
+    width:34px;
+    height:34px;
+    border-radius:7px;
+    cursor:pointer;
+}
+
+/* ================= PRINT ================= */
+
+#printArea{
+    display:none;
+}
+
+@media print{
+    @page{
+        size:80mm auto;
+        margin:0;
+    }
+
+    html,body{
+        width:80mm;
+        height:auto;
+        margin:0;
+        padding:0;
+        background:#fff;
+    }
+
+    body > *{
+        display:none!important;
+    }
+
+    #printArea{
+        display:block!important;
+        width:80mm;
+        padding:4mm;
+        font-family:monospace;
+        color:#000;
+    }
+
+    .receipt{
+        width:100%;
+        font-family:monospace;
+        font-size:12px;
+    }
+
+    .receipt h2{
+        text-align:center;
+        font-size:18px;
+    }
+
+    .center{
+        text-align:center;
+    }
+
+    .line{
+        border-top:1px dashed #000;
+        margin:7px 0;
+    }
+
+    .receipt-row{
+        display:flex;
+        justify-content:space-between;
+        margin:3px 0;
+    }
+
+    .print-kot{
+        page-break-before:always;
+    }
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media(max-width:1000px){
+    .stats{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .pos-layout{
+        grid-template-columns:1fr;
+    }
+}
+
+@media(max-width:700px){
+    .sidebar{
+        width:68px;
+    }
+
+    .sidebar .brand span,
+    .sidebar .menu-text,
+    .sidebar .arrow{
+        display:none;
+    }
+
+    .main{
+        margin-left:68px;
+        width:calc(100% - 68px);
+    }
+
+    .stats{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .topbar-right .user-name{
+        display:none;
+    }
+
+    .pos-tools{
+        grid-template-columns:1fr;
+    }
+
+    .payment-grid{
+        grid-template-columns:1fr;
+    }
+
+    .action-row{
+        grid-template-columns:1fr;
+    }
+}
+
+@media(max-width:450px){
+    .page{
+        padding:10px;
+    }
+
+    .stats{
+        grid-template-columns:1fr;
+    }
+
+    .products{
+        grid-template-columns:repeat(2,1fr);
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- =========================================================
+AUTH
+========================================================= -->
+
+<div id="authScreen">
+
+    <div class="auth-box">
+
+        <div class="logo">
+            <i class="fa-solid fa-file-invoice-dollar"></i>
+            <h1>EASY BILL LK</h1>
+            <p>Advanced ERP & POS System</p>
+        </div>
+
+        <div class="auth-tabs">
+            <button id="loginTab" class="active" onclick="showAuth('login')">
+                Login
+            </button>
+            <button id="signupTab" onclick="showAuth('signup')">
+                Create Account
+            </button>
+        </div>
+
+        <form id="loginForm" onsubmit="login(event)">
+
+            <div class="form-group">
+                <label>Username / Email</label>
+                <input id="loginUser" required>
+            </div>
+
+            <div class="form-group">
+                <label>Password</label>
+                <input id="loginPass" type="password" required>
+            </div>
+
+            <button class="btn btn-primary full">
+                <i class="fa-solid fa-right-to-bracket"></i>
+                Login
+            </button>
+
+        </form>
+
+        <form id="signupForm" style="display:none" onsubmit="signup(event)">
+
+            <div class="form-group">
+                <label>Business Name</label>
+                <input id="signupBusiness" required>
+            </div>
+
+            <div class="form-group">
+                <label>Full Name</label>
+                <input id="signupName" required>
+            </div>
+
+            <div class="form-group">
+                <label>Username</label>
+                <input id="signupUser" required>
+            </div>
+
+            <div class="form-group">
+                <label>Password</label>
+                <input id="signupPass" type="password" minlength="4" required>
+            </div>
+
+            <button class="btn btn-success full">
+                <i class="fa-solid fa-user-plus"></i>
+                Create Account
+            </button>
+
+        </form>
+
+        <div class="demo-note">
+            First time? Create your account above.
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+APP
+========================================================= -->
+
+<div id="app">
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+
+<aside class="sidebar" id="sidebar">
+
+    <div class="sidebar-header">
+
+        <div class="brand">
+            <i class="fa-solid fa-file-invoice-dollar"></i>
+            <span>EASY BILL LK</span>
+        </div>
+
+        <button class="toggle" onclick="toggleSidebar()">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+
+    </div>
+
+    <ul class="menu">
+
+        <li class="menu-item">
+            <div class="menu-link active" onclick="showPage('dashboard',this)">
+                <div class="menu-content">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span class="menu-text">Dashboard</span>
+                </div>
+            </div>
+        </li>
+
+        <li class="menu-item">
+            <div class="menu-link" onclick="showPage('pos',this)">
+                <div class="menu-content">
+                    <i class="fa-solid fa-cash-register"></i>
+                    <span class="menu-text">POS Billing</span>
+                </div>
+            </div>
+        </li>
+
+        <li class="menu-item">
+
+            <div class="menu-link" onclick="toggleSubmenu(this)">
+                <div class="menu-content">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                    <span class="menu-text">Inventory</span>
+                </div>
+                <i class="fa-solid fa-chevron-down arrow"></i>
+            </div>
+
+            <ul class="submenu">
+
+                <li>
+                    <a onclick="showPage('inventory')">
+                        <i class="fa-solid fa-box"></i> Stock List
+                    </a>
+                </li>
+
+                <li>
+                    <a onclick="openProductModal()">
+                        <i class="fa-solid fa-plus"></i> Add Item
+                    </a>
+                </li>
+
+                <li>
+                    <a onclick="showPage('categories')">
+                        <i class="fa-solid fa-tags"></i> Categories
+                    </a>
+                </li>
+
+            </ul>
+
+        </li>
+
+        <li class="menu-item">
+
+            <div class="menu-link" onclick="toggleSubmenu(this)">
+                <div class="menu-content">
+                    <i class="fa-solid fa-users"></i>
+                    <span class="menu-text">Customers</span>
+                </div>
+                <i class="fa-solid fa-chevron-down arrow"></i>
+            </div>
+
+            <ul class="submenu">
+
+                <li>
+                    <a onclick="showPage('customers')">Customer List</a>
+                </li>
+
+                <li>
+                    <a onclick="openCustomerModal()">Add Customer</a>
+                </li>
+
+                <li>
+                    <a onclick="showPage('credits')">Credit Customers</a>
+                </li>
+
+            </ul>
+
+        </li>
+
+        <li class="menu-item">
+
+            <div class="menu-link" onclick="toggleSubmenu(this)">
+                <div class="menu-content">
+                    <i class="fa-solid fa-truck"></i>
+                    <span class="menu-text">Purchasing</span>
+                </div>
+                <i class="fa-solid fa-chevron-down arrow"></i>
+            </div>
+
+            <ul class="submenu">
+
+                <li>
+                    <a onclick="showPage('suppliers')">Suppliers</a>
+                </li>
+
+                <li>
+                    <a onclick="openPurchaseModal()">New Purchase</a>
+                </li>
+
+            </ul>
+
+        </li>
+
+        <li class="menu-item">
+
+            <div class="menu-link" onclick="toggleSubmenu(this)">
+                <div class="menu-content">
+                    <i class="fa-solid fa-file-lines"></i>
+                    <span class="menu-text">Reports</span>
+                </div>
+                <i class="fa-solid fa-chevron-down arrow"></i>
+            </div>
+
+            <ul class="submenu">
+
+                <li>
+                    <a onclick="showPage('salesReports')">Sales Report</a>
+                </li>
+
+                <li>
+                    <a onclick="showPage('profitReport')">Profit Report</a>
+                </li>
+
+                <li>
+                    <a onclick="showPage('stockReport')">Stock Report</a>
+                </li>
+
+            </ul>
+
+        </li>
+
+        <li class="menu-item">
+
+            <div class="menu-link" onclick="toggleSubmenu(this)">
+                <div class="menu-content">
+                    <i class="fa-solid fa-user-shield"></i>
+                    <span class="menu-text">Administration</span>
+                </div>
+                <i class="fa-solid fa-chevron-down arrow"></i>
+            </div>
+
+            <ul class="submenu">
+
+                <li>
+                    <a onclick="showPage('users')">Users</a>
+                </li>
+
+                <li>
+                    <a onclick="showPage('expenses')">Expenses</a>
+                </li>
+
+            </ul>
+
+        </li>
+
+        <li class="menu-item">
+
+            <div class="menu-link" onclick="showPage('settings',this)">
+                <div class="menu-content">
+                    <i class="fa-solid fa-gears"></i>
+                    <span class="menu-text">Settings</span>
+                </div>
+            </div>
+
+        </li>
+
+    </ul>
+
+</aside>
+
+
+<!-- MAIN -->
+
+<main class="main">
+
+<header class="topbar">
+
+    <div class="topbar-left">
+        <h2 id="pageTitle">Dashboard</h2>
+    </div>
+
+    <div class="topbar-right">
+
+        <div class="user-badge">
+            <i class="fa-solid fa-circle-user"></i>
+            <span class="user-name" id="topUser">Admin</span>
+        </div>
+
+        <button class="logout-btn" onclick="logout()">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            Logout
+        </button>
+
+    </div>
+
+</header>
+
+
+<!-- =========================================================
+DASHBOARD
+========================================================= -->
+
+<section id="dashboard" class="page active">
+
+    <div class="page-title">
+        <h2>Dashboard Overview</h2>
+        <p>Welcome to EASY BILL LK</p>
+    </div>
+
+    <div class="stats">
+
+        <div class="stat">
+            <div class="stat-icon">
+                <i class="fa-solid fa-cart-shopping"></i>
+            </div>
+            <h3 id="dashSales">Rs. 0.00</h3>
+            <p>Today's Sales</p>
+        </div>
+
+        <div class="stat">
+            <div class="stat-icon">
+                <i class="fa-solid fa-receipt"></i>
+            </div>
+            <h3 id="dashInvoices">0</h3>
+            <p>Today's Invoices</p>
+        </div>
+
+        <div class="stat">
+            <div class="stat-icon">
+                <i class="fa-solid fa-box"></i>
+            </div>
+            <h3 id="dashProducts">0</h3>
+            <p>Total Products</p>
+        </div>
+
+        <div class="stat">
+            <div class="stat-icon">
+                <i class="fa-solid fa-users"></i>
+            </div>
+            <h3 id="dashCustomers">0</h3>
+            <p>Customers</p>
+        </div>
+
+    </div>
+
+    <div class="panel">
+
+        <h3 style="margin-bottom:12px">
+            Recent Sales
+        </h3>
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Invoice</th>
+                    <th>Date</th>
+                    <th>Customer</th>
+                    <th>Total</th>
+                    <th>Payment</th>
+                </tr>
+            </thead>
+
+            <tbody id="recentSales"></tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+POS
+========================================================= -->
+
+<section id="pos" class="page">
+
+<div class="pos-layout">
+
+<!-- PRODUCTS -->
+
+<div class="panel pos-products">
+
+    <div class="page-title">
+        <h2>POS Billing</h2>
+        <p>Select products to add to bill</p>
+    </div>
+
+    <div class="pos-tools">
+
+        <input
+            id="productSearch"
+            class="search"
+            placeholder="Search product / barcode..."
+            oninput="renderProducts()"
+        >
+
+        <select id="productCategory"
+                class="category"
+                onchange="renderProducts()">
+            <option value="">All Categories</option>
+        </select>
+
+    </div>
+
+    <div id="productsGrid" class="products"></div>
+
+</div>
+
+
+<!-- BILL -->
+
+<div class="panel cart-panel">
+
+    <div class="order-type">
+
+        <button class="active"
+                onclick="setOrderType('Dine-In',this)">
+            Dine-In
+        </button>
+
+        <button onclick="setOrderType('Takeaway',this)">
+            Takeaway
+        </button>
+
+    </div>
+
+    <div class="cart-table-wrap">
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Qty</th>
+                    <th>Total</th>
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody id="cartBody"></tbody>
+
+        </table>
+
+    </div>
+
+    <div class="summary">
+
+        <div class="summary-row">
+            <span>Subtotal</span>
+            <b>Rs. <span id="subtotal">0.00</span></b>
+        </div>
+
+        <div class="payment-grid">
+
+            <input
+                type="number"
+                id="discount"
+                value="0"
+                min="0"
+                placeholder="Discount"
+                onclick="setActiveInput('discount')"
+                oninput="updateTotals()"
+            >
+
+            <select id="paymentMethod"
+                    onchange="updateTotals()">
+                <option>Cash</option>
+                <option>Card</option>
+                <option>Bank Transfer</option>
+                <option>QR Payment</option>
+            </select>
+
+        </div>
+
+        <div class="payment-grid">
+
+            <input
+                type="number"
+                id="cashGiven"
+                value="0"
+                placeholder="Cash Given"
+                onclick="setActiveInput('cashGiven')"
+                oninput="updateTotals()"
+            >
+
+            <input
+                type="text"
+                id="customerName"
+                placeholder="Customer name"
+            >
+
+        </div>
+
+        <div style="margin-top:8px">
+
+            <label style="font-size:13px">
+                <input type="checkbox" id="creditBill"
+                       onchange="updateTotals()">
+                Credit Bill
+            </label>
+
+        </div>
+
+        <div class="summary-row total">
+
+            <span>NET TOTAL</span>
+
+            <span>
+                Rs. <span id="netTotal">0.00</span>
+            </span>
+
+        </div>
+
+        <div class="summary-row">
+
+            <span>Balance</span>
+
+            <b>
+                Rs. <span id="balance">0.00</span>
+            </b>
+
+        </div>
+
+        <div class="keypad">
+
+            <button onclick="pressKey('1')">1</button>
+            <button onclick="pressKey('2')">2</button>
+            <button onclick="pressKey('3')">3</button>
+
+            <button onclick="pressKey('4')">4</button>
+            <button onclick="pressKey('5')">5</button>
+            <button onclick="pressKey('6')">6</button>
+
+            <button onclick="pressKey('7')">7</button>
+            <button onclick="pressKey('8')">8</button>
+            <button onclick="pressKey('9')">9</button>
+
+            <button onclick="pressKey('0')">0</button>
+            <button onclick="pressKey('00')">00</button>
+            <button onclick="clearKey()">C</button>
+
+        </div>
+
+        <div class="action-row">
+
+            <button class="btn btn-primary"
+                    onclick="completeSale(true)">
+                <i class="fa-solid fa-print"></i>
+                Print + KOT
+            </button>
+
+            <button class="btn btn-success"
+                    onclick="completeSale(false)">
+                <i class="fa-solid fa-check"></i>
+                Settle Bill
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =========================================================
+INVENTORY
+========================================================= -->
+
+<section id="inventory" class="page">
+
+    <div class="page-title">
+        <h2>Inventory / Stock</h2>
+        <p>Manage products and stock</p>
+    </div>
+
+    <div class="toolbar">
+
+        <input id="inventorySearch"
+               placeholder="Search..."
+               oninput="renderInventory()">
+
+        <button class="btn btn-primary"
+                onclick="openProductModal()">
+            <i class="fa-solid fa-plus"></i>
+            Add Product
+        </button>
+
+    </div>
+
+    <div class="panel">
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>SKU</th>
+                    <th>Product</th>
+                    <th>Category</th>
+                    <th>Cost</th>
+                    <th>Sell Price</th>
+                    <th>Stock</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody id="inventoryBody"></tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+CATEGORIES
+========================================================= -->
+
+<section id="categories" class="page">
+
+    <div class="page-title">
+        <h2>Categories</h2>
+    </div>
+
+    <div class="toolbar">
+
+        <input id="categoryName"
+               placeholder="New category">
+
+        <button class="btn btn-primary"
+                onclick="addCategory()">
+            Add Category
+        </button>
+
+    </div>
+
+    <div class="panel">
+        <table>
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Products</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="categoryBody"></tbody>
+        </table>
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+CUSTOMERS
+========================================================= -->
+
+<section id="customers" class="page">
+
+    <div class="page-title">
+        <h2>Customers</h2>
+    </div>
+
+    <div class="toolbar">
+
+        <input id="customerSearch"
+               placeholder="Search customer..."
+               oninput="renderCustomers()">
+
+        <button class="btn btn-primary"
+                onclick="openCustomerModal()">
+            <i class="fa-solid fa-plus"></i>
+            Add Customer
+        </button>
+
+    </div>
+
+    <div class="panel">
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>Address</th>
+                    <th>Outstanding</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody id="customerBody"></tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+CREDIT
+========================================================= -->
+
+<section id="credits" class="page">
+
+    <div class="page-title">
+        <h2>Credit Customers</h2>
+    </div>
+
+    <div class="panel">
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Customer</th>
+                    <th>Phone</th>
+                    <th>Outstanding</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody id="creditBody"></tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+SUPPLIERS
+========================================================= -->
+
+<section id="suppliers" class="page">
+
+    <div class="page-title">
+        <h2>Suppliers</h2>
+    </div>
+
+    <div class="toolbar">
+
+        <input id="supplierName"
+               placeholder="Supplier name">
+
+        <input id="supplierPhone"
+               placeholder="Phone">
+
+        <button class="btn btn-primary"
+                onclick="addSupplier()">
+            Add Supplier
+        </button>
+
+    </div>
+
+    <div class="panel">
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody id="supplierBody"></tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+SALES REPORT
+========================================================= -->
+
+<section id="salesReports" class="page">
+
+    <div class="page-title">
+        <h2>Sales Reports</h2>
+    </div>
+
+    <div class="toolbar">
+
+        <input type="date"
+               id="reportDate"
+               onchange="renderReports()">
+
+        <button class="btn btn-primary"
+                onclick="exportSalesCSV()">
+            Export CSV
+        </button>
+
+    </div>
+
+    <div class="panel">
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Invoice</th>
+                    <th>Date</th>
+                    <th>Customer</th>
+                    <th>Items</th>
+                    <th>Total</th>
+                    <th>Payment</th>
+                </tr>
+            </thead>
+
+            <tbody id="salesReportBody"></tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+PROFIT REPORT
+========================================================= -->
+
+<section id="profitReport" class="page">
+
+    <div class="page-title">
+        <h2>Profit Report</h2>
+    </div>
+
+    <div class="stats">
+
+        <div class="stat">
+            <h3 id="profitSales">Rs. 0.00</h3>
+            <p>Total Sales</p>
+        </div>
+
+        <div class="stat">
+            <h3 id="profitCost">Rs. 0.00</h3>
+            <p>Total Cost</p>
+        </div>
+
+        <div class="stat">
+            <h3 id="profitGross">Rs. 0.00</h3>
+            <p>Gross Profit</p>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+STOCK REPORT
+========================================================= -->
+
+<section id="stockReport" class="page">
+
+    <div class="page-title">
+        <h2>Stock Report</h2>
+    </div>
+
+    <div class="panel">
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Stock</th>
+                    <th>Stock Value</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+
+            <tbody id="stockReportBody"></tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+EXPENSES
+========================================================= -->
+
+<section id="expenses" class="page">
+
+    <div class="page-title">
+        <h2>Expenses</h2>
+    </div>
+
+    <div class="toolbar">
+
+        <input id="expenseName"
+               placeholder="Expense name">
+
+        <input id="expenseAmount"
+               type="number"
+               placeholder="Amount">
+
+        <button class="btn btn-danger"
+                onclick="addExpense()">
+            Add Expense
+        </button>
+
+    </div>
+
+    <div class="panel">
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Expense</th>
+                    <th>Amount</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody id="expenseBody"></tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+USERS
+========================================================= -->
+
+<section id="users" class="page">
+
+    <div class="page-title">
+        <h2>Users / Cashier Roles</h2>
+    </div>
+
+    <div class="toolbar">
+
+        <input id="newUserName"
+               placeholder="Username">
+
+        <select id="newUserRole">
+            <option>Cashier</option>
+            <option>Manager</option>
+            <option>Admin</option>
+        </select>
+
+        <button class="btn btn-primary"
+                onclick="addUser()">
+            Add User
+        </button>
+
+    </div>
+
+    <div class="panel">
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody id="usersBody"></tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+SETTINGS
+========================================================= -->
+
+<section id="settings" class="page">
+
+    <div class="page-title">
+        <h2>Configuration</h2>
+    </div>
+
+    <div class="panel">
+
+        <div class="form-group">
+            <label>Business Name</label>
+            <input id="businessSetting">
+        </div>
+
+        <div class="form-group">
+            <label>Phone</label>
+            <input id="phoneSetting">
+        </div>
+
+        <div class="form-group">
+            <label>Address</label>
+            <input id="addressSetting">
+        </div>
+
+        <button class="btn btn-primary"
+                onclick="saveSettings()">
+            Save Settings
+        </button>
+
+    </div>
+
+</section>
+
+</main>
+
+</div>
+
+</div>
+
+
+<!-- =========================================================
+PRODUCT MODAL
+========================================================= -->
+
+<div id="productModal" class="modal">
+
+<div class="modal-box">
+
+    <div class="modal-header">
+        <h3>Add Product</h3>
+        <button class="close"
+                onclick="closeModal('productModal')">
+            ×
+        </button>
+    </div>
+
+    <form onsubmit="saveProduct(event)">
+
+        <div class="form-group">
+            <label>Product Name</label>
+            <input id="pName" required>
+        </div>
+
+        <div class="form-group">
+            <label>SKU / Barcode</label>
+            <input id="pSku" required>
+        </div>
+
+        <div class="form-group">
+            <label>Category</label>
+            <select id="pCategory"></select>
+        </div>
+
+        <div class="form-group">
+            <label>Cost Price</label>
+            <input id="pCost" type="number" min="0" required>
+        </div>
+
+        <div class="form-group">
+            <label>Selling Price</label>
+            <input id="pPrice" type="number" min="0" required>
+        </div>
+
+        <div class="form-group">
+            <label>Opening Stock</label>
+            <input id="pStock" type="number" min="0" required>
+        </div>
+
+        <div class="form-group">
+            <label>Low Stock Alert</label>
+            <input id="pLow" type="number" min="0" value="5">
+        </div>
+
+        <button class="btn btn-primary full">
+            Save Product
+        </button>
+
+    </form>
+
+</div>
+
+</div>
+
+
+<!-- =========================================================
+CUSTOMER MODAL
+========================================================= -->
+
+<div id="customerModal" class="modal">
+
+<div class="modal-box">
+
+    <div class="modal-header">
+
+        <h3>Add Customer</h3>
+
+        <button class="close"
+                onclick="closeModal('customerModal')">
+            ×
+        </button>
+
+    </div>
+
+    <form onsubmit="saveCustomer(event)">
+
+        <div class="form-group">
+            <label>Name</label>
+            <input id="cName" required>
+        </div>
+
+        <div class="form-group">
+            <label>Phone</label>
+            <input id="cPhone">
+        </div>
+
+        <div class="form-group">
+            <label>Address</label>
+            <input id="cAddress">
+        </div>
+
+        <button class="btn btn-primary full">
+            Save Customer
+        </button>
+
+    </form>
+
+</div>
+
+</div>
+
+
+<!-- =========================================================
+PURCHASE MODAL
+========================================================= -->
+
+<div id="purchaseModal" class="modal">
+
+<div class="modal-box">
+
+    <div class="modal-header">
+
+        <h3>New Purchase</h3>
+
+        <button class="close"
+                onclick="closeModal('purchaseModal')">
+            ×
+        </button>
+
+    </div>
+
+    <form onsubmit="savePurchase(event)">
+
+        <div class="form-group">
+            <label>Product</label>
+            <select id="purchaseProduct"></select>
+        </div>
+
+        <div class="form-group">
+            <label>Quantity</label>
+            <input id="purchaseQty"
+                   type="number"
+                   min="1"
+                   required>
+        </div>
+
+        <div class="form-group">
+            <label>Cost Price</label>
+            <input id="purchaseCost"
+                   type="number"
+                   min="0"
+                   required>
+        </div>
+
+        <button class="btn btn-success full">
+            Add Stock
+        </button>
+
+    </form>
+
+</div>
+
+</div>
+
+
+<!-- =========================================================
+PRINT AREA
+========================================================= -->
+
+<div id="printArea">
+
+    <div class="receipt">
+
+        <h2 id="printBusiness">
+            EASY BILL LK
+        </h2>
+
+        <div class="center">
+            <div id="printAddress"></div>
+            <div id="printPhone"></div>
+            <br>
+            <b>SALES RECEIPT</b>
+        </div>
+
+        <div class="line"></div>
+
+        <div>
+            Invoice:
+            <span id="printInvoice"></span>
+        </div>
+
+        <div>
+            Date:
+            <span id="printDate"></span>
+        </div>
+
+        <div>
+            Type:
+            <span id="printType"></span>
+        </div>
+
+        <div class="line"></div>
+
+        <div id="printItems"></div>
+
+        <div class="line"></div>
+
+        <div class="receipt-row">
+            <span>Subtotal</span>
+            <span>Rs. <span id="printSubtotal"></span></span>
+        </div>
+
+        <div class="receipt-row">
+            <span>Discount</span>
+            <span>Rs. <span id="printDiscount"></span></span>
+        </div>
+
+        <div class="receipt-row">
+            <b>TOTAL</b>
+            <b>Rs. <span id="printTotal"></span></b>
+        </div>
+
+        <div class="receipt-row">
+            <span>Payment</span>
+            <span id="printPayment"></span>
+        </div>
+
+        <div class="receipt-row">
+            <span>Balance</span>
+            <span>Rs. <span id="printBalance"></span></span>
+        </div>
+
+        <div class="line"></div>
+
+        <div class="center">
+            Thank You!
+            <br>
+            EASY BILL LK
+        </div>
+
+    </div>
+
+
+    <div class="print-kot receipt">
+
+        <h2>--- KOT ---</h2>
+
+        <div>
+            Order:
+            <span id="kotType"></span>
+        </div>
+
+        <div>
+            Invoice:
+            <span id="kotInvoice"></span>
+        </div>
+
+        <div class="line"></div>
+
+        <div id="kotItems"></div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* =========================================================
+DATABASE
+========================================================= */
+
+const DB = {
+
+    users:'eb_users',
+    products:'eb_products',
+    customers:'eb_customers',
+    suppliers:'eb_suppliers',
+    sales:'eb_sales',
+    expenses:'eb_expenses',
+    categories:'eb_categories',
+    settings:'eb_settings',
+    current:'eb_currentUser',
+    invoice:'eb_invoice'
+};
+
+function getData(key, fallback=[]){
+    try{
+        return JSON.parse(localStorage.getItem(key)) || fallback;
+    }catch(e){
+        return fallback;
+    }
+}
+
+function setData(key,value){
+    localStorage.setItem(key,JSON.stringify(value));
+}
+
+
+/* =========================================================
+DEFAULT DATA
+========================================================= */
+
+function initialize(){
+
+    if(!localStorage.getItem(DB.users)){
+
+        setData(DB.users,[
+            {
+                id:Date.now(),
+                username:'admin',
+                password:'admin123',
+                role:'Admin',
+                business:'EASY BILL LK'
+            }
+        ]);
+
+    }
+
+    if(!localStorage.getItem(DB.products)){
+
+        setData(DB.products,[
+
+            {
+                id:1,
+                name:'Fried Rice',
+                sku:'1001',
+                category:'Food',
+                cost:500,
+                price:800,
+                stock:50,
+                low:5
+            },
+
+            {
+                id:2,
+                name:'Kottu',
+                sku:'1002',
+                category:'Food',
+                cost:450,
+                price:750,
+                stock:40,
+                low:5
+            },
+
+            {
+                id:3,
+                name:'Burger',
+                sku:'1003',
+                category:'Fast Food',
+                cost:300,
+                price:550,
+                stock:35,
+                low:5
+            },
+
+            {
+                id:4,
+                name:'Coffee',
+                sku:'1004',
+                category:'Drinks',
+                cost:120,
+                price:250,
+                stock:60,
+                low:10
+            }
+
+        ]);
+
+    }
+
+    if(!localStorage.getItem(DB.customers))
+        setData(DB.customers,[]);
+
+    if(!localStorage.getItem(DB.suppliers))
+        setData(DB.suppliers,[]);
+
+    if(!localStorage.getItem(DB.sales))
+        setData(DB.sales,[]);
+
+    if(!localStorage.getItem(DB.expenses))
+        setData(DB.expenses,[]);
+
+    if(!localStorage.getItem(DB.categories))
+        setData(DB.categories,['Food','Fast Food','Drinks','Other']);
+
+    if(!localStorage.getItem(DB.settings)){
+
+        setData(DB.settings,{
+            business:'EASY BILL LK',
+            phone:'',
+            address:''
+        });
+
+    }
+
+    if(!localStorage.getItem(DB.invoice))
+        localStorage.setItem(DB.invoice,'1000');
+
+}
+
+initialize();
+
+
+/* =========================================================
+AUTH
+========================================================= */
+
+function showAuth(type){
+
+    const login=document.getElementById('loginForm');
+    const signup=document.getElementById('signupForm');
+
+    const loginTab=document.getElementById('loginTab');
+    const signupTab=document.getElementById('signupTab');
+
+    if(type==='login'){
+
+        login.style.display='block';
+        signup.style.display='none';
+
+        loginTab.classList.add('active');
+        signupTab.classList.remove('active');
+
+    }else{
+
+        login.style.display='none';
+        signup.style.display='block';
+
+        loginTab.classList.remove('active');
+        signupTab.classList.add('active');
+
+    }
+
+}
+
+
+function signup(e){
+
+    e.preventDefault();
+
+    const business=document.getElementById('signupBusiness').value.trim();
+    const name=document.getElementById('signupName').value.trim();
+    const username=document.getElementById('signupUser').value.trim();
+    const password=document.getElementById('signupPass').value;
+
+    let users=getData(DB.users);
+
+    if(users.some(u=>u.username.toLowerCase()===username.toLowerCase())){
+
+        alert('Username already exists!');
+        return;
+
+    }
+
+    users.push({
+
+        id:Date.now(),
+        username,
+        password,
+        name,
+        role:'Admin',
+        business
+
+    });
+
+    setData(DB.users,users);
+
+    alert('Account created successfully!');
+
+    document.getElementById('loginUser').value=username;
+
+    showAuth('login');
+
+}
+
+
+function login(e){
+
+    e.preventDefault();
+
+    const username=document.getElementById('loginUser').value.trim();
+    const password=document.getElementById('loginPass').value;
+
+    const users=getData(DB.users);
+
+    const user=users.find(
+        u=>u.username.toLowerCase()===username.toLowerCase()
+        && u.password===password
+    );
+
+    if(!user){
+
+        alert('Invalid username or password!');
+        return;
+
+    }
+
+    setData(DB.current,user);
+
+    openApp();
+
+}
+
+
+function openApp(){
+
+    document.getElementById('authScreen').style.display='none';
+    document.getElementById('app').style.display='block';
+
+    const user=getData(DB.current,null);
+
+    if(user){
+        document.getElementById('topUser').innerText=
+            user.name || user.username;
+    }
+
+    refreshAll();
+
+}
+
+
+function logout(){
+
+    localStorage.removeItem(DB.current);
+
+    document.getElementById('app').style.display='none';
+    document.getElementById('authScreen').style.display='flex';
+
+    showAuth('login');
+
+}
+
+
+if(localStorage.getItem(DB.current)){
+    openApp();
+}
+
+
+/* =========================================================
+SIDEBAR
+========================================================= */
+
+function toggleSidebar(){
+
+    document.getElementById('sidebar')
+        .classList.toggle('collapsed');
+
+}
+
+
+function toggleSubmenu(el){
+
+    const sidebar=document.getElementById('sidebar');
+
+    if(sidebar.classList.contains('collapsed'))
+        sidebar.classList.remove('collapsed');
+
+    const submenu=el.nextElementSibling;
+
+    if(submenu)
+        submenu.classList.toggle('open');
+
+}
+
+
+/* =========================================================
+PAGES
+========================================================= */
+
+const pageNames={
+
+    dashboard:'Dashboard',
+    pos:'POS Billing',
+    inventory:'Inventory',
+    categories:'Categories',
+    customers:'Customers',
+    credits:'Credit Customers',
+    suppliers:'Suppliers',
+    salesReports:'Sales Reports',
+    profitReport:'Profit Report',
+    stockReport:'Stock Report',
+    expenses:'Expenses',
+    users:'Users / Roles',
+    settings:'Configuration'
+
+};
+
+
+function showPage(id,element=null){
+
+    document.querySelectorAll('.page')
+        .forEach(p=>p.classList.remove('active'));
+
+    const page=document.getElementById(id);
+
+    if(!page) return;
+
+    page.classList.add('active');
+
+    document.getElementById('pageTitle')
+        .innerText=pageNames[id] || id;
+
+    document.querySelectorAll('.menu-link')
+        .forEach(m=>m.classList.remove('active'));
+
+    if(element)
+        element.classList.add('active');
+
+    refreshPage(id);
+
+}
+
+
+/* =========================================================
+PRODUCTS
+========================================================= */
+
+let cart=[];
+let currentOrderType='Dine-In';
+let activeInput='cashGiven';
+
+
+function renderProducts(){
+
+    const grid=document.getElementById('productsGrid');
+
+    if(!grid) return;
+
+    const search=
+        (document.getElementById('productSearch')?.value||'')
+        .toLowerCase();
+
+    const category=
+        document.getElementById('productCategory')?.value||'';
+
+    const products=getData(DB.products);
+
+    const filtered=products.filter(p=>{
+
+        const matchesSearch=
+            p.name.toLowerCase().includes(search) ||
+            p.sku.toLowerCase().includes(search);
+
+        const matchesCategory=
+            !category || p.category===category;
+
+        return matchesSearch && matchesCategory;
+
+    });
+
+    grid.innerHTML='';
+
+    filtered.forEach(p=>{
+
+        const div=document.createElement('div');
+
+        div.className='product';
+
+        div.onclick=()=>addToCart(p.id);
+
+        div.innerHTML=`
+
+            <div class="product-name">
+                ${escapeHtml(p.name)}
+            </div>
+
+            <div class="product-price">
+                Rs. ${money(p.price)}
+            </div>
+
+            <div class="stock">
+                Stock: ${p.stock}
+            </div>
+
+        `;
+
+        grid.appendChild(div);
+
+    });
+
+}
+
+
+function addToCart(id){
+
+    const product=getData(DB.products)
+        .find(p=>p.id==id);
+
+    if(!product) return;
+
+    const existing=cart.find(i=>i.id==id);
+
+    if(product.stock<=0){
+
+        alert('Out of stock!');
+        return;
+
+    }
+
+    if(existing){
+
+        if(existing.qty>=product.stock){
+
+            alert('Not enough stock!');
+            return;
+
+        }
+
+        existing.qty++;
+
+    }else{
+
+        cart.push({
+            id:product.id,
+            name:product.name,
+            price:Number(product.price),
+            cost:Number(product.cost),
+            qty:1
+        });
+
+    }
+
+    renderCart();
+
+}
+
+
+function renderCart(){
+
+    const body=document.getElementById('cartBody');
+
+    body.innerHTML='';
+
+    cart.forEach((item,index)=>{
+
+        const tr=document.createElement('tr');
+
+        tr.innerHTML=`
+
+            <td>${escapeHtml(item.name)}</td>
+
+            <td>
+
+                <div class="qty-control">
+
+                    <button onclick="changeQty(${index},-1)">
+                        −
+                    </button>
+
+                    <span>${item.qty}</span>
+
+                    <button onclick="changeQty(${index},1)">
+                        +
+                    </button>
+
+                </div>
+
+            </td>
+
+            <td>Rs. ${money(item.price*item.qty)}</td>
+
+            <td>
+
+                <button
+                    class="btn btn-danger"
+                    style="padding:5px 8px"
+                    onclick="removeCart(${index})">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+
+            </td>
+
+        `;
+
+        body.appendChild(tr);
+
+    });
+
+    updateTotals();
+
+}
+
+
+function changeQty(index,value){
+
+    const item=cart[index];
+
+    const product=getData(DB.products)
+        .find(p=>p.id==item.id);
+
+    item.qty+=value;
+
+    if(item.qty<=0){
+
+        cart.splice(index,1);
+
+    }else if(item.qty>product.stock){
+
+        item.qty=product.stock;
+
+        alert('Stock limit reached.');
+
+    }
+
+    renderCart();
+
+}
+
+
+function removeCart(index){
+
+    cart.splice(index,1);
+
+    renderCart();
+
+}
+
+
+function setOrderType(type,button){
+
+    currentOrderType=type;
+
+    document.querySelectorAll('.order-type button')
+        .forEach(b=>b.classList.remove('active'));
+
+    button.classList.add('active');
+
+}
+
+
+/* =========================================================
+TOTALS
+========================================================= */
+
+function setActiveInput(id){
+
+    activeInput=id;
+
+}
+
+
+function pressKey(value){
+
+    const input=document.getElementById(activeInput);
+
+    if(!input) return;
+
+    if(input.value==='0')
+        input.value=value;
+    else
+        input.value+=value;
+
+    updateTotals();
+
+}
+
+
+function clearKey(){
+
+    const input=document.getElementById(activeInput);
+
+    if(input){
+
+        input.value='0';
+        updateTotals();
+
+    }
+
+}
+
+
+function updateTotals(){
+
+    let subtotal=0;
+
+    cart.forEach(i=>{
+        subtotal+=i.price*i.qty;
+    });
+
+    const discount=
+        Number(document.getElementById('discount')?.value)||0;
+
+    const net=Math.max(0,subtotal-discount);
+
+    const cash=
+        Number(document.getElementById('cashGiven')?.value)||0;
+
+    const balance=Math.max(0,cash-net);
+
+    document.getElementById('subtotal').innerText=money(subtotal);
+    document.getElementById('netTotal').innerText=money(net);
+    document.getElementById('balance').innerText=money(balance);
+
+}
+
+
+/* =========================================================
+COMPLETE SALE
+========================================================= */
+
+function nextInvoice(){
+
+    let n=Number(localStorage.getItem(DB.invoice)||1000);
+
+    n++;
+
+    localStorage.setItem(DB.invoice,n);
+
+    return 'INV-'+n;
+
+}
+
+
+function completeSale(print){
+
+    if(cart.length===0){
+
+        alert('Cart is empty!');
+        return;
+
+    }
+
+    const discount=
+        Number(document.getElementById('discount').value)||0;
+
+    const subtotal=cart.reduce(
+        (sum,i)=>sum+(i.price*i.qty),0
+    );
+
+    const total=Math.max(0,subtotal-discount);
+
+    const credit=
+        document.getElementById('creditBill').checked;
+
+    const payment=credit
+        ?'Credit'
+        :document.getElementById('paymentMethod').value;
+
+    const cash=
+        Number(document.getElementById('cashGiven').value)||0;
+
+    if(!credit &&
+       payment==='Cash' &&
+       cash<total){
+
+        alert('Cash amount is less than total!');
+        return;
+
+    }
+
+    const invoice=nextInvoice();
+
+    const sale={
+
+        id:Date.now(),
+
+        invoice,
+
+        date:new Date().toISOString(),
+
+        customer:
+            document.getElementById('customerName').value.trim()
+            ||'Walk-in Customer',
+
+        orderType:currentOrderType,
+
+        items:JSON.parse(JSON.stringify(cart)),
+
+        subtotal,
+
+        discount,
+
+        total,
+
+        payment,
+
+        cash,
+
+        balance:Math.max(0,cash-total),
+
+        user:getData(DB.current,null)?.username || 'Admin'
+
+    };
+
+    /* STOCK DEDUCTION */
+
+    let products=getData(DB.products);
+
+    cart.forEach(item=>{
+
+        const product=products.find(p=>p.id==item.id);
+
+        if(product)
+            product.stock-=item.qty;
+
+    });
+
+    setData(DB.products,products);
+
+
+    /* SAVE SALE */
+
+    let sales=getData(DB.sales);
+
+    sales.push(sale);
+
+    setData(DB.sales,sales);
+
+
+    /* CREDIT */
+
+    if(credit){
+
+        let customers=getData(DB.customers);
+
+        let customer=customers.find(
+            c=>c.name.toLowerCase()===sale.customer.toLowerCase()
+        );
+
+        if(customer){
+
+            customer.outstanding=
+                Number(customer.outstanding||0)+total;
+
+        }
+
+        setData(DB.customers,customers);
+
+    }
+
+
+    if(print)
+        preparePrint(sale);
+
+    cart=[];
+
+    document.getElementById('discount').value='0';
+    document.getElementById('cashGiven').value='0';
+    document.getElementById('customerName').value='';
+    document.getElementById('creditBill').checked=false;
+
+    renderCart();
+    refreshAll();
+
+    if(print){
+
+        setTimeout(()=>{
+            window.print();
+        },300);
+
+    }
+
+    alert(
+        'Sale completed successfully!\nInvoice: '+invoice
+    );
+
+}
+
+
+/* =========================================================
+PRINT
+========================================================= */
+
+function preparePrint(sale){
+
+    const settings=getData(DB.settings,{});
+
+    document.getElementById('printBusiness')
+        .innerText=settings.business||'EASY BILL LK';
+
+    document.getElementById('printAddress')
+        .innerText=settings.address||'';
+
+    document.getElementById('printPhone')
+        .innerText=settings.phone||'';
+
+    document.getElementById('printInvoice')
+        .innerText=sale.invoice;
+
+    document.getElementById('printDate')
+        .innerText=new Date(sale.date).toLocaleString();
+
+    document.getElementById('printType')
+        .innerText=sale.orderType;
+
+    document.getElementById('printSubtotal')
+        .innerText=money(sale.subtotal);
+
+    document.getElementById('printDiscount')
+        .innerText=money(sale.discount);
+
+    document.getElementById('printTotal')
+        .innerText=money(sale.total);
+
+    document.getElementById('printPayment')
+        .innerText=sale.payment;
+
+    document.getElementById('printBalance')
+        .innerText=money(sale.balance);
+
+    let html='';
+
+    sale.items.forEach(i=>{
+
+        html+=`
+
+            <div class="receipt-row">
+
+                <span>
+                    ${escapeHtml(i.name)}
+                    x${i.qty}
+                </span>
+
+                <span>
+                    ${money(i.price*i.qty)}
+                </span>
+
+            </div>
+
+        `;
+
+    });
+
+    document.getElementById('printItems').innerHTML=html;
+
+    document.getElementById('kotType').innerText=sale.orderType;
+    document.getElementById('kotInvoice').innerText=sale.invoice;
+
+    let kot='';
+
+    sale.items.forEach(i=>{
+
+        kot+=`
+
+            <div style="margin:8px 0;font-size:15px">
+
+                <b>${escapeHtml(i.name)}</b>
+
+                <span style="float:right">
+                    x ${i.qty}
+                </span>
+
+            </div>
+
+        `;
+
+    });
+
+    document.getElementById('kotItems').innerHTML=kot;
+
+}
+
+
+/* =========================================================
+INVENTORY
+========================================================= */
+
+function renderInventory(){
+
+    const body=document.getElementById('inventoryBody');
+
+    if(!body) return;
+
+    const search=
+        (document.getElementById('inventorySearch')?.value||'')
+        .toLowerCase();
+
+    const products=getData(DB.products);
+
+    body.innerHTML='';
+
+    products
+    .filter(p=>p.name.toLowerCase().includes(search)
+            ||p.sku.toLowerCase().includes(search))
+    .forEach(p=>{
+
+        const tr=document.createElement('tr');
+
+        tr.innerHTML=`
+
+            <td>${escapeHtml(p.sku)}</td>
+
+            <td>${escapeHtml(p.name)}</td>
+
+            <td>${escapeHtml(p.category)}</td>
+
+            <td>Rs. ${money(p.cost)}</td>
+
+            <td>Rs. ${money(p.price)}</td>
+
+            <td>
+
+                <b style="color:${p.stock<=p.low?'#dc2626':'#16a34a'}">
+                    ${p.stock}
+                </b>
+
+            </td>
+
+            <td>
+
+                <button
+                    class="btn btn-danger"
+                    style="padding:6px 9px"
+                    onclick="deleteProduct(${p.id})">
+                    Delete
+                </button>
+
+            </td>
+
+        `;
+
+        body.appendChild(tr);
+
+    });
+
+}
+
+
+function openProductModal(){
+
+    populateCategories();
+
+    document.getElementById('productModal')
+        .classList.add('show');
+
+}
+
+
+function saveProduct(e){
+
+    e.preventDefault();
+
+    let products=getData(DB.products);
+
+    products.push({
+
+        id:Date.now(),
+
+        name:document.getElementById('pName').value.trim(),
+
+        sku:document.getElementById('pSku').value.trim(),
+
+        category:document.getElementById('pCategory').value,
+
+        cost:Number(document.getElementById('pCost').value),
+
+        price:Number(document.getElementById('pPrice').value),
+
+        stock:Number(document.getElementById('pStock').value),
+
+        low:Number(document.getElementById('pLow').value)||5
+
+    });
+
+    setData(DB.products,products);
+
+    closeModal('productModal');
+
+    e.target.reset();
+
+    refreshAll();
+
+}
+
+
+function deleteProduct(id){
+
+    if(!confirm('Delete this product?'))
+        return;
+
+    let products=getData(DB.products)
+        .filter(p=>p.id!=id);
+
+    setData(DB.products,products);
+
+    refreshAll();
+
+}
+
+
+/* =========================================================
+CATEGORY
+========================================================= */
+
+function populateCategories(){
+
+    const categories=getData(DB.categories);
+
+    const select=document.getElementById('pCategory');
+
+    if(select){
+
+        select.innerHTML='';
+
+        categories.forEach(c=>{
+
+            const option=document.createElement('option');
+
+            option.value=c;
+            option.textContent=c;
+
+            select.appendChild(option);
+
+        });
+
+    }
+
+    const filter=document.getElementById('productCategory');
+
+    if(filter){
+
+        const current=filter.value;
+
+        filter.innerHTML='<option value="">All Categories</option>';
+
+        categories.forEach(c=>{
+
+            const option=document.createElement('option');
+
+            option.value=c;
+            option.textContent=c;
+
+            filter.appendChild(option);
+
+        });
+
+        filter.value=current;
+
+    }
+
+}
+
+
+function addCategory(){
+
+    const input=document.getElementById('categoryName');
+
+    const name=input.value.trim();
+
+    if(!name) return;
+
+    let categories=getData(DB.categories);
+
+    if(categories.includes(name)){
+
+        alert('Category already exists!');
+        return;
+
+    }
+
+    categories.push(name);
+
+    setData(DB.categories,categories);
+
+    input.value='';
+
+    refreshAll();
+
+}
+
+
+function renderCategories(){
+
+    const body=document.getElementById('categoryBody');
+
+    if(!body) return;
+
+    const categories=getData(DB.categories);
+
+    const products=getData(DB.products);
+
+    body.innerHTML='';
+
+    categories.forEach(c=>{
+
+        const count=
+            products.filter(p=>p.category===c).length;
+
+        const tr=document.createElement('tr');
+
+        tr.innerHTML=`
+
+            <td>${escapeHtml(c)}</td>
+
+            <td>${count}</td>
+
+            <td>
+
+                <button class="btn btn-danger"
+                        style="padding:6px"
+                        onclick="deleteCategory('${escapeAttr(c)}')">
+                    Delete
+                </button>
+
+            </td>
+
+        `;
+
+        body.appendChild(tr);
+
+    });
+
+}
+
+
+function deleteCategory(name){
+
+    const products=getData(DB.products);
+
+    if(products.some(p=>p.category===name)){
+
+        alert('Cannot delete category while products use it.');
+        return;
+
+    }
+
+    let categories=getData(DB.categories)
+        .filter(c=>c!==name);
+
+    setData(DB.categories,categories);
+
+    refreshAll();
+
+}
+
+
+/* =========================================================
+CUSTOMERS
+========================================================= */
+
+function openCustomerModal(){
+
+    document.getElementById('customerModal')
+        .classList.add('show');
+
+}
+
+
+function saveCustomer(e){
+
+    e.preventDefault();
+
+    let customers=getData(DB.customers);
+
+    customers.push({
+
+        id:Date.now(),
+
+        name:document.getElementById('cName').value.trim(),
+
+        phone:document.getElementById('cPhone').value.trim(),
+
+        address:document.getElementById('cAddress').value.trim(),
+
+        outstanding:0
+
+    });
+
+    setData(DB.customers,customers);
+
+    closeModal('customerModal');
+
+    e.target.reset();
+
+    refreshAll();
+
+}
+
+
+function renderCustomers(){
+
+    const body=document.getElementById('customerBody');
+
+    if(!body) return;
+
+    const search=
+        (document.getElementById('customerSearch')?.value||'')
+        .toLowerCase();
+
+    const customers=getData(DB.customers);
+
+    body.innerHTML='';
+
+    customers
+    .filter(c=>
+        c.name.toLowerCase().includes(search)
+        ||c.phone.toLowerCase().includes(search)
+    )
+    .forEach(c=>{
+
+        const tr=document.createElement('tr');
+
+        tr.innerHTML=`
+
+            <td>${escapeHtml(c.name)}</td>
+
+            <td>${escapeHtml(c.phone)}</td>
+
+            <td>${escapeHtml(c.address)}</td>
+
+            <td>
+                Rs. ${money(c.outstanding||0)}
+            </td>
+
+            <td>
+
+                <button
+                    class="btn btn-success"
+                    style="padding:6px"
+                    onclick="collectCredit(${c.id})">
+                    Collect
+                </button>
+
+            </td>
+
+        `;
+
+        body.appendChild(tr);
+
+    });
+
+}
+
+
+function renderCredits(){
+
+    const body=document.getElementById('creditBody');
+
+    if(!body) return;
+
+    const customers=getData(DB.customers)
+        .filter(c=>Number(c.outstanding||0)>0);
+
+    body.innerHTML='';
+
+    customers.forEach(c=>{
+
+        const tr=document.createElement('tr');
+
+        tr.innerHTML=`
+
+            <td>${escapeHtml(c.name)}</td>
+
+            <td>${escapeHtml(c.phone)}</td>
+
+            <td>
+                Rs. ${money(c.outstanding)}
+            </td>
+
+            <td>
+
+                <button class="btn btn-success"
+                        style="padding:6px"
+                        onclick="collectCredit(${c.id})">
+                    Collect Payment
+                </button>
+
+            </td>
+
+        `;
+
+        body.appendChild(tr);
+
+    });
+
+}
+
+
+function collectCredit(id){
+
+    let customers=getData(DB.customers);
+
+    const customer=customers.find(c=>c.id==id);
+
+    if(!customer) return;
+
+    const amount=Number(
+        prompt(
+            'Outstanding: Rs. '+money(customer.outstanding)
+            +'\nEnter payment amount:'
+        )
+    );
+
+    if(!amount || amount<=0) return;
+
+    customer.outstanding=
+        Math.max(0,Number(customer.outstanding)-amount);
+
+    setData(DB.customers,customers);
+
+    refreshAll();
+
+}
+
+
+/* =========================================================
+SUPPLIERS
+========================================================= */
+
+function addSupplier(){
+
+    const name=document.getElementById('supplierName').value.trim();
+    const phone=document.getElementById('supplierPhone').value.trim();
+
+    if(!name){
+
+        alert('Enter supplier name.');
+        return;
+
+    }
+
+    let suppliers=getData(DB.suppliers);
+
+    suppliers.push({
+
+        id:Date.now(),
+        name,
+        phone
+
+    });
+
+    setData(DB.suppliers,suppliers);
+
+    document.getElementById('supplierName').value='';
+    document.getElementById('supplierPhone').value='';
+
+    renderSuppliers();
+
+}
+
+
+function renderSuppliers(){
+
+    const body=document.getElementById('supplierBody');
+
+    if(!body) return;
+
+    const suppliers=getData(DB.suppliers);
+
+    body.innerHTML='';
+
+    suppliers.forEach(s=>{
+
+        const tr=document.createElement('tr');
+
+        tr.innerHTML=`
+
+            <td>${escapeHtml(s.name)}</td>
+
+            <td>${escapeHtml(s.phone)}</td>
+
+            <td>
+
+                <button class="btn btn-danger"
+                        style="padding:6px"
+                        onclick="deleteSupplier(${s.id})">
+                    Delete
+                </button>
+
+            </td>
+
+        `;
+
+        body.appendChild(tr);
+
+    });
+
+}
+
+
+function deleteSupplier(id){
+
+    let suppliers=getData(DB.suppliers)
+        .filter(s=>s.id!=id);
+
+    setData(DB.suppliers,suppliers);
+
+    renderSuppliers();
+
+}
+
+
+/* =========================================================
+PURCHASING
+========================================================= */
+
+function openPurchaseModal(){
+
+    const select=document.getElementById('purchaseProduct');
+
+    const products=getData(DB.products);
+
+    select.innerHTML='';
+
+    products.forEach(p=>{
+
+        const o=document.createElement('option');
+
+        o.value=p.id;
+        o.textContent=p.name;
+
+        select.appendChild(o);
+
+    });
+
+    document.getElementById('purchaseModal')
+        .classList.add('show');
+
+}
+
+
+function savePurchase(e){
+
+    e.preventDefault();
+
+    const id=Number(
+        document.getElementById('purchaseProduct').value
+    );
+
+    const qty=Number(
+        document.getElementById('purchaseQty').value
+    );
+
+    const cost=Number(
+        document.getElementById('purchaseCost').value
+    );
+
+    let products=getData(DB.products);
+
+    const product=products.find(p=>p.id===id);
+
+    if(product){
+
+        product.stock+=qty;
+        product.cost=cost;
+
+    }
+
+    setData(DB.products,products);
+
+    closeModal('purchaseModal');
+
+    e.target.reset();
+
+    refreshAll();
+
+    alert('Purchase / Stock added successfully!');
+
+}
+
+
+/* =========================================================
+REPORTS
+========================================================= */
+
+function renderReports(){
+
+    const body=document.getElementById('salesReportBody');
+
+    if(!body) return;
+
+    const date=document.getElementById('reportDate').value;
+
+    const sales=getData(DB.sales);
+
+    body.innerHTML='';
+
+    sales
+    .filter(s=>{
+
+        if(!date) return true;
+
+        return s.date.slice(0,10)===date;
+
+    })
+    .slice()
+    .reverse()
+    .forEach(s=>{
+
+        const itemText=s.items
+            .map(i=>i.name+' x'+i.qty)
+            .join(', ');
+
+        const tr=document.createElement('tr');
+
+        tr.innerHTML=`
+
+            <td>${escapeHtml(s.invoice)}</td>
+
+            <td>
+                ${new Date(s.date).toLocaleString()}
+            </td>
+
+            <td>${escapeHtml(s.customer)}</td>
+
+            <td>${escapeHtml(itemText)}</td>
+
+            <td>Rs. ${money(s.total)}</td>
+
+            <td>${escapeHtml(s.payment)}</td>
+
+        `;
+
+        body.appendChild(tr);
+
+    });
+
+}
+
+
+function renderProfit(){
+
+    const sales=getData(DB.sales);
+
+    let salesTotal=0;
+    let costTotal=0;
+
+    sales.forEach(s=>{
+
+        salesTotal+=Number(s.total);
+
+        s.items.forEach(i=>{
+            costTotal+=Number(i.cost)*Number(i.qty);
+        });
+
+    });
+
+    document.getElementById('profitSales')
+        .innerText='Rs. '+money(salesTotal);
+
+    document.getElementById('profitCost')
+        .innerText='Rs. '+money(costTotal);
+
+    document.getElementById('profitGross')
+        .innerText='Rs. '+money(salesTotal-costTotal);
+
+}
+
+
+function renderStockReport(){
+
+    const body=document.getElementById('stockReportBody');
+
+    if(!body) return;
+
+    const products=getData(DB.products);
+
+    body.innerHTML='';
+
+    products.forEach(p=>{
+
+        const value=p.stock*p.cost;
+
+        const low=p.stock<=p.low;
+
+        const tr=document.createElement('tr');
+
+        tr.innerHTML=`
+
+            <td>${escapeHtml(p.name)}</td>
+
+            <td>${p.stock}</td>
+
+            <td>Rs. ${money(value)}</td>
+
+            <td>
+
+                <b style="color:${low?'#dc2626':'#16a34a'}">
+                    ${low?'LOW STOCK':'OK'}
+                </b>
+
+            </td>
+
+        `;
+
+        body.appendChild(tr);
+
+    });
+
+}
+
+
+/* =========================================================
+EXPENSES
+========================================================= */
+
+function addExpense(){
+
+    const name=document.getElementById('expenseName').value.trim();
+
+    const amount=Number(
+        document.getElementById('expenseAmount').value
+    );
+
+    if(!name || amount<=0){
+
+        alert('Enter valid expense.');
+        return;
+
+    }
+
+    let expenses=getData(DB.expenses);
+
+    expenses.push({
+
+        id:Date.now(),
+
+        date:new Date().toISOString(),
+
+        name,
+
+        amount
+
+    });
+
+    setData(DB.expenses,expenses);
+
+    document.getElementById('expenseName').value='';
+    document.getElementById('expenseAmount').value='';
+
+    renderExpenses();
+
+}
+
+
+function renderExpenses(){
+
+    const body=document.getElementById('expenseBody');
+
+    if(!body) return;
+
+    const expenses=getData(DB.expenses);
+
+    body.innerHTML='';
+
+    expenses.slice().reverse().forEach(e=>{
+
+        const tr=document.createElement('tr');
+
+        tr.innerHTML=`
+
+            <td>${new Date(e.date).toLocaleDateString()}</td>
+
+            <td>${escapeHtml(e.name)}</td>
+
+            <td>Rs. ${money(e.amount)}</td>
+
+            <td>
+
+                <button class="btn btn-danger"
+                        style="padding:6px"
+                        onclick="deleteExpense(${e.id})">
+                    Delete
+                </button>
+
+            </td>
+
+        `;
+
+        body.appendChild(tr);
+
+    });
+
+}
+
+
+function deleteExpense(id){
+
+    let expenses=getData(DB.expenses)
+        .filter(e=>e.id!=id);
+
+    setData(DB.expenses,expenses);
+
+    renderExpenses();
+
+}
+
+
+/* =========================================================
+USERS
+========================================================= */
+
+function addUser(){
+
+    const username=
+        document.getElementById('newUserName').value.trim();
+
+    const role=
+        document.getElementById('newUserRole').value;
+
+    if(!username){
+
+        alert('Enter username.');
+        return;
+
+    }
+
+    let users=getData(DB.users);
+
+    if(users.some(u=>u.username===username)){
+
+        alert('User already exists.');
+        return;
+
+    }
+
+    users.push({
+
+        id:Date.now(),
+
+        username,
+
+        password:'1234',
+
+        role
+
+    });
+
+    setData(DB.users,users);
+
+    document.getElementById('newUserName').value='';
+
+    renderUsers();
+
+    alert('User added. Default password: 1234');
+
+}
+
+
+function renderUsers(){
+
+    const body=document.getElementById('usersBody');
+
+    if(!body) return;
+
+    const users=getData(DB.users);
+
+    body.innerHTML='';
+
+    users.forEach(u=>{
+
+        const tr=document.createElement('tr');
+
+        tr.innerHTML=`
+
+            <td>${escapeHtml(u.username)}</td>
+
+            <td>${escapeHtml(u.role)}</td>
+
+            <td>
+
+                <button class="btn btn-danger"
+                        style="padding:6px"
+                        onclick="deleteUser(${u.id})">
+                    Delete
+                </button>
+
+            </td>
+
+        `;
+
+        body.appendChild(tr);
+
+    });
+
+}
+
+
+function deleteUser(id){
+
+    let users=getData(DB.users);
+
+    if(users.length<=1){
+
+        alert('At least one user must remain.');
+        return;
+
+    }
+
+    users=users.filter(u=>u.id!=id);
+
+    setData(DB.users,users);
+
+    renderUsers();
+
+}
+
+
+/* =========================================================
+SETTINGS
+========================================================= */
+
+function loadSettings(){
+
+    const s=getData(DB.settings,{});
+
+    document.getElementById('businessSetting').value=
+        s.business||'';
+
+    document.getElementById('phoneSetting').value=
+        s.phone||'';
+
+    document.getElementById('addressSetting').value=
+        s.address||'';
+
+}
+
+
+function saveSettings(){
+
+    setData(DB.settings,{
+
+        business:
+            document.getElementById('businessSetting').value,
+
+        phone:
+            document.getElementById('phoneSetting').value,
+
+        address:
+            document.getElementById('addressSetting').value
+
+    });
+
+    alert('Settings saved.');
+
+}
+
+
+/* =========================================================
+DASHBOARD
+========================================================= */
+
+function renderDashboard(){
+
+    const sales=getData(DB.sales);
+
+    const today=new Date().toISOString().slice(0,10);
+
+    const todaySales=sales.filter(
+        s=>s.date.slice(0,10)===today
+    );
+
+    const total=todaySales.reduce(
+        (sum,s)=>sum+Number(s.total),0
+    );
+
+    document.getElementById('dashSales')
+        .innerText='Rs. '+money(total);
+
+    document.getElementById('dashInvoices')
+        .innerText=todaySales.length;
+
+    document.getElementById('dashProducts')
+        .innerText=getData(DB.products).length;
+
+    document.getElementById('dashCustomers')
+        .innerText=getData(DB.customers).length;
+
+    const body=document.getElementById('recentSales');
+
+    body.innerHTML='';
+
+    sales.slice().reverse().slice(0,8).forEach(s=>{
+
+        const tr=document.createElement('tr');
+
+        tr.innerHTML=`
+
+            <td>${escapeHtml(s.invoice)}</td>
+
+            <td>${new Date(s.date).toLocaleString()}</td>
+
+            <td>${escapeHtml(s.customer)}</td>
+
+            <td>Rs. ${money(s.total)}</td>
+
+            <td>${escapeHtml(s.payment)}</td>
+
+        `;
+
+        body.appendChild(tr);
+
+    });
+
+}
+
+
+/* =========================================================
+CSV EXPORT
+========================================================= */
+
+function exportSalesCSV(){
+
+    const sales=getData(DB.sales);
+
+    let csv=
+        'Invoice,Date,Customer,Total,Payment\\n';
+
+    sales.forEach(s=>{
+
+        csv+=
+            `"${s.invoice}",`+
+            `"${new Date(s.date).toLocaleString()}",`+
+            `"${s.customer}",`+
+            `"${s.total}",`+
+            `"${s.payment}"\\n`;
+
+    });
+
+    const blob=new Blob([csv],{
+        type:'text/csv;charset=utf-8;'
+    });
+
+    const url=URL.createObjectURL(blob);
+
+    const a=document.createElement('a');
+
+    a.href=url;
+    a.download='easy_bill_sales.csv';
+
+    a.click();
+
+    URL.revokeObjectURL(url);
+
+}
+
+
+/* =========================================================
+UTILITIES
+========================================================= */
+
+function money(value){
+
+    return Number(value||0).toFixed(2);
+
+}
+
+
+function escapeHtml(text){
+
+    return String(text??'')
+        .replaceAll('&','&amp;')
+        .replaceAll('<','&lt;')
+        .replaceAll('>','&gt;')
+        .replaceAll('"','&quot;')
+        .replaceAll("'","&#039;");
+
+}
+
+
+function escapeAttr(text){
+
+    return String(text??'')
+        .replaceAll("\\","\\\\")
+        .replaceAll("'","\\'");
+
+}
+
+
+function closeModal(id){
+
+    document.getElementById(id)
+        .classList.remove('show');
+
+}
+
+
+/* =========================================================
+REFRESH
+========================================================= */
+
+function refreshAll(){
+
+    renderDashboard();
+    renderProducts();
+    renderCart();
+    renderInventory();
+    renderCategories();
+    renderCustomers();
+    renderCredits();
+    renderSuppliers();
+    renderReports();
+    renderProfit();
+    renderStockReport();
+    renderExpenses();
+    renderUsers();
+    populateCategories();
+    loadSettings();
+
+}
+
+
+function refreshPage(id){
+
+    if(id==='dashboard') renderDashboard();
+
+    if(id==='pos'){
+
+        renderProducts();
+        renderCart();
+
+    }
+
+    if(id==='inventory') renderInventory();
+
+    if(id==='categories') renderCategories();
+
+    if(id==='customers') renderCustomers();
+
+    if(id==='credits') renderCredits();
+
+    if(id==='suppliers') renderSuppliers();
+
+    if(id==='salesReports') renderReports();
+
+    if(id==='profitReport') renderProfit();
+
+    if(id==='stockReport') renderStockReport();
+
+    if(id==='expenses') renderExpenses();
+
+    if(id==='users') renderUsers();
+
+    if(id==='settings') loadSettings();
+
+}
+
+
+/* =========================================================
+START
+========================================================= */
+
+renderCart();
+
+</script>
+
+</body>
+</html>
