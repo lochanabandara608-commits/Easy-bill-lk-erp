@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>EASY BILL LK - Restaurant ERP POS</title>
+<style>
+*{box-sizing:border-box} :root{--blue:#2563eb;--dark:#111827;--dark2:#1f2937;--bg:#eef2f7;--border:#d1d5db;--green:#16a34a;--red:#dc2626;--orange:#f59e0b}
+body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:#111827;overflow:hidden}
+button,input,select{font:inherit}button{cursor:pointer;border:0}
+.app{display:flex;height:100vh}.sidebar{width:250px;background:var(--dark);color:white;position:fixed;inset:0 auto 0 0;z-index:1000;transition:.25s;overflow:auto}.sidebar.closed{transform:translateX(-100%)}
+.logo{height:70px;display:flex;align-items:center;padding:0 20px;font-size:21px;font-weight:bold;border-bottom:1px solid #374151}.logo span{color:#60a5fa;margin-right:7px}
+.menu{padding:10px}.menu-title{padding:12px 10px 6px;color:#9ca3af;font-size:11px;text-transform:uppercase}.menu-item{display:flex;align-items:center;justify-content:space-between;padding:12px 13px;margin:3px 0;border-radius:7px;color:#e5e7eb;user-select:none}.menu-item:hover,.menu-item.active{background:var(--blue);color:white}.menu-left{display:flex;gap:10px;align-items:center}.arrow{transition:.2s}.menu-item.open .arrow{transform:rotate(90deg)}.submenu{display:none;padding-left:18px;animation:subOpen .16s ease}.submenu.show{display:block}@keyframes subOpen{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}.sub-item{padding:9px 12px;margin:2px 0;border-radius:6px;color:#cbd5e1;cursor:pointer}.sub-item:hover{background:#374151;color:white}
+.main{width:100%;margin-left:250px;height:100vh;transition:.25s}.main.full{margin-left:0}.topbar{height:64px;background:white;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 18px}.left-top{display:flex;align-items:center;gap:15px}.hamburger{width:42px;height:40px;background:#eef2ff;border-radius:7px;font-size:22px;color:#1d4ed8}.page-title{font-size:19px;font-weight:bold}.user-box{display:flex;align-items:center;gap:10px}.user-circle{width:35px;height:35px;border-radius:50%;background:var(--blue);color:white;display:grid;place-items:center;font-weight:bold}.content{height:calc(100vh - 64px);overflow:auto;padding:15px}
+.page{display:none}.page.active{display:block}.card{background:white;border:1px solid var(--border);border-radius:9px;padding:15px;margin-bottom:15px}.btn{padding:10px 15px;border-radius:7px;color:white;font-weight:bold}.btn-blue{background:var(--blue)}.btn-green{background:var(--green)}.btn-red{background:var(--red)}.btn-orange{background:var(--orange)}.btn-gray{background:#6b7280}.btn-light{background:#e5e7eb;color:#111827}input,select{border:1px solid var(--border);border-radius:6px;padding:10px;width:100%;outline:0}input:focus,select:focus{border-color:var(--blue)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.stat{background:white;border:1px solid var(--border);border-radius:9px;padding:18px}.stat small{color:#6b7280}.stat h2{margin:8px 0}
+.pos-layout{display:grid;grid-template-columns:minmax(500px,1fr) 400px;gap:15px;min-height:calc(100vh - 100px)}.pos-head{display:flex;gap:8px;margin-bottom:10px}.pos-head input{flex:1}.category-bar{display:flex;gap:7px;overflow:auto;margin-bottom:10px}.cat-btn{background:#e5e7eb;padding:8px 13px;border-radius:20px;white-space:nowrap}.cat-btn.active{background:var(--blue);color:white}.products{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-height:calc(100vh - 220px);overflow:auto}.product{background:white;border:1px solid var(--border);border-radius:8px;padding:10px;cursor:pointer;min-height:110px}.product:hover{border-color:var(--blue);box-shadow:0 2px 7px #0001}.product-name{font-weight:bold;margin-bottom:7px}.product-price{color:var(--blue);font-weight:bold}.product-stock{font-size:12px;color:#6b7280;margin-top:6px}
+.bill-card{height:calc(100vh - 100px);display:flex;flex-direction:column;padding:12px}.bill-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:10px}.bill-no{font-weight:bold}.order-type{display:flex;gap:5px;margin:10px 0}.order-type button{flex:1;padding:9px;border-radius:6px;background:#e5e7eb}.order-type button.active{background:var(--blue);color:white}.bill-items{flex:1;overflow:auto}.bill-table,.table-list{width:100%;border-collapse:collapse;font-size:13px}.bill-table th,.bill-table td,.table-list th,.table-list td{border-bottom:1px solid #e5e7eb;padding:7px 4px;text-align:left}.qty{display:flex;align-items:center;gap:5px}.qty-input{width:58px;text-align:center;padding:6px;border:1px solid #d1d5db;border-radius:6px;font-weight:700}.qty button{width:24px;height:24px;border-radius:4px;background:#e5e7eb}.total-area{border-top:2px solid #111827;padding-top:8px}.total-row{display:flex;justify-content:space-between;padding:4px 0}.grand{font-size:21px}.discount-box{display:flex;gap:5px;margin:7px 0}.discount-box input{width:100px}.payment-methods{display:grid;grid-template-columns:repeat(2,1fr);gap:5px;margin-top:7px}.pay-btn{padding:9px;border-radius:6px;background:#e5e7eb}.pay-btn.active{background:#111827;color:white}.cash-row{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:7px}.change{background:#ecfdf5;color:#15803d;padding:9px;border-radius:6px;font-weight:bold}.bill-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}.bill-actions button{padding:11px 5px}.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:8px}.key{padding:10px;background:#e5e7eb;border-radius:6px;font-weight:bold}.key.zero{grid-column:span 2}
+.tables{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}.table-box{min-height:105px;background:#ecfdf5;border:2px solid #22c55e;border-radius:10px;padding:12px;cursor:pointer}.table-box.occupied{background:#fff7ed;border-color:#f97316}.table-name{font-weight:bold;font-size:18px}.table-status{margin-top:8px;font-size:13px}.table-total{margin-top:5px;font-weight:bold}
+.login-screen{position:fixed;inset:0;background:#111827;display:flex;align-items:center;justify-content:center;z-index:5000}.login-box{width:390px;max-width:94vw;background:white;padding:25px;border-radius:12px}.login-box h1{text-align:center;margin-top:0}.field{margin-bottom:12px}.login-box button{width:100%}.login-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.modal{display:none;position:fixed;inset:0;background:#0008;z-index:6000;align-items:center;justify-content:center;padding:15px}.modal.show{display:flex}.modal-box{background:white;border-radius:12px;width:500px;max-width:96vw;max-height:90vh;overflow:auto;padding:20px}.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.modal-head h3{margin:0}.table-select-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.select-table{padding:15px;border-radius:9px;border:2px solid #22c55e;background:#ecfdf5;text-align:center;font-weight:bold}.select-table.occupied{border-color:#f97316;background:#fff7ed}.select-table:disabled{opacity:.55;cursor:not-allowed}
+#toast{position:fixed;right:20px;bottom:20px;background:#111827;color:white;padding:12px 16px;border-radius:8px;display:none;z-index:8000}.print-red{color:red!important}
+@media(max-width:1200px){.products{grid-template-columns:repeat(3,1fr)}.tables{grid-template-columns:repeat(4,1fr)}.pos-layout{grid-template-columns:minmax(400px,1fr) 360px}}
+@media(max-width:900px){.sidebar{transform:translateX(-100%)}.sidebar.mobile-open{transform:translateX(0)}.main{margin-left:0}.pos-layout{grid-template-columns:1fr}.bill-card{height:auto}.products{grid-template-columns:repeat(2,1fr)}.tables{grid-template-columns:repeat(3,1fr)}body{overflow:auto}.content{height:auto}.app{height:auto}}
+@media print{html,body{margin:0!important;padding:0!important;background:#fff!important}body *{visibility:hidden!important}#printArea,#printArea *{visibility:visible!important}#printArea{position:absolute;left:0;top:0;width:80mm;color:#000;background:#fff;margin:0!important;padding:0!important}}
+
+.permission-grid{display:grid;grid-template-columns:1fr;gap:10px}
+.permission-user{display:grid;grid-template-columns:220px 1fr;gap:15px;align-items:start}
+.perm-box{display:grid;grid-template-columns:repeat(3,minmax(180px,1fr));gap:8px}
+.perm-check{display:flex;align-items:center;gap:7px;background:#f8fafc;border:1px solid #e5e7eb;padding:9px;border-radius:7px}
+.perm-check input{width:auto}
+.item-actions{display:flex;gap:5px;flex-wrap:wrap}
+.small-btn{padding:6px 9px;border-radius:6px;font-size:12px;font-weight:bold}
+.table-box.pending{background:#fffbeb;border-color:#f59e0b}
+.table-box.printed{background:#fef2f2;border-color:#dc2626}
+.table-box.settled{background:#ecfdf5;border-color:#22c55e}
+.status-pill{display:inline-block;padding:3px 7px;border-radius:999px;font-size:11px;font-weight:bold}
+.status-pending{background:#fef3c7;color:#92400e}
+.status-printed{background:#fee2e2;color:#991b1b}
+.status-empty{background:#dcfce7;color:#166534}
+.kot-card{margin-top:10px;border:2px dashed #f59e0b;background:#fffbeb;border-radius:8px;padding:10px}
+.kot-head{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed #d97706;padding-bottom:6px;margin-bottom:6px}
+.checkbox-row{display:flex;align-items:center;gap:8px;margin:7px 0;padding:8px;background:#f8fafc;border-radius:6px}
+.checkbox-row input{width:auto}
+.modal-wide{width:720px}
+@media(max-width:900px){.permission-user{grid-template-columns:1fr}.perm-box{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <h1>EASY BILL LK</h1>
+    <p style="text-align:center;color:#6b7280">Restaurant ERP POS</p>
+    <div class="field"><label>Username</label><input id="loginUser" autocomplete="username"></div>
+    <div class="field"><label>Password</label><input id="loginPass" type="password" autocomplete="current-password"></div>
+    <button class="btn btn-blue" onclick="login()">LOGIN</button>
+    <div class="login-actions">
+      <button class="btn btn-green" onclick="showCreateAccount()">CREATE ACCOUNT</button>
+      <button class="btn btn-gray" onclick="useDemoAdmin()">DEMO ADMIN</button>
+    </div>
+    <p id="loginMsg" style="color:#dc2626;text-align:center"></p>
+  </div>
+</div>
+
+<!-- CREATE ACCOUNT MODAL -->
+<div class="modal" id="accountModal">
+  <div class="modal-box">
+    <div class="modal-head"><h3>Create New Account</h3><button class="btn btn-red" onclick="closeModal('accountModal')">×</button></div>
+    <p style="color:#6b7280">Create an account and login. Data is stored in this browser.</p>
+    <div class="field"><label>Business Name</label><input id="regBusiness" placeholder="My Restaurant"></div>
+    <div class="field"><label>Username</label><input id="regUser" placeholder="username"></div>
+    <div class="field"><label>Password</label><input id="regPass" type="password" placeholder="password"></div>
+    <div class="field"><label>Confirm Password</label><input id="regPass2" type="password" placeholder="confirm password"></div>
+    <div class="field"><label>Phone</label><input id="regPhone" placeholder="07XXXXXXXX"></div>
+    <button class="btn btn-green" onclick="createAccount()">CREATE ACCOUNT</button>
+    <p id="regMsg" style="text-align:center"></p>
+  </div>
+</div>
+
+<!-- TABLE SELECT MODAL -->
+<div class="modal" id="tableModal">
+  <div class="modal-box">
+    <div class="modal-head"><h3>Select Dine-In Table / Order</h3><button class="btn btn-red" onclick="closeModal('tableModal')">×</button></div>
+    <p style="color:#6b7280">Touch a Dine-In table or Takeaway order to open it. Existing orders can also be opened to continue billing.</p>
+    <div class="table-select-grid" id="tableSelectGrid"></div>
+  </div>
+</div>
+
+<div class="app">
+<aside class="sidebar" id="sidebar">
+  <div class="logo"><span>●</span>EASY BILL LK</div>
+  <div class="menu">
+    <div class="menu-title">Main</div>
+    <div class="menu-item active" onclick="openPage('dashboard',this)"><div class="menu-left">🏠 Dashboard</div></div>
+    <div class="menu-item" onclick="openPage('billing',this)"><div class="menu-left">🧾 Billing / POS</div></div>
+    <div class="menu-item" id="tablesMenu" onclick="openPage('tables',this)"><div class="menu-left">🪑 Tables</div></div>
+
+    <div class="menu-item" onclick="toggleSub(this,'salesSub')"><div class="menu-left">💰 Sales</div><span class="arrow">▶</span></div>
+    <div class="submenu" id="salesSub"><div class="sub-item" onclick="event.stopPropagation();openPage('billing')">New Bill</div><div class="sub-item" onclick="event.stopPropagation();openPage('sales')">Sales List</div><div class="sub-item" onclick="event.stopPropagation();openPage('returns')">Returns / Refunds</div></div>
+
+    <div class="menu-item" onclick="toggleSub(this,'itemsSub')"><div class="menu-left">📦 Items</div><span class="arrow">▶</span></div>
+    <div class="submenu" id="itemsSub"><div class="sub-item" onclick="event.stopPropagation();openPage('items')">Items List</div><div class="sub-item" onclick="event.stopPropagation();openPage('categories')">Categories</div><div class="sub-item" onclick="event.stopPropagation();openPage('inventory')">Inventory</div><div class="sub-item" onclick="event.stopPropagation();openPage('expiry')">Expiry</div></div>
+
+    <div class="menu-item" id="purchaseMenu" onclick="toggleSub(this,'purchaseSub')"><div class="menu-left">🛒 Purchasing</div><span class="arrow">▶</span></div>
+    <div class="submenu" id="purchaseSub"><div class="sub-item" onclick="event.stopPropagation();openPage('purchases')">Purchases</div><div class="sub-item" onclick="event.stopPropagation();openPage('dailyPurchase')">Daily Purchasing</div><div class="sub-item" onclick="event.stopPropagation();openPage('suppliers')">Suppliers</div></div>
+
+    <div class="menu-item" id="customerMenu" onclick="toggleSub(this,'customerSub')"><div class="menu-left">👥 Customers</div><span class="arrow">▶</span></div>
+    <div class="submenu" id="customerSub"><div class="sub-item" onclick="event.stopPropagation();openPage('customers')">Customer List</div><div class="sub-item" onclick="event.stopPropagation();openPage('credit')">Credit</div><div class="sub-item" onclick="event.stopPropagation();openPage('statements')">Statements</div></div>
+
+    <div class="menu-item" onclick="toggleSub(this,'accountsSub')"><div class="menu-left">📒 Accounts</div><span class="arrow">▶</span></div>
+    <div class="submenu" id="accountsSub"><div class="sub-item" onclick="event.stopPropagation();openPage('accounts')">Accounts Dashboard</div><div class="sub-item" onclick="event.stopPropagation();openPage('cashbook')">Cash Book</div><div class="sub-item" onclick="event.stopPropagation();openPage('expenses')">Expenses</div><div class="sub-item" onclick="event.stopPropagation();openPage('income')">Income</div><div class="sub-item" onclick="event.stopPropagation();openPage('profit')">Profit</div></div>
+
+    <div class="menu-item" onclick="toggleSub(this,'reportsSub')"><div class="menu-left">📊 Reports</div><span class="arrow">▶</span></div>
+    <div class="submenu" id="reportsSub">
+      <div class="sub-item" onclick="event.stopPropagation();openPage('dailyReport')">📅 Daily Sales</div>
+      <div class="sub-item" onclick="event.stopPropagation();openPage('stockReport')">📦 Stock Report</div>
+      <div class="sub-item" onclick="event.stopPropagation();openPage('profitReport')">💰 Profit Report</div>
+      <div class="sub-item" onclick="event.stopPropagation();openPage('stockSummaryReport')">1️⃣ Stock Summary</div>
+      <div class="sub-item" onclick="event.stopPropagation();openPage('lowStockReport')">2️⃣ Low Stock</div>
+      <div class="sub-item" onclick="event.stopPropagation();openPage('stockMovementReport')">3️⃣ Stock Movement</div>
+      <div class="sub-item" onclick="event.stopPropagation();openPage('inventoryValueReport')">4️⃣ Inventory Value</div>
+    </div>
+
+    <div class="menu-item" id="employeeMenu" onclick="toggleSub(this,'employeeSub')"><div class="menu-left">👨‍💼 Employees</div><span class="arrow">▶</span></div>
+    <div class="submenu" id="employeeSub"><div class="sub-item" onclick="event.stopPropagation();openPage('employees')">Employees</div><div class="sub-item" onclick="event.stopPropagation();openPage('attendance')">Attendance</div><div class="sub-item" onclick="event.stopPropagation();openPage('salary')">Salary</div><div class="sub-item" onclick="event.stopPropagation();openPage('commission')">Commission</div></div>
+
+    <div class="menu-item" onclick="toggleSub(this,'settingsSub')"><div class="menu-left">⚙ Settings</div><span class="arrow">▶</span></div>
+    <div class="submenu" id="settingsSub"><div class="sub-item" onclick="event.stopPropagation();openPage('settings')">General Settings</div><div class="sub-item" onclick="event.stopPropagation();openPage('users')">Users / Accounts</div><div class="sub-item" onclick="event.stopPropagation();openPage('permissions')">🔐 Permissions</div><div class="sub-item" onclick="event.stopPropagation();openPage('configs')">Configurations</div></div>
+  </div>
+</aside>
+
+<main class="main" id="main">
+<header class="topbar">
+  <div class="left-top"><button class="hamburger" onclick="toggleSidebar()">☰</button><div class="page-title" id="pageTitle">Dashboard</div></div>
+  <div class="user-box"><button id="workStartBtn" class="btn btn-green" onclick="startCashierWork()">▶ Start Work</button><button id="workEndBtn" class="btn btn-red" onclick="endCashierWork()">■ End Work</button><span id="workStatus" style="font-size:12px;font-weight:700;color:#64748b">Not Started</span><span id="userName">Admin</span><div class="user-circle" id="userCircle">A</div><button class="btn btn-red" onclick="logout()">Logout</button></div>
+</header>
+<section class="content">
+
+<div class="page active" id="dashboard">
+  <div class="stats">
+    <div class="stat"><small>Today's Sales</small><h2 id="dashSales">Rs. 0.00</h2></div>
+    <div class="stat"><small>Today's Bills</small><h2 id="dashBills">0</h2></div>
+    <div class="stat"><small>Open Tables</small><h2 id="dashTables">0</h2></div>
+    <div class="stat"><small>Items</small><h2 id="dashItems">0</h2></div>
+  </div>
+  <div class="card" style="margin-top:15px"><h3 id="dashboardModeTitle">Universal POS</h3><p id="dashboardModeText">Manage sales, stock, purchasing, customers and reports from one system.</p><button class="btn btn-blue" onclick="startNewBill()">Open New Bill</button> <button class="btn btn-orange" onclick="openPage('tables')">Open Tables</button></div>
+</div>
+
+<div class="page" id="billing">
+ <div class="pos-layout">
+  <div class="card" style="padding:10px">
+    <div class="pos-head"><input id="productSearch" placeholder="Search item / barcode..." oninput="renderProducts()"><button class="btn btn-blue" onclick="startNewBill()">＋ New Bill</button></div>
+    <div class="category-bar" id="categoryBar"></div><div class="products" id="products"></div>
+  </div>
+  <div class="card bill-card">
+    <div class="bill-header"><div><div style="font-size:17px;font-weight:bold">CURRENT BILL</div><div class="bill-no" id="billNo"></div></div><button class="btn btn-light" onclick="holdBill()">Hold</button></div>
+    <div class="order-type"><button id="takeawayBtn" class="active" onclick="openTakeawaySelector()">🥡 Takeaway</button><button id="tableBtn" onclick="openTableSelector()">🪑 Dine-In Table</button></div>
+    <div id="selectedTableText" style="font-weight:bold;color:#2563eb;margin-bottom:5px">Takeaway 01</div>
+    <div class="bill-items"><table class="bill-table"><thead><tr><th>Item</th><th>Qty</th><th>Total</th></tr></thead><tbody id="billItems"></tbody></table></div>
+    <div class="kot-card">
+      <div class="kot-head"><b>🔥 KOT</b><span id="kotNo">KOT-0001</span></div>
+      <div id="kotPreview">Add items to generate KOT automatically.</div>
+    </div>
+    <div class="total-area">
+      <div class="total-row"><span>Subtotal</span><b id="subtotal">Rs. 0.00</b></div>
+      <div class="discount-box" id="discountBox"><span style="padding-top:9px">Discount</span><input id="discount" type="number" min="0" value="0" oninput="calculateBill()"><span style="padding-top:9px">Rs.</span></div>
+      <div class="total-row"><span>Grand Total</span><b class="grand" id="grandTotal">Rs. 0.00</b></div>
+      <label class="checkbox-row"><input type="checkbox" id="creditBill" onchange="toggleCreditBill()"> <b>Credit Bill</b> <span style="color:#6b7280;font-size:12px">Customer required</span></label>
+      <div id="customerSelectBox" style="display:none;margin-bottom:7px"><select id="billCustomer"></select></div>
+      <div style="margin-top:7px"><b>Payment Method</b><div class="payment-methods">
+        <button class="pay-btn active" data-pay="Cash" onclick="setPayment('Cash',this)">💵 Cash</button>
+        <button class="pay-btn" data-pay="Card" onclick="setPayment('Card',this)">💳 Card</button>
+        <button class="pay-btn" data-pay="Credit" onclick="setPayment('Credit',this)">📒 Credit</button>
+        <button class="pay-btn" data-pay="Bank Transfer" onclick="setPayment('Bank Transfer',this)">🏦 Bank Transfer</button>
+      </div></div>
+      <div class="cash-row"><div><label>Cash Amount</label><input id="cashAmount" type="number" placeholder="Enter cash" oninput="calculateChange()"></div><div><label>Change</label><div class="change" id="change">Rs. 0.00</div></div></div>
+      <div class="keypad"><button class="key" onclick="keypad('7')">7</button><button class="key" onclick="keypad('8')">8</button><button class="key" onclick="keypad('9')">9</button><button class="key" onclick="keypad('4')">4</button><button class="key" onclick="keypad('5')">5</button><button class="key" onclick="keypad('6')">6</button><button class="key" onclick="keypad('1')">1</button><button class="key" onclick="keypad('2')">2</button><button class="key" onclick="keypad('3')">3</button><button class="key zero" onclick="keypad('0')">0</button><button class="key" onclick="keypad('.')">.</button><button class="key btn-red" onclick="clearCash()">C</button></div>
+      <div class="bill-actions"><button class="btn btn-gray" onclick="printBill()">🖨 Print Bill + KOT</button><button class="btn btn-green" onclick="settleBill()">✓ Settle + KOT</button></div>
+    </div>
+  </div>
+ </div>
+</div>
+<div class="page" id="tables">
+ <div class="card">
+   <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+     <div><h2 style="margin:0">🪑 Dine-In & Takeaway</h2><p style="margin:5px 0;color:#6b7280">20 Dine-In tables + 20 Takeaway orders. Each one keeps its own bill.</p></div>
+     <button class="btn btn-blue" onclick="newTableBill()">＋ New Table Bill</button>
+   </div>
+   <div class="order-type" style="max-width:450px;margin-top:12px">
+     <button id="tablesDineBtn" class="active" onclick="setTableView('Dine-In')">🪑 Dine-In</button>
+     <button id="tablesTakeBtn" onclick="setTableView('Takeaway')">🥡 Takeaway</button>
+   </div>
+ </div>
+ <div class="tables" id="tablesGrid"></div>
+ <div class="card" id="tableDetailCard" style="display:none;margin-top:15px">
+   <div style="display:flex;justify-content:space-between"><h3 id="detailTitle">Table</h3><button class="btn btn-red" onclick="closeTableDetail()">Close</button></div>
+   <table class="table-list"><thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead><tbody id="tableDetailItems"></tbody></table>
+   <h3 style="text-align:right" id="tableDetailTotal">Rs. 0.00</h3>
+   <button class="btn btn-blue" onclick="continueTableBill()">Continue Billing</button>
+ </div>
+</div>
+
+<div class="page" id="items">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+      <div><h2 style="margin:0">📦 Items</h2><p style="color:#6b7280;margin:5px 0">Add, edit, select and delete products.</p></div>
+      <button class="btn btn-blue" onclick="openItemModal()">＋ Add Item</button>
+    </div>
+    <div style="margin-top:12px"><input id="itemSearch" placeholder="Search item / SKU / barcode..." oninput="renderItems()"></div>
+    <div style="overflow:auto;margin-top:12px"><table class="table-list"><thead><tr><th>Item</th><th>SKU / Barcode</th><th>Category</th><th>Cost</th><th>Price</th><th>Stock</th><th>Actions</th></tr></thead><tbody id="itemsList"></tbody></table></div>
+  </div>
+</div>
+<div class="page" id="inventory">
+<div class="card"><div class="report-head"><div><h2>📦 Inventory Management</h2><p>Stock In, Stock Out, Opening Stock and adjustments.</p></div><button class="btn btn-blue" onclick="renderInventoryPage()">↻ Refresh</button></div>
+<div class="stats"><div class="stat"><small>Total Units</small><h2 id="inventoryUnits">0</h2></div><div class="stat"><small>Inventory Value</small><h2 id="inventoryValue">Rs. 0.00</h2></div><div class="stat"><small>Low Stock</small><h2 id="inventoryLow">0</h2></div><div class="stat"><small>Movements</small><h2 id="inventoryMoves">0</h2></div></div>
+<div class="card" style="margin-top:15px"><h3>Stock Adjustment</h3><div style="display:grid;grid-template-columns:2fr 1fr 1fr 2fr;gap:8px"><select id="invProduct"></select><select id="invAction"><option value="in">Stock In</option><option value="out">Stock Out</option><option value="set">Set Opening Stock</option></select><input id="invQty" type="number" min="0" placeholder="Quantity"><input id="invNote" placeholder="Note / Reference"></div><button class="btn btn-green" style="margin-top:10px" onclick="adjustStock()">Save Stock Adjustment</button><span id="invMsg" style="margin-left:10px;color:#16a34a"></span></div>
+<div class="report-table-wrap"><table class="table-list"><thead><tr><th>Item</th><th>Category</th><th>Stock</th><th>Price</th><th>Value</th><th>Status</th></tr></thead><tbody id="inventoryBody"></tbody></table></div></div></div>
+<div class="page" id="categories">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+      <div><h2 style="margin:0">🏷 Categories</h2><p style="color:#6b7280;margin:5px 0">Create and manage item categories.</p></div>
+    </div>
+    <form id="categoryForm" style="display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:12px">
+      <input id="categoryName" placeholder="Category name (e.g. Rice)" required>
+      <button class="btn btn-green" type="submit">＋ Add Category</button>
+    </form>
+    <div id="categoryList" style="margin-top:15px"></div>
+  </div>
+</div>
+<div class="page" id="expiry"><div class="card"><h2>Expiry Management</h2></div></div>
+<div class="page" id="sales"><div class="card"><h2>Sales</h2><table class="table-list"><thead><tr><th>Bill</th><th>Type</th><th>Amount</th><th>Payment</th></tr></thead><tbody id="salesList"></tbody></table></div></div>
+<div class="page" id="dailyReport"><div class="card"><div class="report-head"><div><h2>📅 Daily Sales Report</h2><h3 id="dailyReportTotal">Rs. 0.00</h3></div><button class="btn btn-blue" onclick="printReport('dailyReport','Daily Sales Report')">🖨 Print Daily Sales</button></div><div class="report-table-wrap"><table class="table-list"><thead><tr><th>Item Name</th><th>Qty</th><th>Total</th></tr></thead><tbody id="dailyItems"></tbody></table></div></div></div>
+<div class="page" id="returns"><div class="card"><h2>↩️ Returns / Refunds</h2><p>Select a sold bill and enter the return quantity.</p><div style="display:grid;grid-template-columns:2fr 1fr auto;gap:8px"><select id="returnSale"></select><input id="returnQty" type="number" min="1" value="1" placeholder="Qty"><button class="btn btn-red" onclick="processReturn()">Process Return</button></div><div class="report-table-wrap" style="margin-top:12px"><table class="table-list"><thead><tr><th>Bill</th><th>Date</th><th>Customer</th><th>Total</th></tr></thead><tbody id="returnSalesBody"></tbody></table></div></div></div>
+<div class="page" id="purchases"><div class="card"><div class="report-head"><div><h2>🛒 Purchases</h2><p>Add supplier purchases and automatically increase stock.</p></div><button class="btn btn-blue" onclick="renderPurchases()">↻ Refresh</button></div><div style="display:grid;grid-template-columns:1.5fr 1.5fr 1fr 1fr 1fr auto;gap:8px"><input id="purchaseSupplier" placeholder="Supplier name"><select id="purchaseProduct"></select><input id="purchaseQty" type="number" min="1" value="1" placeholder="Qty"><input id="purchaseCost" type="number" min="0" placeholder="Cost / unit"><input id="purchaseRef" placeholder="Invoice / Ref"><button class="btn btn-green" onclick="savePurchase()">＋ Add Purchase</button></div><div class="stats" style="margin-top:12px"><div class="stat"><small>Total Purchases</small><h2 id="purchaseTotal">Rs. 0.00</h2></div><div class="stat"><small>Today</small><h2 id="purchaseToday">Rs. 0.00</h2></div><div class="stat"><small>Purchase Count</small><h2 id="purchaseCount">0</h2></div></div><div class="report-table-wrap"><table class="table-list"><thead><tr><th>Date</th><th>Supplier</th><th>Item</th><th>Qty</th><th>Cost</th><th>Total</th><th>Ref</th></tr></thead><tbody id="purchasesBody"></tbody></table></div></div></div>
+<div class="page" id="dailyPurchase"><div class="card"><h2>📅 Daily Purchasing</h2><div class="stats"><div class="stat"><small>Today's Purchase</small><h2 id="dailyPurchaseTotal">Rs. 0.00</h2></div><div class="stat"><small>Items Purchased</small><h2 id="dailyPurchaseUnits">0</h2></div></div><div class="report-table-wrap"><table class="table-list"><thead><tr><th>Time</th><th>Supplier</th><th>Item</th><th>Qty</th><th>Total</th></tr></thead><tbody id="dailyPurchaseBody"></tbody></table></div></div></div>
+<div class="page" id="suppliers"><div class="card"><h2>🏭 Suppliers</h2><div style="display:grid;grid-template-columns:1.5fr 1fr 2fr auto;gap:8px"><input id="supplierName" placeholder="Supplier name"><input id="supplierPhone" placeholder="Phone"><input id="supplierNote" placeholder="Address / Note"><button class="btn btn-green" onclick="saveSupplier()">＋ Add Supplier</button></div><div id="supplierList" style="margin-top:12px"></div></div></div>
+<div class="page" id="customers"><div class="card"><h2>👥 Customers</h2><div style="display:grid;grid-template-columns:1.5fr 1fr 1fr auto;gap:8px"><input id="customerName" placeholder="Customer name"><input id="customerPhone" placeholder="Phone"><input id="customerOpening" type="number" min="0" value="0" placeholder="Opening credit"><button class="btn btn-green" onclick="saveCustomer()">＋ Add Customer</button></div><div class="report-table-wrap" style="margin-top:12px"><table class="table-list"><thead><tr><th>Name</th><th>Phone</th><th>Outstanding</th><th>Action</th></tr></thead><tbody id="customersBody"></tbody></table></div></div></div>
+<div class="page" id="credit"><div class="card"><h2>📒 Credit / Outstanding</h2><div style="display:grid;grid-template-columns:2fr 1fr auto;gap:8px"><select id="creditCustomer"></select><input id="creditPayment" type="number" min="0" placeholder="Payment amount"><button class="btn btn-green" onclick="collectCredit()">Collect Payment</button></div><div class="report-table-wrap" style="margin-top:12px"><table class="table-list"><thead><tr><th>Customer</th><th>Phone</th><th>Outstanding</th><th>Status</th></tr></thead><tbody id="creditBody"></tbody></table></div></div></div>
+<div class="page" id="statements"><div class="card"><h2>📄 Customer Statements</h2><select id="statementCustomer" onchange="renderStatement()"></select><div id="statementBox" style="margin-top:12px"></div></div></div><div class="page" id="accounts"><div class="card"><div class="report-head"><div><h2>📒 Accounts Dashboard</h2><p>Sales, cash, expenses and income overview.</p></div><button class="btn btn-blue" onclick="renderAccounts()">↻ Refresh</button></div><div class="stats"><div class="stat"><small>Total Sales</small><h2 id="accSales">Rs. 0.00</h2></div><div class="stat"><small>Cash Sales</small><h2 id="accCash">Rs. 0.00</h2></div><div class="stat"><small>Expenses</small><h2 id="accExpenses">Rs. 0.00</h2></div><div class="stat"><small>Net</small><h2 id="accNet">Rs. 0.00</h2></div></div><div class="report-table-wrap"><table class="table-list"><thead><tr><th>Date</th><th>Reference</th><th>Type</th><th>Amount</th></tr></thead><tbody id="accountsBody"></tbody></table></div></div></div><div class="page" id="cashbook"><div class="card"><h2>📒 Cash Book</h2><p>All sales, income and expenses are shown in the Accounts Dashboard.</p><button class="btn btn-blue" onclick="openPage('accounts')">Open Accounts Dashboard</button></div></div><div class="page" id="expenses"><div class="card"><h2>💸 Expenses</h2><p>Expense entries and totals are managed from the Accounts section.</p><button class="btn btn-blue" onclick="openPage('accounts')">Open Accounts Dashboard</button></div></div><div class="page" id="income"><div class="card"><h2>💵 Income</h2><p>Income and sales transactions are displayed in Accounts.</p><button class="btn btn-blue" onclick="openPage('accounts')">Open Accounts Dashboard</button></div></div><div class="page" id="profit"><div class="card"><h2>📈 Profit & Loss</h2><p>Estimated gross profit is available in the Profit Report.</p><button class="btn btn-blue" onclick="openPage('profitReport')">Open Profit Report</button></div></div><div class="page" id="employees"><div class="card"><div class="report-head"><div><h2>👨‍💼 Employees</h2><p>Employee profiles and cashier users.</p></div></div><div style="display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr 1fr auto;gap:8px"><input id="empName" placeholder="Employee name"><input id="empPhone" placeholder="Phone"><input id="empRole" placeholder="Role / Position" value="Cashier"><input id="empSalary" type="number" min="0" placeholder="Monthly salary"><input id="empRate" type="number" min="0" placeholder="Commission %"><button class="btn btn-green" onclick="saveEmployee()">＋ Add Employee</button></div><div class="report-table-wrap" style="margin-top:14px"><table class="table-list"><thead><tr><th>Name</th><th>Phone</th><th>Position</th><th>Salary</th><th>Commission</th><th>Actions</th></tr></thead><tbody id="employeesBody"></tbody></table></div></div></div>
+<div class="page" id="attendance"><div class="card"><div class="report-head"><div><h2>🕘 Attendance / Work Periods</h2><p>Cashier start and end times are recorded automatically.</p></div><button class="btn btn-blue" onclick="renderEmployees()">↻ Refresh</button></div><div class="stats"><div class="stat"><small>Today Starts</small><h2 id="attStarts">0</h2></div><div class="stat"><small>Today Ends</small><h2 id="attEnds">0</h2></div><div class="stat"><small>Worked Hours</small><h2 id="attHours">0.00</h2></div></div><div class="report-table-wrap"><table class="table-list"><thead><tr><th>Employee</th><th>Date</th><th>Start</th><th>End</th><th>Hours</th><th>Status</th></tr></thead><tbody id="attendanceBody"></tbody></table></div></div></div>
+<div class="page" id="salary"><div class="card"><div class="report-head"><div><h2>💵 Salary</h2><p>Employee salary summary based on saved profiles.</p></div></div><div class="report-table-wrap"><table class="table-list"><thead><tr><th>Employee</th><th>Position</th><th>Monthly Salary</th><th>Commission %</th><th>Estimated Commission</th><th>Total</th></tr></thead><tbody id="salaryBody"></tbody></table></div></div></div>
+<div class="page" id="commission"><div class="card"><div class="report-head"><div><h2>📈 Commission</h2><p>Commission is calculated from each employee's saved rate and their sales.</p></div></div><div class="report-table-wrap"><table class="table-list"><thead><tr><th>Employee</th><th>Rate</th><th>Sales</th><th>Commission</th></tr></thead><tbody id="commissionBody"></tbody></table></div></div></div><div class="page" id="stockSummaryReport"><div class="card"><div class="report-head"><div><h2>📦 Stock Summary Report</h2><p>Current stock summary for all items.</p></div><button class="btn btn-blue" onclick="printReport('stockSummaryReport','Stock Summary Report')">🖨 Print</button></div><div class="stats"><div class="stat"><small>Total Items</small><h2 id="invTotalItems">0</h2></div><div class="stat"><small>Total Units</small><h2 id="invTotalUnits">0</h2></div><div class="stat"><small>Inventory Value</small><h2 id="invStockValue">Rs. 0.00</h2></div><div class="stat"><small>Low Stock</small><h2 id="invLowCount">0</h2></div></div><div class="report-table-wrap"><table class="table-list"><thead><tr><th>Item</th><th>Category</th><th>Stock</th><th>Price</th><th>Value</th><th>Status</th></tr></thead><tbody id="stockSummaryBody"></tbody></table></div></div></div>
+
+<div class="page" id="lowStockReport"><div class="card"><div class="report-head"><div><h2>⚠️ Low Stock Report</h2><p>Items at or below the selected reorder level.</p></div><div style="display:flex;gap:8px"><input id="lowStockLimit" type="number" value="10" min="0" style="width:100px" oninput="renderWorkingReports()"><button class="btn btn-blue" onclick="printReport('lowStockReport','Low Stock Report')">🖨 Print</button></div></div><div class="report-table-wrap"><table class="table-list"><thead><tr><th>Item</th><th>Category</th><th>Stock</th><th>Price</th><th>Status</th></tr></thead><tbody id="lowStockBody"></tbody></table></div></div></div>
+
+<div class="page" id="stockMovementReport"><div class="card"><div class="report-head"><div><h2>🔄 Stock Movement Report</h2><p>Items sold and current stock.</p></div><button class="btn btn-blue" onclick="printReport('stockMovementReport','Stock Movement Report')">🖨 Print</button></div><div class="report-table-wrap"><table class="table-list"><thead><tr><th>Item</th><th>Category</th><th>Sold Qty</th><th>Sales Value</th><th>Current Stock</th></tr></thead><tbody id="stockMovementBody"></tbody></table></div></div></div>
+
+<div class="page" id="inventoryValueReport"><div class="card"><div class="report-head"><div><h2>💰 Inventory Value Report</h2><p>Current stock value by item.</p></div><button class="btn btn-blue" onclick="printReport('inventoryValueReport','Inventory Value Report')">🖨 Print</button></div><div class="report-total" id="inventoryGrandValue">Total: Rs. 0.00</div><div class="report-table-wrap"><table class="table-list"><thead><tr><th>Item</th><th>Stock</th><th>Price</th><th>Inventory Value</th></tr></thead><tbody id="inventoryValueBody"></tbody></table></div></div></div>
+
+<div class="page" id="stockReport">
+  <div class="card">
+    <div class="report-head">
+      <div><h2>📦 Stock Report</h2><p>Current stock overview.</p></div>
+      <button class="btn btn-blue" onclick="printReport('stockReport','Stock Report')">🖨 Print</button>
+    </div>
+    <div class="stats">
+      <div class="stat"><small>Total Items</small><h2 id="stockRptItems">0</h2></div>
+      <div class="stat"><small>Total Units</small><h2 id="stockRptUnits">0</h2></div>
+      <div class="stat"><small>Low Stock</small><h2 id="stockRptLow">0</h2></div>
+      <div class="stat"><small>Stock Value</small><h2 id="stockRptValue">Rs. 0.00</h2></div>
+    </div>
+    <div class="report-table-wrap">
+      <table class="table-list">
+        <thead><tr><th>Item</th><th>Category</th><th>Stock</th><th>Price</th><th>Status</th></tr></thead>
+        <tbody id="stockReportBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div><div class="page" id="profitReport">
+  <div class="card">
+    <div class="report-head">
+      <div><h2>💰 Profit Report</h2><p>Sales, cost and estimated gross profit.</p></div>
+      <button class="btn btn-blue" onclick="printReport('profitReport','Profit Report')">🖨 Print</button>
+    </div>
+    <div class="stats">
+      <div class="stat"><small>Sales</small><h2 id="profitRptSales">Rs. 0.00</h2></div>
+      <div class="stat"><small>Estimated Cost</small><h2 id="profitRptCost">Rs. 0.00</h2></div>
+      <div class="stat"><small>Gross Profit</small><h2 id="profitRptGross">Rs. 0.00</h2></div>
+      <div class="stat"><small>Profit %</small><h2 id="profitRptPercent">0%</h2></div>
+    </div>
+    <div class="report-table-wrap">
+      <table class="table-list">
+        <thead><tr><th>Bill</th><th>Date</th><th>Type</th><th>Sales</th><th>Estimated Cost</th><th>Profit</th></tr></thead>
+        <tbody id="profitReportBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div><div class="page" id="settings">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+      <div><h2>🏢 Universal Business Settings</h2><p style="color:#6b7280;margin:4px 0">Choose your business type. EASY BILL LK will adapt the POS for retail, restaurant, service and other businesses.</p></div>
+      <span id="businessModeBadge" class="badge" style="background:#eff6ff;color:#2563eb;padding:8px 12px;border-radius:999px;font-weight:700">Universal</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,minmax(260px,1fr));gap:12px;margin-top:15px">
+      <div class="field"><label>Business Type / ව්‍යාපාර වර්ගය</label>
+        <select id="businessTypeSelect" onchange="previewBusinessType(this.value)">
+          <option value="Retail">Retail Shop / Retail</option><option value="Supermarket">Supermarket / Grocery</option>
+          <option value="Restaurant">Restaurant</option><option value="Cafe">Cafe / Coffee Shop</option><option value="Bakery">Bakery</option>
+          <option value="Takeaway">Takeaway / Food Outlet</option><option value="Pharmacy">Pharmacy</option><option value="Clothing">Clothing / Fashion</option>
+          <option value="Electronics">Electronics / Mobile</option><option value="Wholesale">Wholesale</option><option value="Service">Service Business</option><option value="Other">Other Business</option>
+        </select>
+      </div>
+      <div class="field"><label>Business Name</label><input id="businessNameUniversal" placeholder="Your Business Name"></div>
+      <div class="field"><label>Phone / Hotline</label><input id="businessPhoneUniversal" placeholder="07XXXXXXXX"></div>
+      <div class="field"><label>Address</label><input id="businessAddressUniversal" placeholder="Business address"></div>
+    </div>
+    <div id="businessModeInfo" style="margin-top:14px;padding:12px;border-radius:10px;background:#f8fafc;color:#334155"></div>
+    <button class="btn btn-green" onclick="saveUniversalBusinessSettings()">💾 Save Business Settings</button>
+    <div id="businessSaveMsg" style="margin-top:10px;font-weight:700;color:#16a34a"></div>
+  </div>
+</div><div class="page" id="users">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center"><div><h2>👤 Users / Accounts</h2><p style="color:#6b7280">Manage users stored in this browser.</p></div><button class="btn btn-blue" onclick="openUserModal()">＋ Add User</button></div>
+    <div id="usersList" style="margin-top:12px"></div>
+  </div>
+</div>
+<div class="page" id="permissions">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+      <div><h2>🔐 Permissions</h2><p style="color:#6b7280">Admin can decide what each user is allowed to access.</p></div>
+      <button class="btn btn-green" onclick="savePermissions()">💾 Save Permissions</button>
+    </div>
+    <div id="permissionPanel" style="margin-top:15px"></div>
+  </div>
+</div>
+<div class="page" id="configs">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+      <div><h2 style="margin:0">⚙ Configurations</h2><p style="color:#6b7280">20 restaurant POS configuration fields.</p></div>
+      <button class="btn btn-green" onclick="saveConfigurations()">💾 Save Configuration</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,minmax(260px,1fr));gap:12px;margin-top:15px">
+      <div><label>1. Business Name</label><input id="cfg_businessName" placeholder="EASY BILL LK"></div>
+      <div><label>2. Address</label><input id="cfg_address" placeholder="Business address"></div>
+      <div><label>3. Phone</label><input id="cfg_phone" placeholder="0771234567"></div>
+      <div><label>4. WhatsApp</label><input id="cfg_whatsapp" placeholder="0771234567"></div>
+      <div><label>5. Currency</label><input id="cfg_currency" value="Rs."></div>
+      <div><label>6. Tax %</label><input id="cfg_tax" type="number" min="0" step="0.01" value="0"></div>
+      <div><label>7. Default Discount</label><input id="cfg_discount" type="number" min="0" step="0.01" value="0"></div>
+      <div><label>8. Low Stock Limit</label><input id="cfg_lowStock" type="number" min="0" value="10"></div>
+      <div><label>9. Receipt Width</label><select id="cfg_receiptWidth"><option value="58mm">58mm</option><option value="80mm" selected>80mm</option></select></div>
+      <div><label>10. Invoice Prefix</label><input id="cfg_prefix" value="KOT-"></div>
+      <div><label>11. Starting Bill Number</label><input id="cfg_startNo" type="number" min="1" value="1"></div>
+      <div><label>12. Table Count</label><input id="cfg_tableCount" type="number" min="1" value="18"></div>
+      <div><label>13. Business Type</label><select id="cfg_restaurantType" onchange="previewBusinessType(this.value)"><option>Retail</option><option>Supermarket</option><option>Restaurant</option><option>Cafe</option><option>Bakery</option><option>Takeaway</option><option>Pharmacy</option><option>Clothing</option><option>Electronics</option><option>Wholesale</option><option>Service</option><option>Other</option></select></div>
+      <div><label>14. Default Order Type</label><select id="cfg_orderType"><option>Takeaway</option><option>Table</option></select></div>
+      <div><label>15. Enable Cash</label><select id="cfg_cash"><option value="yes">Yes</option><option value="no">No</option></select></div>
+      <div><label>16. Enable Card</label><select id="cfg_card"><option value="yes">Yes</option><option value="no">No</option></select></div>
+      <div><label>17. Enable Credit</label><select id="cfg_credit"><option value="yes">Yes</option><option value="no">No</option></select></div>
+      <div><label>18. Enable Bank Transfer</label><select id="cfg_bank"><option value="yes">Yes</option><option value="no">No</option></select></div>
+      <div><label>19. Receipt Footer</label><input id="cfg_footer" placeholder="Thank You! See You Again"></div>
+      <div><label>20. Facebook / Social</label><input id="cfg_social" placeholder="facebook.com/yourshop"></div>
+    </div>
+    <div id="configMsg" style="margin-top:12px;font-weight:bold;color:#16a34a"></div><div style="margin-top:10px;color:#64748b;font-size:12px">Business type controls restaurant-only Tables/KOT mode. All core POS, inventory, purchasing, customers, accounts, reports and employees remain available.</div>
+  </div>
+</div>
+
+</section></main></div>
+
+<div class="modal" id="itemModal">
+ <div class="modal-box modal-wide">
+  <div class="modal-head"><h3 id="itemModalTitle">Add Item</h3><button class="btn btn-red" onclick="closeModal('itemModal')">×</button></div>
+  <input type="hidden" id="editItemId">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+   <div class="field"><label>Item Name *</label><input id="itemName" required></div>
+   <div class="field"><label>SKU / Barcode *</label><input id="itemSku" required></div>
+   <div class="field"><label>Category *</label><select id="itemCategory"></select></div>
+   <div class="field"><label>Unit</label><input id="itemUnit" value="Piece"></div>
+   <div class="field"><label>Cost Price</label><input id="itemCost" type="number" min="0" step="0.01" value="0"></div>
+   <div class="field"><label>Selling Price *</label><input id="itemPrice" type="number" min="0" step="0.01" value="0"></div>
+   <div class="field"><label>Opening Stock</label><input id="itemStock" type="number" min="0" step="1" value="0"></div>
+   <div class="field"><label>Reorder / Min Stock</label><input id="itemReorder" type="number" min="0" step="1" value="5"></div>
+  </div>
+  <div id="itemMsg" style="margin:8px 0;font-weight:bold"></div>
+  <button class="btn btn-green" onclick="saveItem()">💾 Save Item</button>
+ </div>
+</div>
+<div class="modal" id="userModal">
+ <div class="modal-box">
+  <div class="modal-head"><h3 id="userModalTitle">Add User</h3><button class="btn btn-red" onclick="closeModal('userModal')">×</button></div>
+  <input type="hidden" id="editUserId">
+  <div class="field"><label>Name</label><input id="userNameInput"></div>
+  <div class="field"><label>Username</label><input id="userUsernameInput"></div>
+  <div class="field"><label>Password</label><input id="userPasswordInput" type="password"></div>
+  <div class="field"><label>Role</label><select id="userRoleInput"><option value="Manager">Manager</option><option value="Cashier">Cashier</option><option value="Custom">Custom</option></select></div>
+  <button class="btn btn-green" onclick="saveUser()">💾 Save User</button>
+  <div id="userMsg" style="margin-top:8px"></div>
+ </div>
+</div>
+<div id="printArea"></div><div id="toast"></div>
+
+<script>
+const KEY={products:"eb_products",sales:"eb_sales",tables:"eb_tables_v2",accounts:"eb_accounts_v2",categories:"eb_categories",customers:"eb_customers",inventory:"eb_inventoryMoves",expenses:"eb_expenses",incomes:"eb_incomes",users:"eb_users_v2",counter:"eb_billCounter_v2",kot:"eb_kotCounter_v2",config:"eb_config",purchases:"eb_purchases",suppliers:"eb_suppliers"};
+const DEFAULT_CATEGORIES=["Rice","Kottu","Noodles","Short Eats","Drinks","Desserts","Other"];
+const DEFAULT_PRODUCTS=[
+ {id:1,name:"Chicken Rice",sku:"1001",category:"Rice",cost:500,price:850,stock:50,reorder:5,unit:"Plate"},
+ {id:2,name:"Chicken Kottu",sku:"1002",category:"Kottu",cost:600,price:950,stock:40,reorder:5,unit:"Plate"},
+ {id:3,name:"Cheese Kottu",sku:"1003",category:"Kottu",cost:750,price:1200,stock:30,reorder:5,unit:"Plate"},
+ {id:4,name:"Chicken Noodles",sku:"1004",category:"Noodles",cost:500,price:850,stock:35,reorder:5,unit:"Plate"},
+ {id:5,name:"Egg Noodles",sku:"1005",category:"Noodles",cost:400,price:700,stock:35,reorder:5,unit:"Plate"},
+ {id:6,name:"Fish Bun",sku:"1006",category:"Short Eats",cost:100,price:180,stock:60,reorder:10,unit:"Piece"},
+ {id:7,name:"Chicken Roll",sku:"1007",category:"Short Eats",cost:90,price:160,stock:60,reorder:10,unit:"Piece"},
+ {id:8,name:"Coca Cola",sku:"1008",category:"Drinks",cost:150,price:250,stock:100,reorder:10,unit:"Bottle"},
+ {id:9,name:"Sprite",sku:"1009",category:"Drinks",cost:150,price:250,stock:100,reorder:10,unit:"Bottle"},
+ {id:10,name:"Water",sku:"1010",category:"Drinks",cost:60,price:100,stock:100,reorder:10,unit:"Bottle"},
+ {id:11,name:"Watalappan",sku:"1011",category:"Desserts",cost:180,price:300,stock:20,reorder:5,unit:"Piece"},
+ {id:12,name:"Ice Cream",sku:"1012",category:"Desserts",cost:200,price:350,stock:30,reorder:5,unit:"Cup"}
+];
+
+const PERMS=[
+ ["dashboard","Dashboard"],["pos","Billing / POS"],["tables","Tables"],
+ ["items.view","Items - View"],["items.add","Items - Add/Edit"],["items.delete","Items - Delete"],
+ ["categories","Categories"],["inventory","Inventory"],["sales","Sales"],
+ ["customers","Customers"],["suppliers","Suppliers"],["expenses","Expenses"],
+ ["reports","Reports"],["employees","Employees"],["users","Users / Accounts"],
+ ["permissions","Permissions"],["settings","Settings / Config"]
+];
+
+function read(k,f){try{const v=JSON.parse(localStorage.getItem(k));return v??f}catch(e){return f}}
+function write(k,v){localStorage.setItem(k,JSON.stringify(v))}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function money(n){return "Rs. "+Number(n||0).toFixed(2)}
+function uid(p="ID"){return p+"-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,7).toUpperCase()}
+function showToast(msg){const t=document.getElementById("toast");t.textContent=msg;t.style.display="block";clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>t.style.display="none",2200)}
+function closeModal(id){document.getElementById(id)?.classList.remove("show")}
+function today(){return new Date().toDateString()}
+
+let products=read(KEY.products,null)||DEFAULT_PRODUCTS;
+let categories=read(KEY.categories,null)||DEFAULT_CATEGORIES;
+let sales=read(KEY.sales,[]);
+let customers=read(KEY.customers,[]);
+let inventoryMoves=read(KEY.inventory,[]);
+let expenses=read(KEY.expenses,[]);
+let incomes=read(KEY.incomes,[]);
+let purchases=read(KEY.purchases,[]);
+let suppliers=read(KEY.suppliers,[]);
+let employees=read("eb_employees",[]);
+let workPeriods=read("eb_workPeriods",[]);
+let accounts=read(KEY.accounts,[]);
+let users=read(KEY.users,null);
+if(!users){
+ users=[{id:"admin",name:"Administrator",username:"admin",password:"1234",role:"Admin",active:true,permissions:PERMS.map(x=>x[0])}];
+ write(KEY.users,users);
+}
+let tables=read(KEY.tables,null);
+function seedTables(){
+ const arr=[];
+ for(let i=1;i<=20;i++)arr.push({id:"D"+i,type:"Dine-In",name:"Table "+String(i).padStart(2,"0"),items:[],total:0,discount:0,customerId:"",payment:"Cash",status:"empty",bill:"",kot:"",updatedAt:""});
+ for(let i=1;i<=20;i++)arr.push({id:"T"+i,type:"Takeaway",name:"Takeaway "+String(i).padStart(2,"0"),items:[],total:0,discount:0,customerId:"",payment:"Cash",status:"empty",bill:"",kot:"",updatedAt:""});
+ return arr;
+}
+if(!Array.isArray(tables)||tables.length!==40) {
+ const old=Array.isArray(tables)?tables:[];
+ tables=seedTables();
+ old.forEach(o=>{const t=tables.find(x=>x.id===o.id||x.name===o.name);if(t){t.items=o.items||[];t.total=o.total||0;t.status=t.items.length?(o.status||"pending"):"empty"}})
+ write(KEY.tables,tables);
+}
+let billCounter=Number(localStorage.getItem(KEY.counter)||1);
+let kotCounter=Number(localStorage.getItem(KEY.kot)||1);
+let currentUserObj=null,currentUser="Admin",userRole="Admin",businessName="EASY BILL LK";
+let cart=[],currentCategory="All",orderType="Takeaway",selectedTable=null,paymentMethod="Cash",tableView="Dine-In";
+
+function saveAll(){
+ write(KEY.products,products);write(KEY.categories,categories);write(KEY.sales,sales);write(KEY.tables,tables);
+ write(KEY.accounts,accounts);write(KEY.inventory,inventoryMoves);write(KEY.expenses,expenses);write(KEY.incomes,incomes);
+ write(KEY.customers,customers);write(KEY.purchases,purchases);write(KEY.suppliers,suppliers);write("eb_employees",employees);write("eb_workPeriods",workPeriods);write(KEY.users,users);localStorage.setItem(KEY.counter,String(billCounter));localStorage.setItem(KEY.kot,String(kotCounter));
+}
+function billNo(){return "INV-"+String(billCounter).padStart(5,"0")}
+function nextBillNo(){const n="INV-"+String(billCounter).padStart(5,"0");return n}
+function kotNo(){return "KOT-"+String(kotCounter).padStart(5,"0")}
+function ensureNumbers(t){
+ if(!t.bill)t.bill=nextBillNo();
+ if(!t.kot)t.kot=kotNo();
+ return t;
+}
+function allPerms(){return PERMS.map(x=>x[0])}
+function hasPerm(p){
+ if(userRole==="Admin")return true;
+ return !!(currentUserObj?.permissions||[]).includes(p);
+}
+function requirePerm(p,msg="You do not have permission for this action."){
+ if(hasPerm(p))return true;alert(msg);return false;
+}
+
+function showCreateAccount(){document.getElementById("regMsg").textContent="";document.getElementById("accountModal").classList.add("show")}
+function createAccount(){
+ const business=document.getElementById("regBusiness").value.trim(),u=document.getElementById("regUser").value.trim().toLowerCase(),p=document.getElementById("regPass").value,p2=document.getElementById("regPass2").value,phone=document.getElementById("regPhone").value.trim(),m=document.getElementById("regMsg");
+ if(!business||!u||!p||!p2||!phone){m.style.color="red";m.textContent="Please fill all fields.";return}
+ if(!/^[a-z0-9._-]{3,30}$/.test(u)){m.style.color="red";m.textContent="Username: 3-30 letters/numbers only.";return}
+ if(p!==p2){m.style.color="red";m.textContent="Passwords do not match.";return}
+ if(p.length<4){m.style.color="red";m.textContent="Password must be at least 4 characters.";return}
+ if(u==="admin"||users.some(x=>x.username===u)){m.style.color="red";m.textContent="Username already exists.";return}
+ accounts.push({id:uid("ACC"),business,username:u,password:p,phone,role:"Admin",created:new Date().toISOString()});
+ users.push({id:uid("USR"),name:business+" Admin",username:u,password:p,role:"Admin",active:true,permissions:allPerms()});
+ write(KEY.accounts,accounts);write(KEY.users,users);
+ document.getElementById("loginUser").value=u;document.getElementById("loginPass").value=p;
+ m.style.color="green";m.textContent="Account created successfully. Login now.";
+ setTimeout(()=>closeModal("accountModal"),700);
+}
+function useDemoAdmin(){document.getElementById("loginUser").value="admin";document.getElementById("loginPass").value="1234"}
+function login(){
+ const u=document.getElementById("loginUser").value.trim().toLowerCase(),p=document.getElementById("loginPass").value;
+ currentUserObj=users.find(x=>x.username.toLowerCase()===u&&x.password===p&&x.active!==false);
+ if(!currentUserObj){document.getElementById("loginMsg").textContent="Invalid username or password.";return}
+ currentUser=currentUserObj.name||currentUserObj.username;userRole=currentUserObj.role||"Cashier";
+ const acc=accounts.find(a=>a.username===u);businessName=acc?.business||"EASY BILL LK";
+ document.getElementById("loginScreen").style.display="none";document.getElementById("userName").textContent=currentUser;document.getElementById("userCircle").textContent=currentUser.charAt(0).toUpperCase();
+ applyPermissions();init();
+}
+function logout(){location.reload()}
+
+function toggleSidebar(){const s=document.getElementById("sidebar"),m=document.getElementById("main");if(innerWidth<=900)s.classList.toggle("mobile-open");else{s.classList.toggle("closed");m.classList.toggle("full")}}
+function toggleSub(el,id){
+ const sub=document.getElementById(id);
+ if(!sub)return;
+ const willOpen=!sub.classList.contains("show");
+ document.querySelectorAll(".submenu.show").forEach(x=>x.classList.remove("show"));
+ document.querySelectorAll(".menu-item.open").forEach(x=>x.classList.remove("open"));
+ if(willOpen){sub.classList.add("show");el.classList.add("open");}
+}
+function openPage(id,el=null){
+ if(id==="permissions"&&!hasPerm("permissions"))return alert("Permissions page is Admin/authorized only.");
+ const map={dashboard:"Dashboard",billing:"Billing / POS",tables:"Tables",items:"Items",inventory:"Inventory",categories:"Categories",sales:"Sales",dailyReport:"Daily Sales Report",permissions:"Permissions",users:"Users / Accounts"};
+ document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+ const page=document.getElementById(id);if(!page)return;
+ page.classList.add("active");document.getElementById("pageTitle").textContent=map[id]||id.replace(/([A-Z])/g," $1").replace(/^./,x=>x.toUpperCase());
+ if(el){document.querySelectorAll(".menu-item").forEach(x=>x.classList.remove("active"));el.classList.add("active")}
+ if(id==="billing"){populateCustomerSelect();renderProducts();renderCart()}
+ if(id==="tables")renderTables();
+ if(id==="items")renderItems();
+ if(id==="categories")renderCategoriesPage();
+ if(id==="inventory")renderInventoryPage();
+ if(["accounts","cashbook","expenses","income","profit"].includes(id))renderAccounts();
+ if(id==="sales")renderSales();
+ if(id==="dailyReport")renderDailyReport();
+ if(id==="users")renderUsers();
+ if(id==="permissions")renderPermissions();
+ if(["stockSummaryReport","lowStockReport","stockMovementReport","inventoryValueReport","stockReport","profitReport"].includes(id))renderWorkingReports();
+ if(id==="configs"||id==="settings")loadConfigurations();if(id==="settings")applyBusinessMode();
+ if(innerWidth<=900)document.getElementById("sidebar").classList.remove("mobile-open");
+}
+function applyPermissions(){
+ const menuMap=[
+  ["billing","pos"],["tables","tables"],["items","items.view"],["categories","categories"],["inventory","inventory"],
+  ["sales","sales"],["customers","customers"],["suppliers","suppliers"],["expenses","expenses"],["reportsSub","reports"],
+  ["employeeSub","employees"],["users","users"],["permissions","permissions"],["settingsSub","settings"]
+ ];
+ document.querySelectorAll(".menu-item,.sub-item").forEach(el=>el.style.display="");
+ const labels=[...document.querySelectorAll(".menu-item,.sub-item")];
+ labels.forEach(el=>{
+  const txt=el.textContent.trim();
+  if(txt.includes("Billing")&&!hasPerm("pos"))el.style.display="none";
+  if(txt==="🪑 Tables"&&!hasPerm("tables"))el.style.display="none";
+  if(txt.includes("Items List")&&!hasPerm("items.view"))el.style.display="none";
+  if(txt.includes("Categories")&&!hasPerm("categories"))el.style.display="none";
+  if(txt.includes("Inventory")&&!hasPerm("inventory"))el.style.display="none";
+  if(txt.includes("Sales List")&&!hasPerm("sales"))el.style.display="none";
+  if(txt.includes("Customer List")&&!hasPerm("customers"))el.style.display="none";
+  if(txt.includes("Suppliers")&&!hasPerm("suppliers"))el.style.display="none";
+  if(txt.includes("Expenses")&&!hasPerm("expenses"))el.style.display="none";
+  if(txt.includes("Reports")&&!hasPerm("reports"))el.style.display="none";
+  if(txt.includes("Employees")&&!hasPerm("employees"))el.style.display="none";
+  if(txt.includes("Users / Accounts")&&!hasPerm("users"))el.style.display="none";
+  if(txt.includes("Permissions")&&!hasPerm("permissions"))el.style.display="none";
+  if(txt.includes("Settings")&&!hasPerm("settings"))el.style.display="none";
+ });
+}
+function init(){
+ document.getElementById("billNo").textContent=nextBillNo();renderCategories();renderProducts();renderCart();renderTables();renderItems();renderCategoriesPage();renderInventoryPage();renderAccounts();renderInventoryReports();loadConfigurations();updateDashboard();populateCustomerSelect();
+}
+
+function renderCategories(){const bar=document.getElementById("categoryBar");if(!bar)return;bar.innerHTML=["All",...categories].map(c=>`<button class="cat-btn ${c===currentCategory?"active":""}" onclick="selectCategory(${JSON.stringify(c)})">${esc(c)}</button>`).join("")}
+function selectCategory(c){currentCategory=c;renderProducts()}
+function renderProducts(){
+ const box=document.getElementById("products");if(!box)return;renderCategories();
+ const q=(document.getElementById("productSearch")?.value||"").trim().toLowerCase();
+ const list=products.filter(p=>(currentCategory==="All"||p.category===currentCategory)&&((p.name||"").toLowerCase().includes(q)||(p.sku||"").toLowerCase().includes(q)));
+ box.innerHTML=list.map(p=>`<div class="product" data-product-id="${p.id}" title="Click to add">
+  <div class="product-name">${esc(p.name)}</div><div style="font-size:11px;color:#6b7280">${esc(p.category)} • ${esc(p.sku)}</div>
+  <div class="product-price">${money(p.price)}</div><div class="product-stock">Stock: ${Number(p.stock)||0}</div>
+  <div style="margin-top:7px;color:#16a34a;font-size:12px">＋ Add Item</div>
+ </div>`).join("")||"<div class='card'>No items found.</div>";
+}
+document.addEventListener("click",e=>{
+ const sub=e.target.closest(".sub-item");
+ if(sub)e.stopPropagation();
+ const card=e.target.closest("[data-product-id]");if(card){e.preventDefault();addToCart(card.dataset.productId)}
+ const act=e.target.closest("[data-action]");if(act){
+  const id=act.dataset.id,action=act.dataset.action;
+  if(action==="edit-item")openItemModal(id);
+  if(action==="delete-item")deleteItem(id);
+  if(action==="edit-user")openUserModal(id);
+  if(action==="delete-user")deleteUser(id);
+  if(action==="delete-category")deleteCategory(id);
+ }
+});
+
+function addToCart(id){
+ if(!hasPerm("pos"))return alert("No POS permission.");
+ const p=products.find(x=>String(x.id)===String(id));if(!p)return alert("Item not found.");
+ if(Number(p.stock)<=0)return alert("Out of stock.");
+ if(orderType==="Table"&&selectedTable===null)return alert("Please select a Dine-In table first.");
+ const x=cart.find(i=>String(i.id)===String(p.id));
+ if(x){if(x.qty>=Number(p.stock))return alert("Not enough stock.");x.qty++}
+ else cart.push({id:p.id,name:p.name,price:Number(p.price)||0,cost:Number(p.cost)||0,qty:1});
+ if(orderType==="Table")saveCurrentTable("pending");
+ ensureCurrentOrder();renderCart();updateKOT();renderTables();showToast(p.name+" added");
+}
+function ensureCurrentOrder(){
+ if(orderType==="Table"&&selectedTable!==null){const t=tables.find(x=>x.id===selectedTable);if(t&&cart.length){ensureNumbers(t);t.status="pending";t.updatedAt=new Date().toISOString();write(KEY.tables,tables);localStorage.setItem(KEY.counter,String(billCounter));localStorage.setItem(KEY.kot,String(kotCounter))}}
+}
+function renderCart(){
+ const b=document.getElementById("billItems");if(!b)return;
+ b.innerHTML=cart.length?cart.map((x,i)=>`<tr><td><b>${esc(x.name)}</b><br><small>${money(x.price)} / ${esc(products.find(q=>String(q.id)===String(x.id))?.unit||"Unit")}</small></td><td><div class="qty"><button onclick="changeQty(${i},-1)">−</button><input class="qty-input" type="number" min="1" max="${Number(products.find(q=>String(q.id)===String(x.id))?.stock)||999999}" value="${x.qty}" onchange="setQty(${i},this.value)" onclick="this.select()"><button onclick="changeQty(${i},1)">+</button></div></td><td>${money(x.price*x.qty)}<br><button onclick="removeItem(${i})" style="color:red;background:none">× Delete</button></td></tr>`).join(""):`<tr><td colspan="3" style="text-align:center;color:#9ca3af;padding:30px">No items added</td></tr>`;
+ calculateBill();updateKOT();
+}
+function changeQty(i,n){const x=cart[i];if(!x)return;const p=products.find(q=>String(q.id)===String(x.id));x.qty+=n;if(x.qty<=0)cart.splice(i,1);else if(p&&x.qty>Number(p.stock))x.qty=Number(p.stock);if(orderType==="Table")saveCurrentTable(cart.length?"pending":"empty");renderCart();renderTables()}
+function setQty(i,v){const x=cart[i];if(!x)return;const p=products.find(q=>String(q.id)===String(x.id));let q=Math.floor(Number(v)||0);if(q<=0){cart.splice(i,1)}else{x.qty=Math.min(q,Number(p?.stock)||999999)}if(orderType==="Table"||selectedTable)saveCurrentTable(cart.length?"pending":"empty");renderCart();renderTables();}
+function removeItem(i){if(!cart[i])return;cart.splice(i,1);if(orderType==="Table")saveCurrentTable(cart.length?"pending":"empty");renderCart();renderTables()}
+function getDiscount(){return userRole==="Admin"||hasPerm("pos")?Math.max(0,Number(document.getElementById("discount")?.value)||0):0}
+function getGrandTotal(){const sub=cart.reduce((s,i)=>s+Number(i.price)*Number(i.qty),0);return Math.max(0,sub-Math.min(sub,getDiscount()))}
+function calculateBill(){const sub=cart.reduce((s,i)=>s+Number(i.price)*Number(i.qty),0),d=Math.min(sub,getDiscount()),total=sub-d;document.getElementById("subtotal").textContent=money(sub);document.getElementById("grandTotal").textContent=money(total);calculateChange()}
+function setPayment(m,b){
+ paymentMethod=m;document.querySelectorAll(".pay-btn").forEach(x=>x.classList.remove("active"));b.classList.add("active");
+ if(m==="Credit"){document.getElementById("creditBill").checked=true;toggleCreditBill()}
+ else if(document.getElementById("creditBill").checked){document.getElementById("creditBill").checked=false;toggleCreditBill()}
+ if(m!=="Cash"){document.getElementById("cashAmount").value="";document.getElementById("change").textContent=money(0)}
+}
+function toggleCreditBill(){
+ const yes=document.getElementById("creditBill").checked;document.getElementById("customerSelectBox").style.display=yes?"block":"none";
+ document.querySelectorAll(".pay-btn").forEach(x=>x.classList.remove("active"));
+ if(yes){paymentMethod="Credit";const b=document.querySelector('[data-pay="Credit"]');if(b)b.classList.add("active")}
+ else{paymentMethod="Cash";const b=document.querySelector('[data-pay="Cash"]');if(b)b.classList.add("active")}
+ calculateChange();
+}
+function calculateChange(){const c=Number(document.getElementById("cashAmount").value)||0;document.getElementById("change").textContent=money(paymentMethod==="Cash"?Math.max(0,c-getGrandTotal()):0)}
+function keypad(v){const i=document.getElementById("cashAmount");if(v==="."&&i.value.includes("."))return;i.value+=v;calculateChange()}
+function clearCash(){document.getElementById("cashAmount").value="";calculateChange()}
+function populateCustomerSelect(){const s=document.getElementById("billCustomer");if(!s)return;s.innerHTML='<option value="">Select customer</option>'+customers.map(c=>`<option value="${c.id}">${esc(c.name)}${c.phone?" - "+esc(c.phone):""}</option>`).join("")}
+
+function setOrderType(t){
+ if(t==="Takeaway")return openTakeawaySelector();
+ openTableSelector();
+}
+function resetPaymentUI(){document.getElementById("creditBill").checked=false;document.getElementById("customerSelectBox").style.display="none";document.getElementById("cashAmount").value="";document.getElementById("change").textContent=money(0);document.querySelectorAll(".pay-btn").forEach((b,i)=>b.classList.toggle("active",i===0))}
+function openTableSelector(){renderTableSelector("Dine-In");document.getElementById("tableModal").classList.add("show")}
+function openTakeawaySelector(){
+ if(selectedTable!==null&&cart.length)autoKotBeforeLeaving();
+ else if(orderType==="Table"&&selectedTable!==null)saveCurrentTable(cart.length?"pending":"empty");
+ renderTableSelector("Takeaway");document.getElementById("tableModal").classList.add("show");
+}
+function renderTableSelector(type="Dine-In"){
+ const list=tables.filter(t=>t.type===type);
+ document.getElementById("tableSelectGrid").innerHTML=list.map(t=>`<button class="select-table ${t.status!=="empty"?"occupied":""}" onclick="chooseTable('${t.id}')"><div>${type==="Dine-In"?"🪑":"🥡"} ${esc(t.name)}</div><small>${t.status==="empty"?"🟢 Available":(t.status==="printed"?"🔴 Printed":"🟡 Items Added")+" • "+money(t.total)}</small></button>`).join("");
+}
+function chooseTable(id){
+ if(selectedTable!==null&&selectedTable!==id&&cart.length){autoKotBeforeLeaving();}
+ else if(orderType==="Table"&&selectedTable!==null&&selectedTable!==id)saveCurrentTable(cart.length?"pending":"empty");
+ const t=tables.find(x=>x.id===id);if(!t)return;
+ selectedTable=id;orderType="Table";ensureNumbers(t);cart=JSON.parse(JSON.stringify(t.items||[]));
+ document.getElementById("takeawayBtn").classList.remove("active");document.getElementById("tableBtn").classList.add("active");document.getElementById("selectedTableText").textContent=t.name+" selected";
+ if(t.customerId)document.getElementById("billCustomer").value=t.customerId;
+ if(t.items?.length){kotCounter=Math.max(kotCounter,Number(String(t.kot||"").replace(/\D/g,""))+1||kotCounter)}
+ closeModal("tableModal");renderCart();updateKOT();renderTables();showToast(t.name+" opened");
+}
+function setTableView(v){tableView=v;document.getElementById("tablesDineBtn").classList.toggle("active",v==="Dine-In");document.getElementById("tablesTakeBtn").classList.toggle("active",v==="Takeaway");renderTables()}
+function renderTables(){
+ const grid=document.getElementById("tablesGrid");if(!grid)return;
+ const list=tables.filter(t=>t.type===tableView);
+ grid.innerHTML=list.map(t=>{
+  const cls=t.status==="pending"?"pending":t.status==="printed"?"printed":"settled";
+  const status=t.status==="pending"?"🟡 Items Added":t.status==="printed"?"🔴 Printed":"🟢 Available";
+  return `<div class="table-box ${cls}" onclick="openTable('${t.id}')"><div class="table-name">${t.type==="Dine-In"?"🪑":"🥡"} ${esc(t.name)}</div><div class="table-status">${status}</div><div class="table-total">${t.items.length?money(t.total):"Empty"}</div></div>`;
+ }).join("");
+ document.getElementById("dashTables").textContent=getBusinessType()!=="Retail"&&BUSINESS_INFO[getBusinessType()]?.tables?tables.filter(t=>t.status!=="empty"&&t.items.length).length:0;
+}
+function openTable(id){
+ const t=tables.find(x=>x.id===id);if(!t)return;selectedTable=id;orderType=t.type==="Dine-In"?"Table":"Takeaway";
+ document.getElementById("detailTitle").textContent=t.name+" - Current Items";
+ document.getElementById("tableDetailItems").innerHTML=t.items.length?t.items.map(i=>`<tr><td>${esc(i.name)}</td><td>${i.qty}</td><td>${money(i.price)}</td><td>${money(i.price*i.qty)}</td></tr>`).join(""):`<tr><td colspan="4" style="text-align:center">No items in this order.</td></tr>`;
+ document.getElementById("tableDetailTotal").textContent=money(t.total);document.getElementById("tableDetailCard").style.display="block";document.getElementById("tableDetailCard").scrollIntoView({behavior:"smooth"});
+}
+function closeTableDetail(){document.getElementById("tableDetailCard").style.display="none"}
+function continueTableBill(){
+ if(selectedTable===null)return;const t=tables.find(x=>x.id===selectedTable);if(!t)return;cart=JSON.parse(JSON.stringify(t.items||[]));orderType=t.type==="Dine-In"?"Table":"Takeaway";
+ document.getElementById("selectedTableText").textContent=t.name+" selected";document.getElementById("takeawayBtn").classList.toggle("active",orderType==="Takeaway");document.getElementById("tableBtn").classList.toggle("active",orderType==="Table");
+ renderCart();openPage("billing");
+}
+function newTableBill(){
+ const t=tables.find(x=>x.type===tableView&&x.status==="empty");if(!t)return alert("No free "+tableView+" order available.");
+ selectedTable=t.id;cart=[];orderType=t.type==="Dine-In"?"Table":"Takeaway";ensureNumbers(t);t.status="empty";write(KEY.tables,tables);
+ document.getElementById("selectedTableText").textContent=t.name+" selected";openPage("billing");showToast(t.name+" ready");
+}
+function saveCurrentTable(status=null){
+ if(selectedTable===null)return;const t=tables.find(x=>x.id===selectedTable);if(!t)return;
+ t.items=JSON.parse(JSON.stringify(cart));t.total=Math.max(0,cart.reduce((s,i)=>s+i.price*i.qty,0)-Math.min(cart.reduce((s,i)=>s+i.price*i.qty,0),getDiscount()));
+ t.discount=getDiscount();t.customerId=document.getElementById("billCustomer")?.value||"";t.payment=paymentMethod;t.status=cart.length?(status||"pending"):"empty";t.updatedAt=new Date().toISOString();if(cart.length)ensureNumbers(t);
+ write(KEY.tables,tables);
+}
+function ensureTakeawayTable(){
+ let t=selectedTable?tables.find(x=>x.id===selectedTable):null;
+ if(orderType==="Takeaway"){
+  if(!t||t.type!=="Takeaway"){t=tables.find(x=>x.type==="Takeaway"&&x.status==="empty");if(!t)t=tables.find(x=>x.type==="Takeaway");selectedTable=t?.id||null}
+  if(t)ensureNumbers(t);
+ }
+ return t;
+}
+function printKotOnly(items, tableObj=null, typeOverride=null){
+ const list=Array.isArray(items)?items.filter(Boolean):[];
+ if(!list.length)return;
+ const t=tableObj || (selectedTable?tables.find(x=>x.id===selectedTable):null);
+ const kot=t?.kot||kotNo();
+ const order=t?.name || ((typeOverride||orderType)==="Table" ? "Dine-In" : "Takeaway");
+ const type=t?.type || typeOverride || orderType;
+ const html=`<!doctype html><html><head><title>${esc(kot)}</title><style>
+ @page{size:80mm 63.5mm;margin:0}html,body{margin:0;padding:0;width:80mm;height:63.5mm;background:#fff;color:#000;font-family:Arial,sans-serif}
+ .kot{width:80mm;height:63.5mm;box-sizing:border-box;padding:5mm;font-size:12px;overflow:hidden}.center{text-align:center}.line{border-top:1px dashed #000;margin:5px 0}
+ .item{font-size:15px;font-weight:bold;margin:7px 0;display:flex;justify-content:space-between;gap:5px}
+ </style></head><body><div class="kot"><div class="center"><h2 style="margin:0">KITCHEN ORDER TICKET</h2><b>${esc(kot)}</b></div><div class="line"></div><div><b>Order:</b> ${esc(order)}</div><div><b>Type:</b> ${esc(type)}</div><div><b>Date:</b> ${esc(new Date().toLocaleString())}</div><div class="line"></div>${list.map(i=>`<div class="item"><span>${esc(i.name)}</span><span>× ${Number(i.qty)||0}</span></div>`).join('')}<div class="line"></div><div class="center"><b>KOT - PLEASE PREPARE</b></div></div></body></html>`;
+ const win=window.open("","_blank","width=420,height=500");
+ if(!win){alert("Please allow popups for automatic KOT printing.");return false}
+ win.document.write(html);win.document.close();win.focus();setTimeout(()=>{win.print();},180);
+ return true;
+}
+function autoKotBeforeLeaving(){
+ if(!cart.length)return;
+ let t=selectedTable?tables.find(x=>x.id===selectedTable):null;
+ if(orderType==="Table")saveCurrentTable("pending");
+ else {
+  t=ensureTakeawayTable();
+  if(t){t.items=JSON.parse(JSON.stringify(cart));t.total=getGrandTotal();t.status="pending";t.payment=paymentMethod;saveAll()}
+ }
+ if(t)ensureNumbers(t);
+ const printed=printKotOnly(cart,t,orderType);
+ if(printed){
+  cart=[];selectedTable=null;orderType="Takeaway";paymentMethod="Cash";resetPaymentUI();
+  document.getElementById("billNo").textContent=nextBillNo();
+  document.getElementById("selectedTableText").textContent="Takeaway 01";
+  renderCart();renderTables();
+ }
+ return printed;
+}
+function holdBill(){
+ if(!cart.length)return alert("No items to hold.");
+ let t=selectedTable?tables.find(x=>x.id===selectedTable):null;
+ if(orderType==="Table")saveCurrentTable("pending");
+ else {
+  t=ensureTakeawayTable();
+  if(t){t.items=JSON.parse(JSON.stringify(cart));t.total=getGrandTotal();t.status="pending";t.payment=paymentMethod;saveAll()}
+ }
+ if(t)ensureNumbers(t);
+ const printed=printKotOnly(cart,t,orderType);
+ if(printed){
+  cart=[];selectedTable=null;orderType="Takeaway";paymentMethod="Cash";resetPaymentUI();
+  document.getElementById("billNo").textContent=nextBillNo();
+  document.getElementById("selectedTableText").textContent="Takeaway 01";
+  renderCart();renderTables();showToast("Bill held. KOT printed automatically.");
+ }
+}
+
+function updateKOT(){
+ const el=document.getElementById("kotPreview"),no=document.getElementById("kotNo");if(!el)return;
+ let t=selectedTable?tables.find(x=>x.id===selectedTable):null;
+ if(cart.length){
+  if(t){ensureNumbers(t);no.textContent=t.kot}else no.textContent=kotNo();
+  el.innerHTML=`<b>${esc(t?.name||"Takeaway 01")}</b><br>`+cart.map(i=>`${esc(i.name)} × <b>${i.qty}</b>`).join("<br>");
+ }else{no.textContent=t?.kot||kotNo();el.textContent="Add items to generate KOT automatically."}
+}
+function printBill(){
+ if(!cart.length)return alert("No items to print.");
+ if(orderType==="Table")saveCurrentTable("printed");else{const t=ensureTakeawayTable();if(t){t.items=JSON.parse(JSON.stringify(cart));t.total=getGrandTotal();t.status="printed";t.payment=paymentMethod;write(KEY.tables,tables)}}
+ const html=buildPrintHTML(true);
+ const win=window.open("","_blank","width=420,height=900");if(!win)return alert("Please allow popups for printing.");
+ win.document.write(html);win.document.close();win.focus();setTimeout(()=>{win.print();},250);
+ renderTables();updateKOT();showToast("Bill + KOT ready to print.");
+}
+function buildPrintHTML(includeKot=true){
+ const sub=cart.reduce((s,i)=>s+i.price*i.qty,0),d=Math.min(sub,getDiscount()),total=sub-d,cash=Number(document.getElementById("cashAmount").value)||0,change=Math.max(0,cash-total);
+ let t=selectedTable?tables.find(x=>x.id===selectedTable):null;const invoice=t?.bill||nextBillNo(),kot=t?.kot||kotNo();
+ return `<!doctype html><html><head><title>${invoice}</title><style>
+ @page{size:80mm auto;margin:0}html,body{margin:0;padding:0;width:80mm;background:#fff;color:#000;font-family:Arial,sans-serif}
+ .receipt{width:80mm;height:127mm;min-height:127mm;padding:8mm 5mm;box-sizing:border-box;font-size:12px;overflow:hidden;page-break-after:always}.kot{width:80mm;height:63.5mm;min-height:63.5mm;padding:5mm 5mm;box-sizing:border-box;font-size:12px;overflow:hidden;page-break-before:always;page-break-after:auto}.center{text-align:center}.line{border-top:1px dashed #000;margin:6px 0}.row{display:flex;justify-content:space-between;gap:8px}.big{font-size:18px;font-weight:bold}.items div{display:flex;justify-content:space-between;gap:5px;margin:4px 0}</style></head><body>
+ <div class="receipt"><div class="center"><h2 style="margin:0">${esc(businessName)}</h2><div>Restaurant ERP POS</div></div><div class="line"></div>
+ <div><b>Bill:</b> ${esc(invoice)}</div><div><b>Type:</b> ${esc(t?.type||orderType)}</div>${t?`<div><b>Table:</b> ${esc(t.name)}</div>`:""}<div><b>Date:</b> ${esc(new Date().toLocaleString())}</div><div class="line"></div>
+ <div class="items">${cart.map(i=>`<div><span>${esc(i.name)} × ${i.qty}</span><span>${money(i.price*i.qty)}</span></div>`).join("")}</div><div class="line"></div>
+ <div class="row"><span>Subtotal</span><b>${money(sub)}</b></div><div class="row"><span>Discount</span><b>${money(d)}</b></div><div class="row big"><span>TOTAL</span><span>${money(total)}</span></div><div class="line"></div>
+ <div>Payment: <b>${esc(paymentMethod)}</b></div>${paymentMethod==="Cash"?`<div>Cash: ${money(cash)}</div><div>Change: ${money(change)}</div>`:""}<div class="line"></div><div class="center">THANK YOU!<br>SEE YOU AGAIN..!</div></div>
+ ${includeKot?`<div class="kot"><div class="center"><h2 style="margin:0">KITCHEN ORDER TICKET</h2><b>${esc(kot)}</b></div><div class="line"></div><div><b>Order:</b> ${esc(t?.name||"Takeaway 01")}</div><div><b>Type:</b> ${esc(t?.type||orderType)}</div><div><b>Date:</b> ${esc(new Date().toLocaleString())}</div><div class="line"></div>${cart.map(i=>`<div style="font-size:15px;font-weight:bold;margin:8px 0">${esc(i.name)} × ${i.qty}</div>`).join("")}<div class="line"></div><div class="center">KOT - PLEASE PREPARE</div></div>`:""}</body></html>`;
+}
+function settleBill(){
+ if(!cart.length)return alert("Please add items first.");
+ const total=getGrandTotal(),cash=Number(document.getElementById("cashAmount").value)||0,credit=document.getElementById("creditBill").checked;
+ if(paymentMethod==="Cash"&&!credit&&cash<total)return alert("Cash amount is not enough. Required "+money(total));
+ if(credit){const cid=document.getElementById("billCustomer").value;if(!cid)return alert("Select a customer for a credit bill.");paymentMethod="Credit"}
+ let t=selectedTable?tables.find(x=>x.id===selectedTable):null;
+ if(!t&&orderType==="Takeaway")t=ensureTakeawayTable();
+ if(t)ensureNumbers(t);
+ const sale={id:uid("SALE"),bill:t?.bill||nextBillNo(),kot:t?.kot||kotNo(),date:new Date().toISOString(),type:t?.type||orderType,table:t?.name||"",items:JSON.parse(JSON.stringify(cart)),subtotal:cart.reduce((s,i)=>s+i.price*i.qty,0),discount:getDiscount(),total,payment:paymentMethod,customerId:document.getElementById("billCustomer")?.value||"",cashier:currentUser,cash,change:paymentMethod==="Cash"?Math.max(0,cash-total):0};
+ sales.push(sale);
+ cart.forEach(i=>{const p=products.find(x=>String(x.id)===String(i.id));if(p){const before=Number(p.stock)||0;p.stock=Math.max(0,before-Number(i.qty));inventoryMoves.push({date:new Date().toISOString(),itemId:p.id,item:p.name,action:"sale",qty:i.qty,before,after:p.stock,note:sale.bill})}});
+ if(credit){const c=customers.find(x=>String(x.id)===String(sale.customerId));if(c)c.outstanding=(Number(c.outstanding)||0)+total}
+ const printHtml=buildPrintHTML(true);
+ if(t){t.items=[];t.total=0;t.discount=0;t.status="empty";t.updatedAt=new Date().toISOString()}
+ saveAll();
+ const win=window.open("","_blank","width=420,height=900");if(win){win.document.write(printHtml);win.document.close();win.focus();setTimeout(()=>win.print(),250)}
+ billCounter++;kotCounter++;localStorage.setItem(KEY.counter,String(billCounter));localStorage.setItem(KEY.kot,String(kotCounter));
+ cart=[];selectedTable=null;orderType="Takeaway";paymentMethod="Cash";resetPaymentUI();document.getElementById("billNo").textContent=nextBillNo();document.getElementById("selectedTableText").textContent="Takeaway 01";renderCart();renderTables();updateDashboard();showToast("Bill settled + KOT printed.");
+}
+function startNewBill(){
+ if(cart.length&&!confirm("Current bill has items. Start a NEW BILL?"))return;
+ if(cart.length)autoKotBeforeLeaving();
+ else if(orderType==="Table")saveCurrentTable("empty");
+ cart=[];selectedTable=null;orderType="Takeaway";paymentMethod="Cash";billCounter++;localStorage.setItem(KEY.counter,String(billCounter));resetPaymentUI();document.getElementById("billNo").textContent=nextBillNo();document.getElementById("selectedTableText").textContent="Takeaway 01";renderCart();openPage("billing");
+}
+function openItemModal(id=null){
+ if(!requirePerm("items.add","You do not have permission to add/edit items."))return;
+ document.getElementById("editItemId").value=id||"";document.getElementById("itemModalTitle").textContent=id?"Edit Item":"Add Item";document.getElementById("itemMsg").textContent="";
+ document.getElementById("itemCategory").innerHTML=categories.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join("");
+ const p=id?products.find(x=>String(x.id)===String(id)):null;
+ document.getElementById("itemName").value=p?.name||"";document.getElementById("itemSku").value=p?.sku||"";document.getElementById("itemCategory").value=p?.category||categories[0]||"Other";document.getElementById("itemUnit").value=p?.unit||"Piece";
+ document.getElementById("itemCost").value=p?.cost??0;document.getElementById("itemPrice").value=p?.price??0;document.getElementById("itemStock").value=p?.stock??0;document.getElementById("itemReorder").value=p?.reorder??5;
+ document.getElementById("itemModal").classList.add("show");
+}
+function saveItem(){
+ if(!requirePerm("items.add"))return;
+ const id=document.getElementById("editItemId").value,n=document.getElementById("itemName").value.trim(),sku=document.getElementById("itemSku").value.trim(),cat=document.getElementById("itemCategory").value,unit=document.getElementById("itemUnit").value.trim()||"Piece",cost=Number(document.getElementById("itemCost").value)||0,price=Number(document.getElementById("itemPrice").value)||0,stock=Math.max(0,Number(document.getElementById("itemStock").value)||0),reorder=Math.max(0,Number(document.getElementById("itemReorder").value)||0),msg=document.getElementById("itemMsg");
+ if(!n||!sku||price<=0){msg.style.color="red";msg.textContent="Name, SKU and selling price are required.";return}
+ if(products.some(p=>String(p.sku).toLowerCase()===sku.toLowerCase()&&String(p.id)!==String(id))){msg.style.color="red";msg.textContent="SKU / Barcode already exists.";return}
+ if(id){const p=products.find(x=>String(x.id)===String(id));if(!p)return;p.name=n;p.sku=sku;p.category=cat;p.unit=unit;p.cost=cost;p.price=price;p.stock=stock;p.reorder=reorder}
+ else products.push({id:uid("ITM"),name:n,sku,category:cat,unit,cost,price,stock,reorder});
+ saveAll();closeModal("itemModal");renderItems();renderProducts();renderInventoryPage();renderWorkingReports();showToast(id?"Item updated":"Item added successfully");
+}
+</script>
+</body>
+</html>
