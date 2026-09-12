@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>EASY BILL LK - Restaurant ERP POS (PRO)</title>
+<style>
+*{box-sizing:border-box} :root{--blue:#2563eb;--dark:#111827;--dark2:#1f2937;--bg:#eef2f7;--border:#d1d5db;--green:#16a34a;--red:#dc2626;--orange:#f59e0b}
+body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:#111827;overflow:hidden}
+button,input,select{font:inherit}button{cursor:pointer;border:0}
+.app{display:flex;height:100vh}.sidebar{width:250px;background:var(--dark);color:white;position:fixed;inset:0 auto 0 0;z-index:1000;transition:.25s;overflow:auto}.sidebar.closed{transform:translateX(-100%)}
+.logo{height:70px;display:flex;align-items:center;padding:0 20px;font-size:21px;font-weight:bold;border-bottom:1px solid #374151}.logo span{color:#60a5fa;margin-right:7px}
+.menu{padding:10px}.menu-title{padding:12px 10px 6px;color:#9ca3af;font-size:11px;text-transform:uppercase}.menu-item{display:flex;align-items:center;justify-content:space-between;padding:12px 13px;margin:3px 0;border-radius:7px;color:#e5e7eb;user-select:none;cursor:pointer}.menu-item:hover,.menu-item.active{background:var(--blue);color:white}.menu-left{display:flex;gap:10px;align-items:center}.arrow{transition:.2s}.menu-item.open .arrow{transform:rotate(90deg)}.submenu{display:none;padding-left:18px;animation:subOpen .16s ease}.submenu.show{display:block}@keyframes subOpen{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}.sub-item{padding:9px 12px;margin:2px 0;border-radius:6px;color:#cbd5e1;cursor:pointer}.sub-item:hover{background:#374151;color:white}
+.main{width:100%;margin-left:250px;height:100vh;transition:.25s}.main.full{margin-left:0}.topbar{height:64px;background:white;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 18px}.left-top{display:flex;align-items:center;gap:15px}.hamburger{width:42px;height:40px;background:#eef2ff;border-radius:7px;font-size:22px;color:#1d4ed8}.page-title{font-size:19px;font-weight:bold}.user-box{display:flex;align-items:center;gap:10px}.user-circle{width:35px;height:35px;border-radius:50%;background:var(--blue);color:white;display:grid;place-items:center;font-weight:bold}.content{height:calc(100vh - 64px);overflow:auto;padding:15px}
+.page{display:none}.page.active{display:block}.card{background:white;border:1px solid var(--border);border-radius:9px;padding:15px;margin-bottom:15px}.btn{padding:10px 15px;border-radius:7px;color:white;font-weight:bold}.btn-blue{background:var(--blue)}.btn-green{background:var(--green)}.btn-red{background:var(--red)}.btn-orange{background:var(--orange)}.btn-gray{background:#6b7280}.btn-light{background:#e5e7eb;color:#111827}input,select{border:1px solid var(--border);border-radius:6px;padding:10px;width:100%;outline:0}input:focus,select:focus{border-color:var(--blue)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.stat{background:white;border:1px solid var(--border);border-radius:9px;padding:18px}.stat small{color:#6b7280}.stat h2{margin:8px 0}
+.pos-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:stretch}.pos-layout>.card{min-height:0}.bill-card{min-height:0}.pos-head{display:flex;gap:6px;margin-bottom:6px}.pos-head input{padding:8px}.pos-head .btn{padding:8px 11px}.pos-head input{flex:1}.category-bar{display:flex;gap:5px;overflow:hidden;margin-bottom:6px;height:34px}.cat-btn{background:#e5e7eb;padding:6px 10px;border-radius:18px;white-space:nowrap;font-size:12px;cursor:pointer}.cat-btn.active{background:var(--blue);color:white}.products{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;height:calc(100vh - 285px);min-height:360px;max-height:560px;overflow-y:auto}.product{background:white;border:1px solid var(--border);border-radius:7px;padding:10px;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden}.product-name{font-weight:bold;margin-bottom:3px;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.product-price{color:var(--blue);font-weight:bold;font-size:13px}.product-stock{font-size:11px;color:#6b7280;margin-top:3px}.product:hover{border-color:var(--blue);box-shadow:0 2px 7px #0001}
+.bill-card{display:flex;flex-direction:column;padding:12px}.bill-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:10px}.bill-no{font-weight:bold}.bill-items{overflow:auto;max-height:calc(100vh - 430px);min-height:140px;margin-top:10px}.bill-table,.table-list{width:100%;border-collapse:collapse;font-size:13px}.bill-table th,.bill-table td,.table-list th,.table-list td{border-bottom:1px solid #e5e7eb;padding:8px;text-align:left}.total-area{border-top:2px solid #111827;padding-top:8px;margin-top:auto}.total-row{display:flex;justify-content:space-between;padding:4px 0}.grand{font-size:18px}.discount-box{display:flex;gap:5px;margin:7px 0}.discount-box input{width:100px}.payment-methods{display:grid;grid-template-columns:repeat(2,1fr);gap:5px;margin-top:7px}.pay-btn{padding:9px;border-radius:6px;background:#e5e7eb;cursor:pointer}.pay-btn.active{background:#111827;color:white}
+.bill-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px}.tables{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}.table-box{min-height:105px;background:#ecfdf5;border:2px solid #22c55e;border-radius:10px;padding:12px;cursor:pointer}.table-box.occupied{background:#fff7ed;border-color:#f97316}.table-name{font-weight:bold;font-size:18px}.table-status{margin-top:8px;font-size:13px}.table-total{margin-top:5px;font-weight:bold}
+.login-screen{position:fixed;inset:0;background:#111827;display:flex;align-items:center;justify-content:center;z-index:5000}.login-box{width:390px;max-width:94vw;background:white;padding:25px;border-radius:12px}.login-box h1{text-align:center;margin-top:0}.field{margin-bottom:12px}.login-box button{width:100%}.login-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.modal{display:none;position:fixed;inset:0;background:#0008;z-index:6000;align-items:center;justify-content:center;padding:15px}.modal.show{display:flex}.modal-box{background:white;border-radius:12px;width:500px;max-width:96vw;max-height:90vh;overflow:auto;padding:20px}.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.modal-head h3{margin:0}
+#toast{position:fixed;right:20px;bottom:20px;background:#111827;color:white;padding:12px 16px;border-radius:8px;display:none;z-index:8000}
+.pro-badge{background:linear-gradient(45deg,#f59e0b,#eab308);color:black;padding:3px 8px;border-radius:12px;font-size:11px;font-weight:bold;margin-left:6px;vertical-align:middle}
+.pro-settings-tab{display:flex;gap:10px;border-bottom:2px solid var(--border);margin-bottom:15px}.pro-tab-btn{padding:10px 15px;background:none;font-weight:bold;color:#6b7280;cursor:pointer;border-bottom:3px solid transparent}.pro-tab-btn.active{color:var(--blue);border-color:var(--blue)}
+</style>
+</head>
+<body>
+<div class="login-screen" id="loginScreen">
+<div class="login-box">
+<h1>EASY BILL LK <span class="pro-badge">PRO</span></h1>
+<p style="text-align:center;color:#6b7280">Restaurant ERP POS System</p>
+<div class="field"><label>Username</label><input id="loginUser" value="admin"></div>
+<div class="field"><label>Password</label><input id="loginPass" type="password" value="admin"></div>
+<button class="btn btn-blue" onclick="login()">LOGIN TO PRO POS</button>
+<div class="login-actions">
+<button class="btn btn-green" onclick="showToast('Demo account ready!')">DEMO READY</button>
+<button class="btn btn-gray" onclick="useDemoAdmin()">USE DEMO</button>
+</div>
+</div>
+</div>
+<div class="app">
+<aside class="sidebar" id="sidebar">
+<div class="logo"><span>●</span>EASY BILL <span class="pro-badge">PRO</span></div>
+<div class="menu">
+<div class="menu-title">Main Navigation</div>
+<div class="menu-item active" onclick="openPage('dashboard',this)"><div class="menu-left">🏠 Dashboard</div></div>
+<div class="menu-item" onclick="openPage('billing',this)"><div class="menu-left">🧾 POS Billing</div></div>
+<div class="menu-item" onclick="openPage('tables',this)"><div class="menu-left">🪑 Tables & KOT</div></div>
+<div class="menu-item" onclick="openPage('items',this)"><div class="menu-left">📦 Item Master</div></div>
+<div class="menu-item" onclick="openPage('sales',this)"><div class="menu-left">💰 Sales History</div></div>
+<div class="menu-item" onclick="openPage('reports',this)"><div class="menu-left">📊 ERP Reports</div></div>
+<div class="menu-item" onclick="openPage('settings',this)"><div class="menu-left">⚙️ System Settings</div></div>
+</div>
+</aside>
+<main class="main" id="main">
+<header class="topbar">
+<div class="left-top"><button class="hamburger" onclick="toggleSidebar()">☰</button><div class="page-title" id="pageTitle">PRO Dashboard</div></div>
+<div class="user-box"><span id="userName">Admin (PRO)</span><div class="user-circle">A</div><button class="btn btn-red" onclick="logout()">Logout</button></div>
+</header>
+<section class="content">
+<!-- DASHBOARD -->
+<div class="page active" id="dashboard">
+<div class="stats">
+<div class="stat"><small>Today's Sales</small><h2 id="dashSales">Rs. 12,450.00</h2></div>
+<div class="stat"><small>Total Orders</small><h2 id="dashBills">18</h2></div>
+<div class="stat"><small>Active Tables</small><h2 id="dashTables">3</h2></div>
+<div class="stat"><small>Total Items</small><h2 id="dashItems">12</h2></div>
+</div>
+<div class="card" style="margin-top:15px">
+<h3>Enterprise POS Status</h3>
+<p>Easy Bill LK PRO Edition is active with unlocked features (Unlimited Transactions, Multi-table billing, Custom Settings & Reports).</p>
+<button class="btn btn-blue" onclick="openPage('billing')">Open POS Billing Terminal</button>
+</div>
+</div>
+<!-- BILLING / POS -->
+<div class="page" id="billing">
+<div class="pos-layout">
+<div class="card">
+<div class="pos-head">
+<input id="productSearch" placeholder="Search item or scan barcode..." oninput="renderProducts()">
+</div>
+<div class="category-bar" id="categoryBar"></div>
+<div class="products" id="products"></div>
+</div>
+<div class="card bill-card">
+<div class="bill-header">
+<div><div style="font-size:17px;font-weight:bold">CURRENT BILL</div><div class="bill-no" id="billNo">#INV-1001</div></div>
+<button class="btn btn-light" onclick="clearCart()">Clear Cart</button>
+</div>
+<div class="bill-items">
+<table class="bill-table">
+<thead><tr><th>Item</th><th>Qty</th><th>Total</th><th>Action</th></tr></thead>
+<tbody id="billItems"></tbody>
+</table>
+</div>
+<div class="total-area">
+<div class="total-row"><span>Subtotal</span><b id="subtotal">Rs. 0.00</b></div>
+<div class="discount-box">
+<span style="padding-top:9px">Discount</span>
+<input id="discount" type="number" value="0" oninput="calculateBill()">
+</div>
+<div class="total-row"><span>Grand Total</span><b class="grand" id="grandTotal">Rs. 0.00</b></div>
+<div class="bill-actions">
+<button class="btn btn-blue" onclick="printBill()">Print Bill</button>
+<button class="btn btn-green" onclick="settleBill()">Pay & Settle</button>
+<button class="btn btn-orange" onclick="printKOT()">Print KOT</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- TABLES -->
+<div class="page" id="tables">
+<div class="card">
+<h2>Table Management & Active Dining</h2>
+<div class="tables" id="tablesGrid"></div>
+</div>
+</div>
+<!-- ITEM MASTER -->
+<div class="page" id="items">
+<div class="card">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<h2>Item Master Inventory</h2>
+<button class="btn btn-blue" onclick="showToast('Add Item feature ready')">＋ Add Item</button>
+</div>
+<table class="table-list" style="margin-top:15px">
+<thead><tr><th>ID</th><th>Item Name</th><th>Category</th><th>Price</th><th>Stock</th></tr></thead>
+<tbody id="itemsList"></tbody>
+</table>
+</div>
+</div>
+<!-- SALES HISTORY -->
+<div class="page" id="sales">
+<div class="card">
+<h2>Sales History & Receipts</h2>
+<table class="table-list">
+<thead><tr><th>Invoice</th><th>Time</th><th>Amount</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td>#INV-1000</td><td>10:15 AM</td><td>Rs. 1,450.00</td><td><span style="color:green;font-weight:bold">PAID</span></td></tr>
+<tr><td>#INV-0999</td><td>09:40 AM</td><td>Rs. 850.00</td><td><span style="color:green;font-weight:bold">PAID</span></td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- REPORTS -->
+<div class="page" id="reports">
+<div class="card">
+<h2>Executive ERP Reports</h2>
+<p>Comprehensive daily summary, cashier performance, and inventory reports.</p>
+<div class="stats" style="margin-top:15px">
+<div class="stat"><small>Net Profit (Est.)</small><h2>Rs. 4,200.00</h2></div>
+<div class="stat"><small>Total Items Sold</small><h2>24 Units</h2></div>
+</div>
+</div>
+</div>
+<!-- PRO SETTINGS (FIXED WORKING PAGE) -->
+<div class="page" id="settings">
+<div class="card">
+<h2>⚙️ PRO System Settings</h2>
+<p style="color:#6b7280;margin-bottom:15px">Configure store details, billing preferences, receipt printers, and PRO options.</p>
+<div class="pro-settings-tab">
+<button class="pro-tab-btn active" onclick="switchSettingsTab('general', this)">General Settings</button>
+<button class="pro-tab-btn" onclick="switchSettingsTab('print', this)">Printer & KOT</button>
+<button class="pro-tab-btn" onclick="switchSettingsTab('pro', this)">PRO ERP Features</button>
+</div>
+<!-- General Tab -->
+<div id="setTabGeneral">
+<div class="field"><label>Business / Restaurant Name</label><input id="cfgBizName" value="EASY BILL RESTAURANT"></div>
+<div class="field"><label>Hotline / Phone</label><input id="cfgPhone" value="0771234567"></div>
+<div class="field"><label>Address</label><input id="cfgAddress" value="123, Main Street, Colombo"></div>
+<div class="field"><label>Currency Symbol</label><input id="cfgCurrency" value="Rs."></div>
+</div>
+<!-- Print Tab -->
+<div id="setTabPrint" style="display:none">
+<div class="field"><label>Receipt Paper Width</label>
+<select id="cfgPaperWidth"><option>80mm Thermal</option><option>58mm Thermal</option></select>
+</div>
+<div class="field"><label>Auto Print KOT on Order Placement</label>
+<select id="cfgAutoKOT"><option>Enabled</option><option>Disabled</option></select>
+</div>
+<div class="field"><label>Receipt Footer Message</label><input id="cfgFooter" value="Thank you! Come again."></div>
+</div>
+<!-- PRO Features Tab -->
+<div id="setTabPro" style="display:none">
+<div class="field"><label>License Status</label><input value="PRO Enterprise Version (Active Unlocked)" readonly style="background:#ecfdf5;color:#166534;font-weight:bold"></div>
+<div class="field"><label>Enable Tax / VAT Tracking</label>
+<select id="cfgTax"><option>Disabled</option><option>Enabled (15%)</option></select>
+</div>
+<div class="field"><label>Cloud Backup Synchronization</label>
+<select><option>Automatic Local Sync</option></select>
+</div>
+</div>
+<button class="btn btn-green" style="margin-top:15px" onclick="saveProSettings()">💾 Save Settings</button>
+</div>
+</div>
+</section>
+</main>
+</div>
+<div id="toast"></div>
+<script>
+// DEMO PRODUCTS & TABLES DATA
+const products = [
+{id:1,name:"Chicken Rice",category:"Rice",price:850,stock:50},
+{id:2,name:"Chicken Kottu",category:"Kottu",price:950,stock:40},
+{id:3,name:"Cheese Kottu",category:"Kottu",price:1200,stock:30},
+{id:4,name:"Chicken Noodles",category:"Noodles",price:850,stock:35},
+{id:5,name:"Egg Noodles",category:"Noodles",price:700,stock:35},
+{id:6,name:"Fish Bun",category:"Bakery",price:180,stock:60},
+{id:7,name:"Chicken Roll",category:"Bakery",price:160,stock:60},
+{id:8,name:"Coca Cola",category:"Drinks",price:250,stock:100}
+];
+const categories = ["All", "Rice", "Kottu", "Noodles", "Bakery", "Drinks"];
+let cart = [];
+let currentCategory = "All";
+// NAVIGATION FUNCTION
+function openPage(pageId, element) {
+document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+const target = document.getElementById(pageId);
+if (target) {
+target.classList.add('active');
+document.getElementById('pageTitle').innerText = pageId.toUpperCase() + ' Management';
+}
+if (element) {
+document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+element.classList.add('active');
+}
+}
+// POS RENDER FUNCTIONS
+function renderCategories() {
+const bar = document.getElementById('categoryBar');
+bar.innerHTML = categories.map(c => <button class="cat-btn ${c===currentCategory?'active':''}" onclick="setCategory('${c}')">${c}</button>).join('');
+}
+function setCategory(cat) {
+currentCategory = cat;
+renderCategories();
+renderProducts();
+}
+function renderProducts() {
+const container = document.getElementById('products');
+const query = document.getElementById('productSearch').value.toLowerCase();
+const filtered = products.filter(p => (currentCategory==='All' || p.category===currentCategory) && p.name.toLowerCase().includes(query));
+container.innerHTML = filtered.map(p => <div class="product" onclick="addToCart(${p.id})"> <div class="product-name">${p.name}</div> <div class="product-price">Rs. ${p.price.toFixed(2)}</div> <div class="product-stock">Stock: ${p.stock}</div> </div>).join('');
+}
+function renderItemsTable() {
+const t = document.getElementById('itemsList');
+if(t) {
+t.innerHTML = products.map(p => <tr><td>#${p.id}</td><td><b>${p.name}</b></td><td>${p.category}</td><td>Rs. ${p.price.toFixed(2)}</td><td>${p.stock}</td></tr>).join('');
+}
+}
+function addToCart(id) {
+const item = products.find(p => p.id === id);
+const exist = cart.find(c => c.id === id);
+if (exist) {
+exist.qty++;
+} else {
+cart.push({...item, qty: 1});
+}
+renderCart();
+}
+function renderCart() {
+const tbody = document.getElementById('billItems');
+tbody.innerHTML = cart.map((item, idx) => <tr> <td>${item.name}</td> <td>${item.qty}</td> <td>Rs. ${(item.price * item.qty).toFixed(2)}</td> <td><button class="btn btn-red" style="padding:2px 6px;font-size:10px" onclick="removeFromCart(${idx})">X</button></td> </tr>).join('');
+calculateBill();
+}
+function removeFromCart(idx) {
+cart.splice(idx, 1);
+renderCart();
+}
+function clearCart() {
+cart = [];
+renderCart();
+}
+function calculateBill() {
+const sub = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+const disc = parseFloat(document.getElementById('discount').value) || 0;
+const grand = Math.max(0, sub - disc);
+document.getElementById('subtotal').innerText = 'Rs. ' + sub.toFixed(2);
+document.getElementById('grandTotal').innerText = 'Rs. ' + grand.toFixed(2);
+}
+function renderTables() {
+const grid = document.getElementById('tablesGrid');
+let html = '';
+for (let i = 1; i <= 12; i++) {
+const occupied = i === 2 || i === 5;
+html += <div class="table-box ${occupied?'occupied':''}" onclick="showToast('Table ${i} selected')"> <div class="table-name">Table ${i}</div> <div class="table-status">${occupied?'Occupied (Order Active)':'Available'}</div> <div class="table-total">${occupied?'Rs. 1,850.00':'-'}</div> </div>;
+}
+grid.innerHTML = html;
+}
+// PRO SETTINGS TABS SWITCHER
+function switchSettingsTab(tab, btn) {
+document.querySelectorAll('.pro-tab-btn').forEach(b => b.classList.remove('active'));
+btn.classList.add('active');
+document.getElementById('setTabGeneral').style.display = tab==='general'?'block':'none';
+document.getElementById('setTabPrint').style.display = tab==='print'?'block':'none';
+document.getElementById('setTabPro').style.display = tab==='pro'?'block':'none';
+}
+function saveProSettings() {
+showToast('Settings saved successfully!');
+}
+function printBill() {
+if (cart.length === 0) return showToast('Cart is empty!');
+showToast('Printing Thermal Bill...');
+}
+function settleBill() {
+if (cart.length === 0) return showToast('Cart is empty!');
+showToast('Bill settled & paid successfully!');
+clearCart();
+}
+function printKOT() {
+if (cart.length === 0) return showToast('Cart is empty!');
+showToast('KOT printed to kitchen!');
+}
+// LOGIN & UTILS
+function login() {
+document.getElementById('loginScreen').style.display = 'none';
+}
+function logout() {
+document.getElementById('loginScreen').style.display = 'flex';
+}
+function useDemoAdmin() {
+login();
+showToast('Welcome Admin!');
+}
+function toggleSidebar() {
+document.getElementById('sidebar').classList.toggle('closed');
+document.getElementById('main').classList.toggle('full');
+}
+function showToast(msg) {
+const t = document.getElementById('toast');
+t.innerText = msg;
+t.style.display = 'block';
+setTimeout(() => t.style.display = 'none', 2500);
+}
+// INITIALIZATION
+window.onload = () => {
+renderCategories();
+renderProducts();
+renderTables();
+renderItemsTable();
+};
+</script>
+</body>
+</html>
