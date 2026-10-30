@@ -1,0 +1,22 @@
+{
+  "name": "easy-bill-lk",
+  "version": "1.0.0",
+  "description": "EASY BILL LK POS",
+  "main": "main.js",
+  "author": "EASY BILL LK",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win nsis --x64 --publish never"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "lk.easybill.pos",
+    "productName": "EASY BILL LK",
+    "files": ["main.js", "preload.js", "index.html"],
+    "win": { "target": "nsis" },
+    "nsis": { "oneClick": false, "allowToChangeInstallationDirectory": true, "createDesktopShortcut": true }
+  }
+}
