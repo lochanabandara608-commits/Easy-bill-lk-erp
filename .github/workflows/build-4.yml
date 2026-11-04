@@ -1,0 +1,48 @@
+
+name: Build Windows EXE
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Check project files
+        shell: pwsh
+        run: |
+          $files = @("package.json", "index.html")
+          foreach ($file in $files) {
+            if (!(Test-Path $file)) {
+              Write-Error "Missing file: $file"
+              exit 1
+            }
+          }
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Build Windows installer
+        run: npx electron-builder --win nsis --x64 --publish never
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: EASY-BILL-LK-Setup
+          path: dist/*.exe
+          if-no-files-found: error
