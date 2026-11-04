@@ -1,0 +1,65 @@
+name: EASY BILL LK
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+    paths-ignore:
+      - '**.md'
+      - '.github/**'
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: windows-latest
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: "false"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Show commit being built
+        shell: bash
+        run: git log -1 --format='Building commit %h - %s'
+      - name: Prepare icons and check files
+        shell: bash
+        run: |
+          echo "Repo root contains:"; ls -la
+          mkdir -p build
+          # people often upload icon.ico / icon.png to the root or with a changed name like "icon[1].ico" - pick them up automatically
+          if [ ! -f build/icon.ico ]; then
+            f=$(ls icon*.ico build/icon*.ico 2>/dev/null | head -n1 || true)
+            if [ -n "$f" ]; then cp "$f" build/icon.ico; echo "Using $f as build/icon.ico"; fi
+          fi
+          if [ ! -f build/icon.png ]; then
+            f=$(ls icon*.png 2>/dev/null | head -n1 || true)
+            if [ -n "$f" ]; then cp "$f" build/icon.png; echo "Using $f as build/icon.png"; fi
+          fi
+          miss=0
+          for f in index.html main.js preload.js package.json build/icon.ico; do
+            if [ ! -f "$f" ]; then echo "::error::MISSING FILE: $f"; miss=1; fi
+          done
+          if [ "$miss" = "1" ]; then exit 1; fi
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install
+        shell: bash
+        run: npm install --no-audit --no-fund
+      - name: Build exe
+        shell: bash
+        run: npx electron-builder --win nsis --x64 --publish never
+      - uses: actions/upload-artifact@v4
+        with:
+          name: EASY-BILL-LK-Setup
+          path: dist/*.exe
+          if-no-files-found: error
+      - name: Publish download (GitHub Release)
+        continue-on-error: true
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: EASY BILL LK v1.0.${{ github.run_number }}
+          files: dist/*.exe
