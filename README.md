@@ -46,3 +46,7 @@ To make business management easier, faster and smarter through technology.
 ⭐ Thank you for visiting my GitHub profile!
 
 EASY BILL LK – Smart Business Management. Simplified.
+## License
+
+EASY BILL LK is proprietary software.
+All rights reserved. See the [LICENSE](LICENSE) file.
