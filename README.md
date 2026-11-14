@@ -1,4 +1,4 @@
-👋 Hi, I'm Lochana Bandara
+![EASY BILL LK Banner](banner.png)👋 Hi, I'm Lochana Bandara
 
 Founder & Developer of EASY BILL LK
 
