@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EASY BILL LK - Customer License Agreement</title>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;padding:20px;
+  font-family:Arial,sans-serif;
+  background:#f1f5f9;color:#172033;
+}
+.container{
+  max-width:850px;margin:20px auto;
+  background:white;border-radius:15px;
+  overflow:hidden;box-shadow:0 5px 25px #0001;
+}
+.header{
+  background:#0b1f3a;color:white;
+  padding:30px;text-align:center;
+}
+.logo{font-size:27px;font-weight:bold;color:#60a5fa}
+.header h1{font-size:25px}
+.content{padding:25px}
+h2{color:#123b70;font-size:19px;margin-top:27px}
+p,li{line-height:1.7;color:#475569}
+.plan{
+  border:1px solid #dbeafe;padding:16px;
+  border-radius:10px;margin:10px 0;
+}
+.notice{
+  background:#eff6ff;border-left:4px solid #2563eb;
+  padding:14px;border-radius:5px;
+}
+.accept{
+  background:#f8fafc;padding:20px;
+  border-radius:10px;margin-top:25px;
+}
+button{
+  width:100%;padding:15px;border:0;
+  border-radius:8px;background:#2563eb;
+  color:white;font-size:16px;font-weight:bold;
+  margin-top:15px;
+}
+button:disabled{background:#94a3b8}
+.footer{
+  background:#0b1f3a;color:white;
+  text-align:center;padding:20px;
+}
+small{color:#64748b}
+.fld{display:block;margin:0 0 12px}.fld label{display:block;font-size:12px;font-weight:bold;color:#334155;margin-bottom:4px}
+.fld input{width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:8px;font-size:15px}
+.kmsg{display:block;font-size:13px;font-weight:bold;margin:-4px 0 12px;min-height:18px}.ok{color:#16a34a}.bad{color:#dc2626}
+.btn2{background:#16a34a;margin-top:10px}.btn3{background:#0b1f3a;margin-top:10px}
+.acts{display:none}.acts.show{display:block}
+@media print{body{background:#fff;padding:0}.container{box-shadow:none;margin:0}.accept label,#acceptBtn,.acts,#agree{display:none}.accept .fld input{border:0;border-bottom:1px solid #000;border-radius:0}}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+  <div class="logo">EASY BILL LK</div>
+  <h1>Customer License Agreement</h1>
+  <p style="color:#dbeafe">Official Software Usage License</p>
+</div>
+
+<div class="content">
+
+<div class="notice">
+<strong>Welcome to EASY BILL LK!</strong>
+<p>This agreement explains the terms and conditions for using the EASY BILL LK POS & ERP Software.</p>
+</div>
+
+<h2>1. License Plans</h2>
+
+<div class="plan">
+<strong>Subscription License</strong>
+<p>Available on monthly or annual subscription basis. The license must be renewed according to the selected package.</p>
+</div>
+
+<div class="plan">
+<strong>One-Time License</strong>
+<p>A one-time commercial license payment. Usage rights, included support, updates and other services are subject to the agreed package terms.</p>
+</div>
+
+<h2>2. Shop Authorization</h2>
+<ul>
+<li>One license is authorized for one registered shop.</li>
+<li>Authorized device limits depend on the purchased package.</li>
+<li>Additional shops or branches require separate authorization or an approved multi-shop agreement.</li>
+<li>License sharing or unauthorized transfer is prohibited.</li>
+</ul>
+
+<h2>3. Customer Rights</h2>
+<ul>
+<li>Use the software for authorized business operations.</li>
+<li>Manage sales, inventory, customers and business records.</li>
+<li>Receive support and updates according to the purchased package.</li>
+<li>Retain ownership of the customer's own business data, subject to applicable law.</li>
+</ul>
+
+<h2>4. Restrictions</h2>
+<ul>
+<li>Copying, reselling or redistributing the software without written permission is prohibited.</li>
+<li>Reverse engineering or unauthorized modification is prohibited, except where applicable law permits.</li>
+<li>Bypassing license verification or security controls is prohibited.</li>
+<li>Using another shop's license without authorization is prohibited.</li>
+</ul>
+
+<h2>5. Customer Data & Privacy</h2>
+<p>Customer business data remains the customer's property. EASY BILL LK may process necessary information to provide authentication, licensing, cloud synchronization and technical support. Third-party services such as Firebase may be used. Data handling is subject to applicable privacy laws and the published privacy policy.</p>
+
+<h2>6. Payments & Renewal</h2>
+<p>Subscription customers must pay renewal fees according to their selected plan. Failure to renew may result in suspension of licensed services after applicable notice. One-Time License conditions are governed by the agreed purchase terms.</p>
+
+<h2>7. Suspension & Termination</h2>
+<p>Unauthorized use, license sharing, fraud or serious violation of this agreement may result in suspension or termination, subject to applicable law and any required notice.</p>
+
+<h2>8. Intellectual Property</h2>
+<p>EASY BILL LK software, branding, design and source code remain the property of their respective rights holder. This agreement grants usage rights only and does not transfer software ownership or source-code rights.</p>
+
+<h2>9. Third-Party Services</h2>
+<p>Some features may depend on third-party platforms, hosting, internet connectivity and cloud services. Their availability may be subject to those providers' terms and conditions.</p>
+
+<h2>10. Governing Law</h2>
+<p>This agreement is intended to be governed by the laws of Sri Lanka, subject to applicable legal requirements.</p>
+
+<h2>11. Customer Agreement</h2>
+<p>By accepting this agreement, the customer confirms that they have read and understood the terms and agree to use EASY BILL LK according to the authorized license.</p>
+
+<div class="accept">
+<strong>Customer Acceptance</strong>
+<p>
+<span class="fld"><label for="cName">Customer / Business Name</label><input id="cName" autocomplete="organization" placeholder="Exactly as given to EASY BILL LK"></span>
+<span class="fld"><label for="cKey">License ID</label><input id="cKey" placeholder="EBLK-S2612-XXXX-XXXX" autocapitalize="characters" spellcheck="false"></span>
+<span id="keyMsg" class="kmsg"></span>
+<span class="fld"><label for="cShop">Authorized Shop (name &amp; address)</label><input id="cShop" placeholder="Shop name, town"></span>
+<span class="fld"><label for="cSign">Name of person accepting</label><input id="cSign" autocomplete="name" placeholder="Full name"></span>
+<span class="fld"><label for="cDate">Date</label><input id="cDate" readonly></span>
+</p>
+
+<label>
+<input type="checkbox" id="agree">
+I have read and agree to the EASY BILL LK Customer License Agreement.
+</label>
+
+<button id="acceptBtn" disabled onclick="acceptLicense()">
+Accept & Continue
+</button>
+
+<p id="status" aria-live="polite"></p>
+<div class="acts" id="acts">
+<button class="btn2" onclick="sendWA()">📲 Send acceptance to EASY BILL LK (WhatsApp)</button>
+<button class="btn3" onclick="window.print()">🖨 Print / Save signed copy (PDF)</button>
+<p style="font-size:13px">Acceptance code: <b id="accCode"></b></p>
+</div>
+</div>
+
+</div>
+
+<div class="footer">
+<strong>EASY BILL LK</strong>
+<p style="color:#dbeafe">Professional POS & ERP Solutions</p>
+<p style="color:#dbeafe">WhatsApp: 0789915362</p>
+<small style="color:#cbd5e1">Customer License Agreement</small>
+</div>
+
+</div>
+
+<script>
+/* ===== License key helpers (identical in the Key Generator) ===== */
+const EB_SECRET="EBLK-709219767BCB2A8E";
+function ebNorm(s){return String(s||"").toLowerCase().replace(/[^a-z0-9]/g,"")}
+function ebH(str,seed){let h=seed>>>0;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619)>>>0}return h>>>0}
+function ebSig(shop,plan,exp){const p=EB_SECRET+"|"+ebNorm(shop)+"|"+plan+"|"+exp;const a=ebH(p,2166136261),b=ebH(p+EB_SECRET,2654435761);const A="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";let s="",x=a,y=b;for(let i=0;i<8;i++){s+=A[(i<4?x:y)&31];if(i<4)x>>>=5;else y>>>=5}return s.slice(0,4)+"-"+s.slice(4)}
+function ebParseKey(k){const m=String(k||"").trim().toUpperCase().match(/^EBLK-([SO])(\d{4})-([A-Z2-9]{4}-[A-Z2-9]{4})$/);return m?{plan:m[1],exp:m[2],sig:m[3]}:null}
+
+const checkbox=document.getElementById("agree"),button=document.getElementById("acceptBtn"),$=id=>document.getElementById(id);
+const OWNER_WA="94789915362";
+let keyInfo=null;
+$("cDate").value=new Date().toLocaleDateString("en-CA");
+function checkKey(){
+  const k=$("cKey").value.trim(),n=$("cName").value.trim(),m=$("keyMsg");keyInfo=null;
+  if(!k){m.textContent="";m.className="kmsg";return refresh()}
+  const p=ebParseKey(k);
+  if(!p){m.textContent="✗ License ID format is wrong.";m.className="kmsg bad";return refresh()}
+  if(!n){m.textContent="Enter the Customer / Business Name first.";m.className="kmsg bad";return refresh()}
+  if(ebSig(n,p.plan,p.exp)!==p.sig){m.textContent="✗ This License ID does not match the business name.";m.className="kmsg bad";return refresh()}
+  let life=p.exp==="9999",txt=life?"no expiry":"valid until "+("20"+p.exp.slice(0,2))+"-"+p.exp.slice(2);
+  if(!life){const y=2000+parseInt(p.exp.slice(0,2),10),mo=parseInt(p.exp.slice(2),10),end=new Date(y,mo,0,23,59,59);if(end<new Date()){m.textContent="✗ This License ID expired ("+txt+"). Please renew.";m.className="kmsg bad";return refresh()}}
+  keyInfo=p;m.textContent="✓ Valid "+(p.plan==="S"?"Subscription":"One-Time")+" license, "+txt;m.className="kmsg ok";refresh();
+}
+function ready(){return checkbox.checked&&keyInfo&&$("cName").value.trim()&&$("cShop").value.trim()&&$("cSign").value.trim()}
+function refresh(){button.disabled=!ready()||button.textContent==="Accepted"}
+["cName","cKey","cShop","cSign"].forEach(i=>$(i).addEventListener("input",()=>{if(i==="cName"||i==="cKey")checkKey();else refresh()}));
+checkbox.addEventListener("change",refresh);
+function accCode(r){return ebSig(r.key+"|"+r.date+"|"+r.sign,"A",r.name)}
+function acceptLicense(){
+  if(!ready())return;
+  const r={name:$("cName").value.trim(),key:$("cKey").value.trim().toUpperCase(),shop:$("cShop").value.trim(),sign:$("cSign").value.trim(),date:$("cDate").value,at:new Date().toISOString(),plan:keyInfo.plan};
+  r.code=accCode(r);
+  try{localStorage.setItem("eb_license_accept",JSON.stringify(r))}catch(e){}
+  $("status").textContent="Agreement accepted. Please continue to your authorized EASY BILL LK account.";
+  button.textContent="Accepted";button.disabled=true;["cName","cKey","cShop","cSign"].forEach(i=>$(i).readOnly=true);checkbox.disabled=true;
+  $("accCode").textContent=r.code;$("acts").classList.add("show");
+}
+function sendWA(){
+  let r={};try{r=JSON.parse(localStorage.getItem("eb_license_accept")||"{}")}catch(e){}
+  const t="EASY BILL LK - License Agreement ACCEPTED\nBusiness: "+r.name+"\nShop: "+r.shop+"\nLicense ID: "+r.key+"\nAccepted by: "+r.sign+"\nDate: "+r.date+"\nAcceptance code: "+r.code;
+  window.open("https://wa.me/"+OWNER_WA+"?text="+encodeURIComponent(t),"_blank");
+}
+(function restore(){try{const r=JSON.parse(localStorage.getItem("eb_license_accept")||"null");if(r&&r.key){$("cName").value=r.name;$("cKey").value=r.key;$("cShop").value=r.shop;$("cSign").value=r.sign;$("cDate").value=r.date;checkKey();checkbox.checked=true;checkbox.disabled=true;["cName","cKey","cShop","cSign"].forEach(i=>$(i).readOnly=true);button.textContent="Accepted";button.disabled=true;$("status").textContent="Agreement already accepted on "+r.date+".";$("accCode").textContent=r.code;$("acts").classList.add("show")}}catch(e){}})();
+</script>
+</body>
+</html>
