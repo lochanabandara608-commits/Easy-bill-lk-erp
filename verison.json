@@ -1,0 +1,5 @@
+{
+  "version": "2026.11.22.1",
+  "date": "2026-11-22",
+  "notes": "Invoice lines shown per invoice. Clear stock by Today / Yesterday / 7 days / custom range (incoming, damage, returns, reports, branch stock). New qty and new barcode boxes in purchase invoice (old kept)."
+}
